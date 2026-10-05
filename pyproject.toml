@@ -36,6 +36,7 @@ dev = [
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "ruff>=0.16.10",
+    "statsmodels>=0.15.0",
     "types-pyyaml>=6.0.12.20260906",
 ]
 
@@ -58,7 +59,7 @@ files = ["src/invariant", "tests"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["yfinance.*", "fredapi.*", "scipy.*"]
+module = ["yfinance.*", "fredapi.*", "scipy.*", "statsmodels.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

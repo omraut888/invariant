@@ -1,0 +1,63 @@
+# Planted-signal benchmark. Model and rationale: docs/adr/0003-planted-signal-benchmark-scm.md
+#
+# `base` is a complete SyntheticMarketConfig. Each entry under `presets` is deep-merged onto it
+# (load_benchmark_config(preset=...)). Presets are named sweep points; anything else is a
+# model_copy of the loaded config.
+#
+# ic values are *nominal* (loading = ic * sd of the asset's non-signal return, on unit-variance
+# signals). Exact population ICs, partial ICs and expected t-stats are exported in GroundTruth.
+
+base:
+  n_obs: 6000            # ~23.8 trading years of daily data
+  burn_in: 1000          # safety margin only: state starts at N(0, Sigma), h at sigma_bar^2
+  start_date: 2000-01-03 # first output date (a Monday); dates are consecutive weekdays
+  n_assets: 1
+  observe_confounder: true
+  mu: 0.0003             # daily drift, ~7.5% annualized
+  factor:
+    phi: 0.99            # Z half-life ~69 trading days
+    ic: 0.06
+  real:
+    rho: 0.9
+    z_corr: 0.3          # S_real is correlated with the confounder but still a true cause
+    ic: 0.06
+  conf:
+    rho: 0.9
+    z_corr: 0.8          # strong proxy for Z: marginal IC ~ that of S_real
+  decay:
+    rho: 0.9
+    ic: 0.08
+    start_frac: 0.6      # decay starts at output index floor(0.6 * n_obs)
+    half_life: 250       # coefficient half-life in trading days (TE half-life ~ 125)
+  noise:
+    rho: 0.95
+  garch:
+    nu: 6                # unit-variance Student-t; finite 4th moment needs nu > 4
+    alpha: 0.06
+    beta: 0.92           # fourth-moment condition 0.978 < 1; residual excess kurtosis ~ 8
+    sigma_bar: 0.01      # ~16% annualized residual vol
+  market: null
+  loading_dispersion: 0.0
+
+presets:
+  # Daily IC ~ 0.02 is closer to real alpha. At n_obs = 6000 the expected Stage-1 t-stat is
+  # ~1.5, so failing to detect S_real here is a power limit, not a stage bug.
+  realistic:
+    factor: {ic: 0.02}
+    real: {ic: 0.02}
+    decay: {ic: 0.02}
+
+  # Same simulated paths as `base`; Z is dropped from the observed features. S_conf's non-edge
+  # is then not identifiable (GroundTruth marks identifiable=false).
+  hidden_confounder:
+    observe_confounder: false
+
+  # Common time-series signals, per-asset loadings, latent GARCH-t market factor.
+  multi_asset:
+    n_assets: 5
+    garch: {sigma_bar: 0.008}
+    market:
+      garch: {nu: 6, alpha: 0.06, beta: 0.92, sigma_bar: 0.01}
+      beta_low: 0.7
+      beta_high: 1.3
+    loading_dispersion: 0.25
