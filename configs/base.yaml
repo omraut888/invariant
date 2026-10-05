@@ -1,0 +1,23 @@
+# INVARIANT Phase 0 defaults. Override with a second YAML via load_config(override_path=...).
+#
+# Universe: SPY, the nine original Select Sector SPDRs (inception 1998-12-16), TLT and IEF
+# (inception 2002-07-22), GLD (inception 2004-11-18). GLD is the binding constraint, so the
+# sample starts on the first trading day of 2005 to give a balanced panel. XLRE (2015) and XLC
+# (2018) are excluded for lack of history.
+#
+# Known limitations (docs/adr/0001-config-layering-and-core-contracts.md):
+# - Hindsight / survivorship: every ticker was chosen knowing it still trades today.
+# - The 2018 GICS reshuffle moved GOOGL/META etc. out of XLK/XLY into XLC, so those two ETFs are
+#   not a constant exposure across the sample.
+universe:
+  tickers: [SPY, XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, TLT, IEF, GLD]
+
+# Fixed end date, never "today": the config is part of the run hash.
+dates:
+  start: 2005-01-03
+  end: 2025-12-31
+
+frequency: daily
+
+# Root seed for all np.random.Generator objects in a run.
+seed: 20260105
