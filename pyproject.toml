@@ -50,8 +50,11 @@ select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "NPY", "RUF"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-mypy_path = "src"
-packages = ["invariant"]
+# src/ is the base for `invariant`; the repo root is the base for tests (no __init__.py files
+# there), so test modules are named tests.unit.test_x and can be targeted as `tests.*`.
+mypy_path = ["src", "$MYPY_CONFIG_FILE_DIR"]
+explicit_package_bases = true
+files = ["src/invariant", "tests"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
