@@ -1,0 +1,80 @@
+# INVARIANT
+
+## What this is
+An autonomous quant research pipeline. Five stages, each capable of killing a candidate signal:
+1. Causal discovery: is the signal structurally upstream of returns, or confounded?
+2. Decay validation: transfer-entropy half-life; is the edge being arbitraged away?
+3. DRO portfolio construction: Wasserstein distributionally robust optimization
+4. Adversarial regime certification: worst plausible market path, with a realism constraint
+5. Research memo: citation-backed investment memo arguing for or against the strategy
+
+Full spec: docs/invariant-spec.html
+
+## The bar
+Every claim this system makes must be measured, reproducible, and able to survive a hostile
+reviewer. Rigor beats feature count. A smaller component that is provably correct beats a
+bigger one that only looks impressive. If something in the spec is statistically unsound,
+say so instead of implementing it as written.
+
+## Non-negotiables
+1. **No look-ahead.** A value used at time t uses only information available at t. Macro data
+   uses ALFRED vintages and release dates, never final revised values. Every data transform
+   gets a test in tests/leakage/.
+2. **Ground truth first.** Every stage is validated on the planted-signal benchmark
+   (src/invariant/benchmark/) before it touches real data. A stage that can't recover the
+   planted truth is not done.
+3. **Uncertainty, not point estimates.** Every estimated quantity (transfer entropy, half-life,
+   Sharpe, effect sizes) ships with a CI, bootstrap distribution, or surrogate significance test.
+4. **Multiple-testing awareness.** When many candidates are tested, control the FDR and report
+   the Deflated Sharpe Ratio, not the raw Sharpe.
+5. **Reproducibility.** Every run is keyed by a hash of (data snapshot id, config, git SHA, seed).
+   All randomness flows through explicitly seeded np.random.Generator objects. Never use
+   global np.random or unseeded randomness.
+6. **Every rejection is recorded** in the kill ledger: stage, reason code, and the numbers
+   behind the decision.
+7. **Honest limitations.** When market data violates a method's assumptions (stationarity,
+   causal sufficiency, i.i.d.), document it in the docstring and in docs/.
+
+## Layout
+- src/invariant/config/        settings (.env) + YAML config loading
+- src/invariant/core/          typed contracts, run hashing/reproducibility, logging
+- src/invariant/data/          sources (ETF, French factors, ALFRED), snapshots, point-in-time assembly
+- src/invariant/benchmark/     synthetic planted-signal market + ground truth
+- src/invariant/stages/        causal/ decay/ dro/ adversarial/ memo/
+- src/invariant/ledger/        kill ledger
+- src/invariant/orchestration/ pipeline DAG (later)
+- src/invariant/api/           FastAPI service (later)
+- tests/unit, tests/integration, tests/benchmark, tests/leakage
+- docs/adr/                    architecture decision records
+- data/, runs/                 gitignored, local only
+
+## Conventions
+- Python 3.11 managed with uv. Add deps with `uv add` (never pip) and say why each is needed.
+- Full type hints; mypy strict must pass. No `Any` without a comment explaining why.
+- Pydantic v2 models for configs and cross-stage contracts, frozen where possible.
+- Pure functions for math, I/O at the edges. Stages exchange typed result objects, not dicts.
+- Time series: sorted, unique, tz-naive DatetimeIndex, validated at module boundaries.
+- Logging via structlog. No print() in library code.
+- Every non-trivial algorithm's docstring states the method, its assumptions, and a paper reference.
+- Secrets only from .env. Tunables in configs/*.yaml.
+- Tests: unit tests for all logic, hypothesis property tests for mathematical invariants.
+  Network calls are mocked in unit tests; real calls are marked @pytest.mark.slow.
+
+## Commands
+- uv run pytest -m "not slow"     # fast suite
+- uv run pytest                   # everything
+- uv run ruff check . --fix && uv run ruff format .
+- uv run mypy
+
+## How to work
+- For any non-trivial task: propose a plan and wait for approval before writing code.
+- Write tests alongside the implementation, not after.
+- A task is done only when pytest, ruff, and mypy all pass. Show the output.
+- Record significant design decisions as a short ADR at docs/adr/NNNN-title.md
+  (context, decision, alternatives considered, consequences).
+- Don't silently change public interfaces.
+- End each task with a suggested conventional commit message.
+
+## Current phase
+Phase 0, foundations: config, run hashing, synthetic benchmark, point-in-time data layer,
+kill ledger. No stage logic yet.
