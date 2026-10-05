@@ -8,7 +8,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "fredapi>=0.5.2",
+    "exchange-calendars>=4.13.2",
     "httpx>=0.28.1",
     "numpy>=2.4.6",
     "pandas>=3.0.6",
@@ -59,11 +59,13 @@ files = ["src/invariant", "tests"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["yfinance.*", "fredapi.*", "scipy.*", "statsmodels.*"]
+module = ["yfinance.*", "exchange_calendars.*", "pyarrow.*", "scipy.*", "statsmodels.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Repo root on sys.path so tests can share helpers as `tests.fixtures.<module>`.
+pythonpath = ["."]
 addopts = "-ra --strict-markers"
 markers = [
   "slow: long-running tests",

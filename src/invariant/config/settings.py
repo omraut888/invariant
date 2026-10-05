@@ -36,8 +36,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from invariant.core.types import Frequency
 
 __all__ = [
+    "AlfredConfig",
     "ConfigError",
+    "DataConfig",
     "DateRange",
+    "FrenchConfig",
+    "HttpConfig",
     "PipelineConfig",
     "Settings",
     "UniverseConfig",
@@ -140,11 +144,65 @@ class DateRange(_Frozen):
         return self
 
 
+_FRED_SERIES_RE = re.compile(r"^[A-Z0-9_]{1,30}$")
+_CALENDAR_RE = re.compile(r"^[A-Z0-9]{2,8}$")
+
+
+class HttpConfig(_Frozen):
+    """Timeouts and retry policy shared by every HTTP source."""
+
+    timeout_s: float = Field(gt=0)
+    max_retries: StrictInt = Field(ge=0, le=10)
+    backoff_s: float = Field(ge=0)
+
+
+class FrenchConfig(_Frozen):
+    """Ken French Data Library zip URLs. Tunable because the library has moved before."""
+
+    five_factor_url: str = Field(pattern=r"^https://")
+    momentum_url: str = Field(pattern=r"^https://")
+
+
+class AlfredConfig(_Frozen):
+    """FRED/ALFRED series fetched with all vintages."""
+
+    series: tuple[str, ...] = Field(min_length=1)
+    page_size: StrictInt = Field(ge=1, le=100_000)
+
+    @field_validator("series")
+    @classmethod
+    def _check_series(cls, series: tuple[str, ...]) -> tuple[str, ...]:
+        bad = [s for s in series if not _FRED_SERIES_RE.fullmatch(s)]
+        if bad:
+            raise ValueError(f"FRED series ids must be uppercase alphanumeric, got {bad}")
+        dupes = sorted({s for s in series if series.count(s) > 1})
+        if dupes:
+            raise ValueError(f"duplicate series: {dupes}")
+        return series
+
+
+class DataConfig(_Frozen):
+    """Data-source settings. ``calendar`` is an exchange-calendars code (e.g. XNYS)."""
+
+    calendar: str
+    http: HttpConfig
+    french: FrenchConfig
+    alfred: AlfredConfig
+
+    @field_validator("calendar")
+    @classmethod
+    def _check_calendar(cls, value: str) -> str:
+        if not _CALENDAR_RE.fullmatch(value):
+            raise ValueError(f"calendar must be an exchange code like 'XNYS', got {value!r}")
+        return value
+
+
 class PipelineConfig(_Frozen):
     universe: UniverseConfig
     dates: DateRange
     frequency: Frequency
     seed: StrictInt = Field(ge=0, lt=2**32)
+    data: DataConfig
 
 
 def deep_merge(base: Mapping[str, object], override: Mapping[str, object]) -> dict[str, object]:

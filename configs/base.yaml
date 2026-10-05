@@ -21,3 +21,18 @@ frequency: daily
 
 # Root seed for all np.random.Generator objects in a run.
 seed: 20260105
+
+# Data sources (docs/adr/0004-data-sources-and-pit-limitations.md). Snapshots of fetched data are
+# immutable and content-addressed (docs/adr/0005-immutable-snapshots.md).
+data:
+  calendar: XNYS          # exact session calendar for ETF missing-data checks
+  http:
+    timeout_s: 60
+    max_retries: 3        # retried on transport errors, 429 and 5xx
+    backoff_s: 1.0        # sleep backoff_s * 2**attempt between attempts
+  french:
+    five_factor_url: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_5_Factors_2x3_daily_CSV.zip
+    momentum_url: https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Momentum_Factor_daily_CSV.zip
+  alfred:
+    series: [INDPRO, UNRATE, CPIAUCSL, PAYEMS]
+    page_size: 100000     # FRED API maximum per request; responses are paginated

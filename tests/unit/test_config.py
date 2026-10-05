@@ -167,3 +167,35 @@ def _mutate_all(obj: object) -> None:
         obj["__mutated__"] = True
     elif isinstance(obj, list):
         obj.append("__mutated__")
+
+
+# --- data section -----------------------------------------------------------------------------
+
+
+def test_base_data_config() -> None:
+    data = load_config().data
+    assert data.calendar == "XNYS"
+    assert data.alfred.series == ("INDPRO", "UNRATE", "CPIAUCSL", "PAYEMS")
+    assert data.alfred.page_size == 100_000
+    assert data.french.five_factor_url.endswith("F-F_Research_Data_5_Factors_2x3_daily_CSV.zip")
+    assert data.french.momentum_url.endswith("F-F_Momentum_Factor_daily_CSV.zip")
+    assert data.http.max_retries == 3
+
+
+@pytest.mark.parametrize(
+    ("yaml_text", "match"),
+    [
+        ("data:\n  alfred:\n    series: [unrate]\n", "uppercase"),
+        ("data:\n  alfred:\n    series: [UNRATE, UNRATE]\n", "duplicate series"),
+        ("data:\n  alfred:\n    series: []\n", "at least 1"),
+        ("data:\n  alfred:\n    page_size: 100001\n", "page_size"),
+        ("data:\n  french:\n    momentum_url: http://insecure.test/m.zip\n", "momentum_url"),
+        ("data:\n  http:\n    timeout_s: 0\n", "timeout_s"),
+        ("data:\n  calendar: nyse\n", "calendar"),
+        ("data:\n  alfred:\n    serie: [UNRATE]\n", "serie"),
+    ],
+)
+def test_invalid_data_config_rejected(tmp_path: Path, yaml_text: str, match: str) -> None:
+    override = _write(tmp_path / "o.yaml", yaml_text)
+    with pytest.raises(ValidationError, match=match):
+        load_config(override_path=override)

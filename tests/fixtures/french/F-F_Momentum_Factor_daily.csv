@@ -1,0 +1,25 @@
+This file was created by using the 202608 CRSP database.  It
+contains a momentum factor, constructed from six value-weight portfolios formed
+using independent sorts on size and prior return of NYSE, AMEX, and NASDAQ stocks.
+MOM is the average of the returns on two (big and small) high prior return portfolios
+minus the average of the returns on two low prior return portfolios.  The portfolios
+are constructed daily.  Big means a firm is above the median market cap on the NYSE
+at the end of the previous day; small firms are below the median NYSE market cap.
+Prior return is measured from day - 250 to - 21.  Firms in the low prior return
+portfolio are below the 30th NYSE percentile.  Those in the high portfolio are above
+the 70th NYSE percentile.
+
+Missing data are indicated by -99.99 or -999.
+
+,Mom
+20241226,   0.00
+20241227,  -0.84
+20241230,   0.08
+20241231,  -1.07
+20250102,   0.49
+20250103,   0.83
+20250106,   0.02
+20250107,  -1.57
+20250108,   0.75
+
+Copyright 2026 Eugene F. Fama and Kenneth R. French

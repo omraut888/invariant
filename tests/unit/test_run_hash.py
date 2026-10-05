@@ -15,7 +15,16 @@ from pydantic import ValidationError
 from scipy import stats
 from structlog.testing import capture_logs
 
-from invariant.config.settings import DateRange, PipelineConfig, Settings, UniverseConfig
+from invariant.config.settings import (
+    AlfredConfig,
+    DataConfig,
+    DateRange,
+    FrenchConfig,
+    HttpConfig,
+    PipelineConfig,
+    Settings,
+    UniverseConfig,
+)
 from invariant.core.run_hash import (
     MANIFEST_NAME,
     PATCH_NAME,
@@ -38,6 +47,16 @@ from invariant.core.types import Frequency, StageName
 SHA_A = "a" * 40
 SHA_B = "b" * 40
 DIGEST = "c" * 64
+# Literal, not loaded from base.yaml, so the golden run id does not move with config edits.
+DATA = DataConfig(
+    calendar="XNYS",
+    http=HttpConfig(timeout_s=60, max_retries=3, backoff_s=1.0),
+    french=FrenchConfig(
+        five_factor_url="https://example.test/ff5.zip",
+        momentum_url="https://example.test/mom.zip",
+    ),
+    alfred=AlfredConfig(series=("UNRATE",), page_size=100_000),
+)
 
 
 def _config(**overrides: object) -> PipelineConfig:
@@ -46,6 +65,7 @@ def _config(**overrides: object) -> PipelineConfig:
         "dates": DateRange(start=date(2005, 1, 3), end=date(2025, 12, 31)),
         "frequency": Frequency.DAILY,
         "seed": 42,
+        "data": DATA,
     }
     base.update(overrides)
     return PipelineConfig.model_validate(base)
@@ -73,8 +93,9 @@ def test_same_inputs_same_run_id() -> None:
 
 
 def test_golden_run_id() -> None:
-    # Pinned: if this changes, canonicalization changed and HASH_SCHEMA_VERSION must be bumped.
-    assert compute_run_id(_inputs()) == "1ed83fb132c94ed2"
+    # Pinned: if this changes without a change to the PipelineConfig schema, canonicalization
+    # changed and HASH_SCHEMA_VERSION must be bumped. (Last re-pinned when `data` was added.)
+    assert compute_run_id(_inputs()) == "3f20d5ee463c0032"
 
 
 @pytest.mark.parametrize(
