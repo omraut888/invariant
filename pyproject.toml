@@ -1,0 +1,68 @@
+[project]
+name = "invariant"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "omraut888", email = "omraut0888@gmail.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "fredapi>=0.5.2",
+    "httpx>=0.28.1",
+    "numpy>=2.4.6",
+    "pandas>=3.0.6",
+    "pyarrow>=25.0.1",
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
+    "python-dotenv>=1.2.4",
+    "pyyaml>=6.0.3",
+    "scipy>=1.17.1",
+    "structlog>=26.1.0",
+    "yfinance>=1.7.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.168.4",
+    "ipykernel>=7.4.0",
+    "mypy>=2.4.0",
+    "pandas-stubs>=3.0.5.260914",
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.10",
+    "types-pyyaml>=6.0.12.20260906",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "NPY", "RUF"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+mypy_path = "src"
+packages = ["invariant"]
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["yfinance.*", "fredapi.*", "scipy.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+  "slow: long-running tests",
+  "benchmark: planted-signal ground-truth tests",
+  "leakage: look-ahead bias guards",
+]
