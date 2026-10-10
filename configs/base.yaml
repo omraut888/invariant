@@ -36,3 +36,11 @@ data:
   alfred:
     series: [INDPRO, UNRATE, CPIAUCSL, PAYEMS]
     page_size: 100000     # FRED API maximum per request; responses are paginated
+
+# Point-in-time panel (docs/adr/0006-point-in-time-panel.md).
+pit:
+  targets:
+    execution_lag: 1      # enter at the close of t+1: a close-t feature cannot trade at close t
+    horizon: 1            # target y_t = r_{t+2} (sessions); see TargetConfig
+  publication_lag_sessions:
+    french: 42            # ~2 months: each library release covers data through the prior month

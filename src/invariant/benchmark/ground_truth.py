@@ -26,6 +26,14 @@ decides with unlimited data. They are not a promise that a finite-sample test re
 t-statistic, so a stage test can distinguish "the stage is wrong" from "the stage had no power".
 ``identifiable=False`` marks a signal whose true status cannot be recovered from the observed
 variables at all (S_conf when Z is hidden); stage tests should measure, not assert, those.
+
+Target timing
+-------------
+Every expected value above is a moment of ``(S_t, R_{t+1})``. ``target_timing`` records that as
+the ``TargetConfig`` (execution lag 0, horizon 1) a stage's targets must use to be scored against
+this answer key. Scoring with execution lag 1 would compare a stage against
+``Corr(S_t, R_{t+2})``, a decayed version of the planted effect, and silently pass or fail it
+for the wrong reason. ``require_target_timing`` refuses any other timing.
 """
 
 from __future__ import annotations
@@ -40,9 +48,11 @@ import numpy.typing as npt
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from invariant.benchmark.config import SyntheticMarketConfig
+from invariant.config.settings import TargetConfig
 from invariant.core.types import StageName, Verdict, make_signal_id
 
 __all__ = [
+    "EXPECTED_VALUES_TARGET_TIMING",
     "GROUND_TRUTH_SCHEMA_VERSION",
     "TIMING_CONVENTION",
     "CausalEdge",
@@ -52,15 +62,23 @@ __all__ = [
     "NodeRole",
     "RealizedLoadings",
     "SignalTruth",
+    "TargetTimingMismatchError",
 ]
 
-GROUND_TRUTH_SCHEMA_VERSION = 1
+GROUND_TRUTH_SCHEMA_VERSION = 2  # 2: added target_timing
 
 TIMING_CONVENTION = (
     "A value dated t is known at the close of trading day t. returns[t] is the log return from "
     "close(t-1) to close(t). A signal dated t is scored against returns[t+1]. All mean edges have "
     "lag >= 1 except the latent market factor (lag 0)."
 )
+
+EXPECTED_VALUES_TARGET_TIMING = TargetConfig(execution_lag=0, horizon=1)
+"""The timing every expected value in ``SignalTruth`` is computed for: ``(S_t, R_{t+1})``."""
+
+
+class TargetTimingMismatchError(ValueError):
+    """A benchmark run's target timing differs from the one ``GroundTruth`` was computed for."""
 
 
 class _Frozen(BaseModel):
@@ -172,6 +190,7 @@ class GroundTruth(_Frozen):
     seed: int = Field(ge=0, lt=2**32)
     config: SyntheticMarketConfig
     timing_convention: str = TIMING_CONVENTION
+    target_timing: TargetConfig
     nodes: tuple[Node, ...]
     edges: tuple[CausalEdge, ...]
     signals: tuple[SignalTruth, ...]
@@ -218,6 +237,16 @@ class GroundTruth(_Frozen):
         return self
 
     # -- queries -----------------------------------------------------------------------------
+
+    def require_target_timing(self, timing: TargetConfig) -> None:
+        """Raise ``TargetTimingMismatchError`` unless ``timing`` equals ``target_timing``."""
+        if timing != self.target_timing:
+            raise TargetTimingMismatchError(
+                f"benchmark targets built with execution_lag={timing.execution_lag}, "
+                f"horizon={timing.horizon}, but GroundTruth expected values assume "
+                f"execution_lag={self.target_timing.execution_lag}, "
+                f"horizon={self.target_timing.horizon}; scores would not be comparable"
+            )
 
     @property
     def node_names(self) -> tuple[str, ...]:

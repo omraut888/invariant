@@ -64,6 +64,7 @@ __all__ = [
     "SeriesReport",
     "fetch_alfred",
     "parse_alfred_rows",
+    "validate_vintages",
 ]
 
 VINTAGE_COLUMNS = ("series_id", "observation_date", "realtime_start", "realtime_end", "value")
@@ -129,6 +130,22 @@ def parse_alfred_rows(raw: AlfredRawSeries) -> pd.DataFrame:
             "value": np.asarray(values, dtype="float64"),
         }
     )
+    return validate_vintages(frame, sid)
+
+
+def validate_vintages(frame: pd.DataFrame, series_id: str) -> pd.DataFrame:
+    """Sort one series' ``VINTAGE_COLUMNS`` table and check its real-time periods.
+
+    Raises ``DataValidationError`` if a period ends before it starts, an
+    ``(observation_date, realtime_start)`` pair repeats, or two periods of one observation
+    overlap. Returns a sorted copy with a default index.
+    """
+    sid = series_id
+    missing = [c for c in VINTAGE_COLUMNS if c not in frame.columns]
+    if missing:
+        raise DataValidationError(f"{sid}: vintage table lacks columns {missing}")
+    if (frame["series_id"] != sid).any():
+        raise DataValidationError(f"{sid}: vintage table contains other series")
     frame = frame.sort_values(["observation_date", "realtime_start"], kind="stable")
     frame = frame.reset_index(drop=True)
 

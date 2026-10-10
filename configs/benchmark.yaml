@@ -6,6 +6,15 @@
 #
 # ic values are *nominal* (loading = ic * sd of the asset's non-signal return, on unit-variance
 # signals). Exact population ICs, partial ICs and expected t-stats are exported in GroundTruth.
+#
+# `pit.targets` is the target timing every benchmark run is scored with. The SCM plants
+# S_t -> R_{t+1}, so it must be execution_lag 0, horizon 1: GroundTruth.target_timing records
+# the timing its expected values assume, and scoring refuses any other (docs/adr/0006).
+
+pit:
+  targets:
+    execution_lag: 0
+    horizon: 1
 
 base:
   n_obs: 6000            # ~23.8 trading years of daily data

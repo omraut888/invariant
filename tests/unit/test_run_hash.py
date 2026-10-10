@@ -22,7 +22,10 @@ from invariant.config.settings import (
     FrenchConfig,
     HttpConfig,
     PipelineConfig,
+    PitConfig,
+    PublicationLags,
     Settings,
+    TargetConfig,
     UniverseConfig,
 )
 from invariant.core.run_hash import (
@@ -57,6 +60,10 @@ DATA = DataConfig(
     ),
     alfred=AlfredConfig(series=("UNRATE",), page_size=100_000),
 )
+PIT = PitConfig(
+    targets=TargetConfig(execution_lag=1, horizon=1),
+    publication_lag_sessions=PublicationLags(french=42),
+)
 
 
 def _config(**overrides: object) -> PipelineConfig:
@@ -66,6 +73,7 @@ def _config(**overrides: object) -> PipelineConfig:
         "frequency": Frequency.DAILY,
         "seed": 42,
         "data": DATA,
+        "pit": PIT,
     }
     base.update(overrides)
     return PipelineConfig.model_validate(base)
@@ -94,8 +102,8 @@ def test_same_inputs_same_run_id() -> None:
 
 def test_golden_run_id() -> None:
     # Pinned: if this changes without a change to the PipelineConfig schema, canonicalization
-    # changed and HASH_SCHEMA_VERSION must be bumped. (Last re-pinned when `data` was added.)
-    assert compute_run_id(_inputs()) == "3f20d5ee463c0032"
+    # changed and HASH_SCHEMA_VERSION must be bumped. (Last re-pinned when `pit` was added.)
+    assert compute_run_id(_inputs()) == "3856c2b6d5d63065"
 
 
 @pytest.mark.parametrize(
@@ -108,6 +116,14 @@ def test_golden_run_id() -> None:
         ),
         pytest.param({"config": _config(frequency=Frequency.WEEKLY)}, id="frequency"),
         pytest.param({"config": _config(seed=43)}, id="seed"),
+        pytest.param(
+            {
+                "config": _config(
+                    pit=PIT.model_copy(update={"targets": TargetConfig(execution_lag=0, horizon=1)})
+                )
+            },
+            id="execution_lag",
+        ),
         pytest.param({"snapshot_id": "snap-2025-12-30"}, id="snapshot"),
         pytest.param({"git": GitState(sha=SHA_B, dirty=False)}, id="git_sha"),
         pytest.param({"git": GitState(sha=SHA_A, dirty=True, diff_sha256=DIGEST)}, id="dirty"),

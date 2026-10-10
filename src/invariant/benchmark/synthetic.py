@@ -63,6 +63,7 @@ from scipy import linalg, signal
 
 from invariant.benchmark.config import GarchParams, SyntheticMarketConfig, signal_coefficients
 from invariant.benchmark.ground_truth import (
+    EXPECTED_VALUES_TARGET_TIMING,
     CausalEdge,
     GroundTruth,
     Mechanism,
@@ -545,6 +546,7 @@ def build_ground_truth(
     return GroundTruth(
         seed=seed,
         config=config,
+        target_timing=EXPECTED_VALUES_TARGET_TIMING,
         nodes=tuple(_nodes(config)),
         edges=tuple(_edges(config, loadings)),
         signals=tuple(_signal_truths(config, loadings, index)),

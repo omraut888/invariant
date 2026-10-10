@@ -43,7 +43,10 @@ __all__ = [
     "FrenchConfig",
     "HttpConfig",
     "PipelineConfig",
+    "PitConfig",
+    "PublicationLags",
     "Settings",
+    "TargetConfig",
     "UniverseConfig",
     "deep_merge",
     "find_project_root",
@@ -197,12 +200,39 @@ class DataConfig(_Frozen):
         return value
 
 
+class TargetConfig(_Frozen):
+    """Forward-return target timing: ``y_t = r_{t+1+e} + ... + r_{t+e+h}``, ``e = execution_lag``.
+
+    ``execution_lag`` is the number of sessions between the close at which features are known
+    and the close at which the position is entered. It has no default on purpose: real data
+    uses 1 (a close-t signal cannot trade at the close-t auction), the planted-signal benchmark
+    uses 0 because its expected values assume ``S_t -> R_{t+1}``. See docs/adr/0006.
+    """
+
+    execution_lag: StrictInt = Field(ge=0, le=21)
+    horizon: StrictInt = Field(ge=1, le=252)
+
+
+class PublicationLags(_Frozen):
+    """Sessions between a row's date and its first use, for sources without release dates."""
+
+    french: StrictInt = Field(ge=0, le=252)
+
+
+class PitConfig(_Frozen):
+    """Point-in-time panel assembly (``invariant.data.pit``)."""
+
+    targets: TargetConfig
+    publication_lag_sessions: PublicationLags
+
+
 class PipelineConfig(_Frozen):
     universe: UniverseConfig
     dates: DateRange
     frequency: Frequency
     seed: StrictInt = Field(ge=0, lt=2**32)
     data: DataConfig
+    pit: PitConfig
 
 
 def deep_merge(base: Mapping[str, object], override: Mapping[str, object]) -> dict[str, object]:

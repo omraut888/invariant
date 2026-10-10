@@ -13,6 +13,7 @@ from invariant.benchmark.config import (
     SyntheticMarketConfig,
     list_benchmark_presets,
     load_benchmark_config,
+    load_benchmark_target_timing,
     signal_coefficients,
 )
 from invariant.config.settings import ConfigError
@@ -90,6 +91,18 @@ def test_malformed_file_raises(tmp_path: Path) -> None:
     bad.write_text("base: {}\nextra: 1\n")
     with pytest.raises(ConfigError, match="unknown top-level"):
         load_benchmark_config(path=bad)
+
+
+@pytest.mark.parametrize(
+    "pit",
+    ["", "pit: {}\n", "pit: {targets: {execution_lag: 0, horizon: 1}, extra: 1}\n"],
+    ids=["missing", "no_targets", "extra_key"],
+)
+def test_benchmark_target_timing_is_required(tmp_path: Path, pit: str) -> None:
+    path = tmp_path / "b.yaml"
+    path.write_text("base: {}\n" + pit)
+    with pytest.raises(ConfigError, match="'pit'"):
+        load_benchmark_target_timing(path)
 
 
 # --- validators -------------------------------------------------------------------------------

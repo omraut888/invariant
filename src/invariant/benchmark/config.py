@@ -16,9 +16,10 @@ non-stationary or ill-posed signal process (non-positive innovation variance), a
 without a finite unconditional variance, or one without a finite fourth moment (for which
 excess kurtosis, one of the stylized facts we check, is infinite).
 
-YAML layout (``configs/benchmark.yaml``): a ``base`` mapping holding a full config and a
+YAML layout (``configs/benchmark.yaml``): a ``base`` mapping holding a full config, a
 ``presets`` mapping of named overrides, each deep-merged onto ``base`` with the same rules as the
-pipeline config (``invariant.config.settings.deep_merge``).
+pipeline config (``invariant.config.settings.deep_merge``), and a required ``pit.targets``
+mapping: the target timing benchmark runs are scored with (``load_benchmark_target_timing``).
 """
 
 from __future__ import annotations
@@ -31,7 +32,7 @@ from typing import Self
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, model_validator
 
-from invariant.config.settings import ConfigError, deep_merge, find_project_root
+from invariant.config.settings import ConfigError, TargetConfig, deep_merge, find_project_root
 
 __all__ = [
     "DEFAULT_BENCHMARK_CONFIG",
@@ -45,6 +46,7 @@ __all__ = [
     "SyntheticMarketConfig",
     "list_benchmark_presets",
     "load_benchmark_config",
+    "load_benchmark_target_timing",
     "signal_coefficients",
 ]
 
@@ -252,7 +254,10 @@ def _resolve(path: Path) -> Path:
     return path if path.is_absolute() else find_project_root() / path
 
 
-def _read_benchmark_yaml(path: Path | None) -> tuple[dict[str, object], dict[str, object]]:
+def _read_benchmark_yaml(
+    path: Path | None,
+) -> tuple[dict[str, object], dict[str, object], object]:
+    """Return ``(base, presets, pit)``; ``pit`` is validated by its loader."""
     resolved = _resolve(path or DEFAULT_BENCHMARK_CONFIG)
     try:
         data = yaml.safe_load(resolved.read_text(encoding="utf-8"))
@@ -263,15 +268,15 @@ def _read_benchmark_yaml(path: Path | None) -> tuple[dict[str, object], dict[str
     presets = data.get("presets", {})
     if not isinstance(presets, dict) or not all(isinstance(v, dict) for v in presets.values()):
         raise ConfigError(f"{resolved}: 'presets' must map names to override mappings")
-    extra = set(data) - {"base", "presets"}
+    extra = set(data) - {"base", "presets", "pit"}
     if extra:
         raise ConfigError(f"{resolved}: unknown top-level keys {sorted(extra)}")
-    return data["base"], presets
+    return data["base"], presets, data.get("pit")
 
 
 def list_benchmark_presets(path: Path | None = None) -> tuple[str, ...]:
     """Names of the presets defined in the benchmark YAML, sorted."""
-    _, presets = _read_benchmark_yaml(path)
+    _, presets, _ = _read_benchmark_yaml(path)
     return tuple(sorted(presets))
 
 
@@ -283,7 +288,7 @@ def load_benchmark_config(
 
     Relative paths resolve against the project root. An unknown preset raises ``ConfigError``.
     """
-    base, presets = _read_benchmark_yaml(path)
+    base, presets, _ = _read_benchmark_yaml(path)
     merged: dict[str, object] = base
     if preset is not None:
         if preset not in presets:
@@ -292,3 +297,19 @@ def load_benchmark_config(
         assert isinstance(override, dict)  # checked in _read_benchmark_yaml
         merged = deep_merge(base, override)
     return SyntheticMarketConfig.model_validate(merged)
+
+
+def load_benchmark_target_timing(path: Path | None = None) -> TargetConfig:
+    """The ``pit.targets`` timing benchmark runs are scored with (required in the YAML).
+
+    It is not part of ``SyntheticMarketConfig``: it does not change the generated data, only
+    how a stage's output is compared with ``GroundTruth`` (see ``GroundTruth.target_timing``).
+    """
+    _, _, pit = _read_benchmark_yaml(path)
+    if (
+        not isinstance(pit, dict)
+        or not isinstance(pit.get("targets"), dict)
+        or set(pit) != {"targets"}
+    ):
+        raise ConfigError("benchmark config needs a 'pit' mapping holding only 'targets'")
+    return TargetConfig.model_validate(pit["targets"])
