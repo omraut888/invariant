@@ -55,7 +55,7 @@ strict = true
 # there), so test modules are named tests.unit.test_x and can be targeted as `tests.*`.
 mypy_path = ["src", "$MYPY_CONFIG_FILE_DIR"]
 explicit_package_bases = true
-files = ["src/invariant", "tests"]
+files = ["src/invariant", "tests", "scripts"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]

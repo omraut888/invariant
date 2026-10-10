@@ -80,6 +80,9 @@ class KillReason(StrEnum):
     INSUFFICIENT_DATA = "general.insufficient_data"
     DATA_VALIDATION_FAILED = "general.data_validation_failed"
     ASSUMPTION_VIOLATION = "general.assumption_violation"
+    # Only for ledger entries marked ``placeholder=True`` (smoke runs, tests); the kill ledger
+    # rejects it otherwise. Never emitted by a real stage.
+    PLACEHOLDER = "general.placeholder"
 
     @property
     def stage(self) -> StageName | None:

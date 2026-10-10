@@ -12,6 +12,7 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 from tests.fixtures.fakes import alfred_raw, alfred_row, price_frame
 
+from invariant.benchmark.payload import synthetic_prices
 from invariant.data.sources.alfred import parse_alfred_rows
 from invariant.data.sources.etf import adj_close_panel, log_returns, parse_price_frame
 from invariant.data.sources.french import FIVE_FACTOR_HEADER, parse_french_csv
@@ -104,3 +105,18 @@ def test_alfred_parse_preserves_every_vintage_and_publication_date() -> None:
     jan = frame[frame["observation_date"] == pd.Timestamp("2025-01-01")]
     assert list(jan["value"]) == [143.0, 143.2, 143.4]
     assert np.isnan(frame["value"].iloc[-1])
+
+
+@settings(max_examples=60)
+@given(
+    st.lists(st.floats(min_value=-0.1, max_value=0.1), min_size=N, max_size=N),
+    st.integers(min_value=0, max_value=N - 1),
+    st.lists(st.floats(min_value=-0.1, max_value=0.1), min_size=N, max_size=N),
+)
+def test_synthetic_prices_ignore_future_returns(
+    base: list[float], cut: int, other: list[float]
+) -> None:
+    a = pd.DataFrame({"X": base}, index=INDEX)
+    b = pd.DataFrame({"X": [*base[: cut + 1], *other[cut + 1 :]]}, index=INDEX)
+    pa, pb = synthetic_prices(a), synthetic_prices(b)
+    assert pa.iloc[: cut + 1].to_numpy().tobytes() == pb.iloc[: cut + 1].to_numpy().tobytes()
