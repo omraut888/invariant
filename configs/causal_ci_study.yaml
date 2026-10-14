@@ -1,0 +1,21 @@
+# Stage 1 CI-test size/power study (docs/adr/0009-stage1-ci-test-and-multiple-testing.md).
+# Read by scripts/causal_ci_size_study.py. Rules are in invariant.stages.causal.calibration.
+#
+# The admissibility rule and the selection rule were fixed before any result was seen.
+
+root_seed: 20261014
+n_seeds: null           # null: required_seeds(alpha, size_cutoff, n_gating, all_pass_prob)
+n_obs: 6000             # the benchmark's default sample length
+tau_max: 5              # one trading week; fixed a priori, not tuned on the benchmark
+pc_alpha: 0.2
+alpha: 0.05
+size_cutoff: 0.075      # admissible iff the Wilson 95% upper bound of size <= this, every gate
+all_pass_prob: 0.90     # P(a true-alpha test passes every gate) >= this (union bound)
+confidence: 0.95
+tests:
+  - {label: parcorr, test: parcorr}
+  - {label: wls10, test: parcorr_wls, wls_window: 10}
+  - {label: wls50, test: parcorr_wls, wls_window: 50}
+  - {label: robust, test: robust_parcorr}
+selection_scenario: e3_default
+selection_families: ["s_real->R", "s_decay->R"]

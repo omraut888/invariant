@@ -10,6 +10,7 @@ requires-python = ">=3.11"
 dependencies = [
     "exchange-calendars>=4.13.2",
     "httpx>=0.28.1",
+    "joblib>=1.6.0",
     "numpy>=2.4.6",
     "pandas>=3.0.6",
     "pyarrow>=25.0.1",
@@ -19,6 +20,7 @@ dependencies = [
     "pyyaml>=6.0.3",
     "scipy>=1.17.1",
     "structlog>=26.1.0",
+    "tigramite>=5.2.10.1",
     "yfinance>=1.7.0",
 ]
 
@@ -59,7 +61,11 @@ files = ["src/invariant", "tests", "scripts"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-module = ["yfinance.*", "exchange_calendars.*", "pyarrow.*", "scipy.*", "statsmodels.*"]
+module = [
+  "yfinance.*", "exchange_calendars.*", "pyarrow.*", "scipy.*", "statsmodels.*",
+  "tigramite.*",  # untyped; contained in stages/causal/{ci_tests,pcmci}.py
+  "joblib.*",     # untyped
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
