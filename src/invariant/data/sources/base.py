@@ -40,6 +40,7 @@ class SourceName(StrEnum):
     ETF = "etf"
     FRENCH = "french"
     ALFRED = "alfred"
+    SYNTHETIC = "synthetic"  # planted-signal benchmark features only; never fetched
 
 
 @dataclass(frozen=True)

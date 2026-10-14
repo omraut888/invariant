@@ -23,14 +23,17 @@ from invariant.data.sources.clients import (
 from invariant.data.sources.etf import fetch_etf_prices
 from invariant.data.sources.french import fetch_french_factors
 
-__all__ = ["build_snapshot"]
+__all__ = ["FETCHED_SOURCES", "build_snapshot"]
+
+FETCHED_SOURCES: tuple[SourceName, ...] = (SourceName.ETF, SourceName.FRENCH, SourceName.ALFRED)
+"""Sources with a network fetcher. ``SourceName.SYNTHETIC`` is written by the benchmark only."""
 
 
 def build_snapshot(
     config: PipelineConfig,
     settings: Settings | None = None,
     *,
-    sources: Sequence[SourceName] = tuple(SourceName),
+    sources: Sequence[SourceName] = FETCHED_SOURCES,
     price_client: PriceClient | None = None,
     http: HttpClient | None = None,
     alfred_client: AlfredClient | None = None,
@@ -38,8 +41,11 @@ def build_snapshot(
     """Fetch ``sources`` as configured and write them as one immutable snapshot.
 
     Clients default to the real adapters; ALFRED requires ``FRED_API_KEY`` unless
-    ``alfred_client`` is injected.
+    ``alfred_client`` is injected. ``sources`` must be a subset of ``FETCHED_SOURCES``.
     """
+    unfetchable = [str(s) for s in sources if s not in FETCHED_SOURCES]
+    if unfetchable:
+        raise ValueError(f"no fetcher for sources {unfetchable}")
     settings = settings if settings is not None else load_settings()
     data_cfg = config.data
     owned: HttpxClient | None = None

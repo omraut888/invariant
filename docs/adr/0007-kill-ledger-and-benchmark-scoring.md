@@ -79,7 +79,8 @@ answer yet.
   true signal. Rejected.
 - *A new `SourceName.SYNTHETIC`*: cleaner typing, but it would need new snapshot accessors and
   PIT plumbing for no behavioural difference. Rejected for now; `provider` in the params marks
-  the data instead.
+  the data instead. *Superseded by ADR 0008*, which adds the source for the observed features
+  (prices stay in `etf`).
 
 ## Consequences
 - `KillReason` gained `general.placeholder`.

@@ -36,6 +36,14 @@ feature at t is then a function of the values whose information time is at or be
   *in the same vintages*. A NaN row still ends the previous vintage of its observation, so an
   older value is never resurrected. ``obs_dates`` shows how stale each value is.
 
+- **Synthetic benchmark features** (``syn_<name>``, planted-signal snapshots only): the value
+  dated t is known at the close of t (lag 0, ``SYNTHETIC_FEATURE_LAG_SESSIONS``), exactly the
+  timing ``GroundTruth.timing_convention`` assumes. The lag is a constant, not a tunable:
+  changing it would score stages against moments the answer key does not describe. Every date
+  must be a panel session; an off-calendar date raises instead of being moved. Lag 0 with
+  ``execution_lag = 0`` means trading at the close the signal is observed at. That is the
+  benchmark's convention, not a claim about real execution (ADR 0008).
+
 - **Targets** (``fwd_<TICKER>``): ``y_t = r_{t+1+e} + ... + r_{t+e+h}`` with ``e =
   execution_lag`` and ``h = horizon`` (``TargetConfig``). A window with any NaN, or one that
   runs past the end of the sample, gives NaN. ``y_t`` reads only returns dated after t. In
@@ -76,8 +84,10 @@ from invariant.data.snapshot import Snapshot
 from invariant.data.sources.alfred import validate_vintages
 from invariant.data.sources.base import DATE_DTYPE, DataValidationError, SourceName
 from invariant.data.sources.etf import log_returns
+from invariant.data.sources.synthetic import SYNTHETIC_PROVIDER
 
 __all__ = [
+    "SYNTHETIC_FEATURE_LAG_SESSIONS",
     "PitInputs",
     "PitPanel",
     "alfred_asof",
@@ -85,7 +95,11 @@ __all__ = [
     "build_pit_panel",
     "forward_returns",
     "lag_by_sessions",
+    "synthetic_on_sessions",
 ]
+
+SYNTHETIC_FEATURE_LAG_SESSIONS: Final = 0
+"""A synthetic feature dated t is usable at the close of t (``GroundTruth.timing_convention``)."""
 
 _ONE_DAY: Final = np.timedelta64(1, "D")
 _FloatArray = npt.NDArray[np.float64]
@@ -177,6 +191,24 @@ def lag_by_sessions(frame: pd.DataFrame, sessions: pd.DatetimeIndex, lag: int) -
     return out
 
 
+def synthetic_on_sessions(frame: pd.DataFrame, sessions: pd.DatetimeIndex) -> pd.DataFrame:
+    """Place synthetic features ``SYNTHETIC_FEATURE_LAG_SESSIONS`` sessions after their date.
+
+    Every date in ``frame`` must be one of ``sessions`` (``DataValidationError`` otherwise).
+    Sessions with no row are NaN.
+    """
+    sess = _check_sessions(sessions)
+    if len(frame):
+        validate_time_index(frame)
+    off = ~np.isin(_dates(frame.index), sess)
+    if off.any():
+        raise DataValidationError(
+            f"{int(off.sum())} synthetic feature rows are not on panel sessions, "
+            f"e.g. {frame.index[off][0]}"
+        )
+    return lag_by_sessions(frame, sessions, SYNTHETIC_FEATURE_LAG_SESSIONS)
+
+
 def forward_returns(returns: pd.DataFrame, target: TargetConfig) -> pd.DataFrame:
     """``y_t = r_{t+1+e} + ... + r_{t+e+h}`` for a session-aligned return panel.
 
@@ -209,20 +241,23 @@ class PitInputs:
     ``adj_close``: session-aligned adjusted closes (``sessions x tickers``; its index is the panel
     index). ``french``: factor returns indexed by date, or ``None``. ``alfred``: series id ->
     that series' ``VINTAGE_COLUMNS`` table. The keys, not the rows, decide the macro columns, so
-    the panel's columns never depend on which vintages exist yet.
+    the panel's columns never depend on which vintages exist yet. ``synthetic``: observed
+    planted-signal features indexed by date, or ``None`` (real data).
     """
 
     adj_close: pd.DataFrame
     french: pd.DataFrame | None = None
     alfred: Mapping[str, pd.DataFrame] = field(default_factory=dict)
+    synthetic: pd.DataFrame | None = None
 
 
 @dataclass(frozen=True)
 class PitPanel:
     """A point-in-time panel. All frames share one validated daily session index.
 
-    ``features``: ``ret_*``, ``ff_*`` and ``macro_*`` columns. ``obs_dates``: for each
-    ``macro_*`` column, the observation date of the value used. ``targets``: ``fwd_*`` columns.
+    ``features``: ``ret_*``, ``ff_*``, ``macro_*`` and (benchmark only) ``syn_*`` columns.
+    ``obs_dates``: for each ``macro_*`` column, the observation date of the value used.
+    ``targets``: ``fwd_*`` columns.
     """
 
     features: pd.DataFrame
@@ -253,6 +288,8 @@ def assemble_panel(inputs: PitInputs, config: PitConfig) -> PitPanel:
         macro_obs[f"macro_{sid}"] = asof["obs_date"]
     if macro_values:
         parts.append(pd.DataFrame(macro_values, index=sessions))
+    if inputs.synthetic is not None:
+        parts.append(synthetic_on_sessions(inputs.synthetic, sessions).add_prefix("syn_"))
     features = pd.concat(parts, axis=1)
     obs_dates = pd.DataFrame(macro_obs, index=sessions)
     targets = forward_returns(returns, config.targets).add_prefix("fwd_")
@@ -268,6 +305,8 @@ def build_pit_panel(snapshot: Snapshot, config: PipelineConfig) -> PitPanel:
 
     ETF prices are required. French factors and ALFRED series are included when the snapshot
     has them (a missing source is logged). Every configured ALFRED series must be present.
+    Synthetic features are included when present; the ETF source must then be synthetic data
+    with the same ``dataset_sha256`` (``DataValidationError`` otherwise).
     """
     adj = snapshot.etf_adj_close()
     tickers = list(config.universe.tickers)
@@ -292,7 +331,17 @@ def build_pit_panel(snapshot: Snapshot, config: PipelineConfig) -> PitPanel:
     else:
         _log().warning("pit_source_absent", source=str(SourceName.ALFRED))
 
-    panel = assemble_panel(PitInputs(adj_close=adj, french=french, alfred=alfred), config.pit)
+    synthetic: pd.DataFrame | None = None
+    if _has_source(snapshot, SourceName.SYNTHETIC):
+        _require_same_dataset(snapshot)
+        synthetic = snapshot.synthetic_features()
+        synthetic = synthetic.loc[
+            (synthetic.index >= adj.index[0]) & (synthetic.index <= adj.index[-1])
+        ]
+
+    panel = assemble_panel(
+        PitInputs(adj_close=adj, french=french, alfred=alfred, synthetic=synthetic), config.pit
+    )
     _log().info(
         "pit_panel_built",
         snapshot_id=snapshot.snapshot_id,
@@ -302,6 +351,21 @@ def build_pit_panel(snapshot: Snapshot, config: PipelineConfig) -> PitPanel:
         horizon=config.pit.targets.horizon,
     )
     return panel
+
+
+def _require_same_dataset(snapshot: Snapshot) -> None:
+    """Synthetic features may only be paired with returns from the same synthetic dataset."""
+    etf = snapshot.manifest.source(SourceName.ETF).params
+    syn = snapshot.manifest.source(SourceName.SYNTHETIC).params
+    if etf.get("provider") != SYNTHETIC_PROVIDER:
+        raise DataValidationError(
+            f"snapshot {snapshot.snapshot_id} has synthetic features but non-synthetic prices"
+        )
+    if syn.get("dataset_sha256") != etf.get("dataset_sha256"):
+        raise DataValidationError(
+            f"snapshot {snapshot.snapshot_id}: synthetic features are from dataset "
+            f"{syn.get('dataset_sha256')}, prices from {etf.get('dataset_sha256')}"
+        )
 
 
 def _select_series(vintages: pd.DataFrame, series: Sequence[str]) -> dict[str, pd.DataFrame]:

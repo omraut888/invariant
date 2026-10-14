@@ -63,6 +63,7 @@ from invariant.data.sources.etf import (
     log_returns,
 )
 from invariant.data.sources.french import FACTOR_COLUMNS, FrenchReport
+from invariant.data.sources.synthetic import FEATURES_TABLE, SyntheticFeatureReport, features_frame
 
 __all__ = [
     "MANIFEST_NAME",
@@ -418,3 +419,12 @@ class Snapshot:
     def alfred_vintages(self) -> pd.DataFrame:
         """Long vintage table (``VINTAGE_COLUMNS``) for all series."""
         return self.table(SourceName.ALFRED, "vintages")[list(VINTAGE_COLUMNS)]
+
+    # --- synthetic (benchmark only) -----------------------------------------------------------
+
+    def synthetic_report(self) -> SyntheticFeatureReport:
+        return SyntheticFeatureReport.model_validate(self._report(SourceName.SYNTHETIC))
+
+    def synthetic_features(self) -> pd.DataFrame:
+        """Observed planted-signal features indexed by date; a value dated t is known at t."""
+        return features_frame(self.table(SourceName.SYNTHETIC, FEATURES_TABLE))

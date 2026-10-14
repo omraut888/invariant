@@ -38,11 +38,13 @@ No stage logic exists yet. These components are built, tested and documented:
 | Immutable, content-addressed snapshots | `data/snapshot.py` | [0005](docs/adr/0005-immutable-snapshots.md) |
 | Point-in-time panel and forward-return targets | `data/pit.py` | [0006](docs/adr/0006-point-in-time-panel.md) |
 | Kill ledger and benchmark scorer | `ledger/` | [0007](docs/adr/0007-kill-ledger-and-benchmark-scoring.md) |
+| Synthetic feature source (observed signals, lag 0) | `data/sources/synthetic.py`, `benchmark/payload.py` | [0008](docs/adr/0008-synthetic-feature-source.md) |
 
 **Smoke run.** `scripts/phase0_smoke.py` does the following:
-1. Generates a synthetic market and writes it as a snapshot.
+1. Generates a synthetic market and writes it as a snapshot (prices and observed features).
 2. Creates (or resumes) a run keyed by that snapshot.
-3. Builds the point-in-time panel.
+3. Builds the point-in-time panel and checks it holds exactly the observed features, with no
+   oracle-only latent.
 4. Records **placeholder** ledger entries: a deliberately mixed set with a correct pass, a correct
    kill, a kill at the wrong stage and a missed kill.
 5. Scores them against GroundTruth, and exits non-zero unless the known result comes back.

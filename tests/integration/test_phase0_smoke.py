@@ -53,3 +53,20 @@ def test_smoke_runs_and_resumes(tmp_path: Path, capsys: pytest.CaptureFixture[st
     rerun = RunManifest.model_validate_json((run_dir / "manifest.json").read_text())
     assert rerun.attempt == 2 and rerun.status == "completed"
     assert KillLedger.read(run_dir).attempts() == (1, 2)
+
+
+@pytest.mark.parametrize(
+    ("preset", "features"),
+    [
+        (None, "syn_s_real, syn_s_conf, syn_s_decay, syn_s_noise, syn_z"),
+        ("hidden_confounder", "syn_s_real, syn_s_conf, syn_s_decay, syn_s_noise"),
+    ],
+)
+def test_smoke_panel_has_observed_features(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], preset: str | None, features: str
+) -> None:
+    args = ["--n-obs", "300", "--data-dir", str(tmp_path / "d"), "--runs-dir", str(tmp_path / "r")]
+    if preset is not None:
+        args += ["--preset", preset]
+    assert _main()(args) == 0
+    assert f"observed features in panel: {features}\n" in capsys.readouterr().out

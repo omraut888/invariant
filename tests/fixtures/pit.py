@@ -35,6 +35,7 @@ SESSIONS = pd.DatetimeIndex(
 TICKERS = ("AAA", "BBB")
 FACTORS = ("mkt_rf", "smb")
 SERIES = ("SER1", "SER2")
+SYN_FEATURES = ("s_real", "z")
 OBS_DATES = tuple(pd.Timestamp(d) for d in ("2024-12-01", "2025-01-01", "2025-02-01", "2025-03-01"))
 OPEN_END = "9999-12-31"
 
@@ -157,6 +158,7 @@ def prefix_identical(a: PitPanel, b: PitPanel, t: int) -> bool:
 
 _price = st.one_of(st.floats(min_value=0.5, max_value=500.0), st.just(math.nan))
 _factor = st.one_of(st.floats(min_value=-0.05, max_value=0.05), st.just(math.nan))
+_syn = st.one_of(st.floats(min_value=-5.0, max_value=5.0), st.just(math.nan))
 _macro = st.sampled_from([1.0, 2.0, 3.0, math.nan])  # few values, so runs merge
 
 
@@ -192,10 +194,11 @@ def _price_frame(rows: list[list[float]]) -> pd.DataFrame:
 def scenarios(draw: st.DrawFn, max_french_lag: int = 5) -> Scenario:
     """Raw inputs ``a``/``b`` that differ only in information dated after session ``t``.
 
-    "After t" per source: ETF prices dated after t; French rows dated after the session
-    ``lag`` sessions before t (all rows if t < lag); ALFRED releases dated on or after t,
-    because a release dated t is usable only from the next session. The future side may change
-    values, add or remove rows, and (through the release history) move ``realtime_end``.
+    "After t" per source: ETF prices and synthetic features dated after t; French rows dated
+    after the session ``lag`` sessions before t (all rows if t < lag); ALFRED releases dated on
+    or after t, because a release dated t is usable only from the next session. The future side
+    may change values, add or remove rows, and (through the release history) move
+    ``realtime_end``.
     """
     t = draw(st.integers(0, N_SESSIONS - 1))
     lag = draw(st.integers(0, max_french_lag))
@@ -214,6 +217,14 @@ def scenarios(draw: st.DrawFn, max_french_lag: int = 5) -> Scenario:
     fb_future = draw(st.lists(frow, min_size=N_SESSIONS, max_size=N_SESSIONS))
     fb = [fa[i] if SESSIONS[i] <= cutoff else fb_future[i] for i in range(N_SESSIONS)]
 
+    # Synthetic features: one optional row per session (a missing row must stay missing).
+    srow = st.one_of(
+        st.none(), st.lists(_syn, min_size=len(SYN_FEATURES), max_size=len(SYN_FEATURES))
+    )
+    sa = draw(st.lists(srow, min_size=N_SESSIONS, max_size=N_SESSIONS))
+    sb_future = draw(st.lists(srow, min_size=N_SESSIONS, max_size=N_SESSIONS))
+    sb = sa[: t + 1] + sb_future[t + 1 :]
+
     t_date = SESSIONS[t]
     alfred_a: dict[str, pd.DataFrame] = {}
     alfred_b: dict[str, pd.DataFrame] = {}
@@ -226,15 +237,29 @@ def scenarios(draw: st.DrawFn, max_french_lag: int = 5) -> Scenario:
         alfred_b[sid] = releases_to_vintages(sid, past + fut_b)
 
     return Scenario(
-        a=PitInputs(adj_close=_price_frame(prices), french=_french_frame(fa), alfred=alfred_a),
-        b=PitInputs(adj_close=_price_frame(prices_b), french=_french_frame(fb), alfred=alfred_b),
+        a=PitInputs(
+            adj_close=_price_frame(prices),
+            french=_french_frame(fa),
+            alfred=alfred_a,
+            synthetic=_dated_frame(sa, SYN_FEATURES),
+        ),
+        b=PitInputs(
+            adj_close=_price_frame(prices_b),
+            french=_french_frame(fb),
+            alfred=alfred_b,
+            synthetic=_dated_frame(sb, SYN_FEATURES),
+        ),
         t=t,
         config=config,
     )
 
 
 def _french_frame(rows: list[list[float] | None]) -> pd.DataFrame:
+    return _dated_frame(rows, FACTORS)
+
+
+def _dated_frame(rows: list[list[float] | None], columns: Sequence[str]) -> pd.DataFrame:
     keep = [i for i, r in enumerate(rows) if r is not None]
     values = [rows[i] for i in keep]
     index = pd.DatetimeIndex(SESSIONS[keep], name="date")
-    return pd.DataFrame(values, index=index, columns=list(FACTORS), dtype="float64")
+    return pd.DataFrame(values, index=index, columns=list(columns), dtype="float64")

@@ -12,7 +12,7 @@ from tests.fixtures.fakes import (
 )
 
 from invariant.config.settings import PipelineConfig, Settings, load_config
-from invariant.data.build import build_snapshot
+from invariant.data.build import FETCHED_SOURCES, build_snapshot
 from invariant.data.snapshot import default_snapshots_dir
 from invariant.data.sources.base import SourceName
 
@@ -54,7 +54,7 @@ def test_build_snapshot_with_injected_clients(tmp_path: Path) -> None:
         alfred_client=FakeAlfredClient({"UNRATE": UNRATE_ROWS}),
     )
     assert snap.path.parent == default_snapshots_dir(settings) == tmp_path / "snapshots"
-    assert {s.source for s in snap.manifest.sources} == set(SourceName)
+    assert {s.source for s in snap.manifest.sources} == set(FETCHED_SOURCES)
     assert snap.etf_report().complete
     assert snap.alfred_report().series[0].series_id == "UNRATE"
 

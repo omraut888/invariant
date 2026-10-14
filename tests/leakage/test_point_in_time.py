@@ -86,6 +86,13 @@ def _french_without_lag(inputs: PitInputs, config: PitConfig) -> PitPanel:
     return assemble_panel(inputs, unlagged)
 
 
+def _synthetic_next_day(inputs: PitInputs, config: PitConfig) -> PitPanel:
+    """Use the synthetic feature dated t+1 at t (lag -1)."""
+    assert inputs.synthetic is not None
+    shifted = inputs.synthetic.reindex(inputs.adj_close.index).shift(-1)
+    return assemble_panel(dataclasses.replace(inputs, synthetic=shifted), config)
+
+
 def _next_close(inputs: PitInputs, config: PitConfig) -> PitPanel:
     """Compute the return at t from the close of t+1."""
     return assemble_panel(dataclasses.replace(inputs, adj_close=inputs.adj_close.shift(-1)), config)
@@ -93,7 +100,7 @@ def _next_close(inputs: PitInputs, config: PitConfig) -> PitPanel:
 
 @pytest.mark.parametrize(
     "leaky",
-    [_same_day_alfred, _final_values, _french_without_lag, _next_close],
+    [_same_day_alfred, _final_values, _french_without_lag, _next_close, _synthetic_next_day],
     ids=lambda f: f.__name__.lstrip("_"),
 )
 def test_property_detects_known_leaks(leaky: Builder) -> None:

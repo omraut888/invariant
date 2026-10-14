@@ -1,9 +1,11 @@
 """Phase 0 smoke run: every foundation component, end to end, on the planted-signal benchmark.
 
 1. Generate a synthetic dataset and its GroundTruth.
-2. Write it as an immutable snapshot.
+2. Write it as an immutable snapshot: synthetic prices plus the observed features.
 3. Create (or resume) a RunContext keyed by that snapshot and the benchmark target timing.
-4. Build the point-in-time panel from the snapshot and check its returns against the dataset.
+4. Build the point-in-time panel from the snapshot. Check its returns against the dataset, and
+   that it holds exactly the observed features (``syn_*``, lag 0, bit-identical) and no
+   oracle-only latent.
 5. Write *placeholder* ledger entries: a deliberately mixed set covering a correct pass, a
    correct kill at the right stage, a correct kill at the wrong stage and a missed kill. Every
    entry has ``placeholder=True``. No stage logic exists yet.
@@ -29,13 +31,19 @@ from invariant.benchmark.config import (
     load_benchmark_config,
     load_benchmark_target_timing,
 )
-from invariant.benchmark.payload import synthetic_etf_payload, synthetic_tickers
+from invariant.benchmark.ground_truth import GroundTruth
+from invariant.benchmark.payload import (
+    observable_feature_names,
+    synthetic_etf_payload,
+    synthetic_feature_payload,
+    synthetic_tickers,
+)
 from invariant.benchmark.synthetic import SyntheticDataset, generate_market
 from invariant.config.settings import PipelineConfig, Settings, load_config, load_settings
 from invariant.core.logging import LogMode, configure_logging
 from invariant.core.run_hash import RunContext
 from invariant.core.types import KillReason, StageName, Verdict
-from invariant.data.pit import build_pit_panel
+from invariant.data.pit import PitPanel, build_pit_panel
 from invariant.data.snapshot import write_snapshot
 from invariant.ledger.benchmark_score import ConfusionMatrix, score_run
 from invariant.ledger.kill_ledger import STAGE_ORDER, KillLedger
@@ -47,11 +55,27 @@ PLACEHOLDER_FATES: dict[str, StageName | None] = {
     "s_decay": StageName.CAUSAL,  # expected decay    -> correct kill, wrong stage
     "s_noise": None,  # expected causal   -> missed kill
 }
-# The one expected-pass signal passes here, so wrong_kill is 0 by construction; unit tests
-# cover it.
-EXPECTED_MATRIX = ConfusionMatrix(
-    correct_kill=2, wrong_kill=0, correct_pass=1, missed_kill=1, kills_at_expected_stage=1
-)
+# What each placeholder fate scores as: (outcome field, kill at the expected stage). The one
+# expected-pass signal passes here, so wrong_kill is 0 by construction; unit tests cover it.
+PLACEHOLDER_OUTCOMES: dict[str, tuple[str, bool]] = {
+    "s_real": ("correct_pass", False),
+    "s_conf": ("correct_kill", True),
+    "s_decay": ("correct_kill", False),
+    "s_noise": ("missed_kill", False),
+}
+
+
+def expected_matrix(truth: GroundTruth) -> ConfusionMatrix:
+    """The matrix the placeholders must score. Non-identifiable signals (S_conf when Z is
+    hidden) are kept out of the matrix by the scorer, so they are left out here too."""
+    counts = dict.fromkeys(
+        ("correct_kill", "wrong_kill", "correct_pass", "missed_kill", "kills_at_expected_stage"), 0
+    )
+    for signal_id, (outcome, at_stage) in PLACEHOLDER_OUTCOMES.items():
+        if truth.signal(signal_id).identifiable:
+            counts[outcome] += 1
+            counts["kills_at_expected_stage"] += at_stage
+    return ConfusionMatrix(**counts)
 
 
 def _parse(argv: Sequence[str] | None) -> argparse.Namespace:
@@ -96,6 +120,28 @@ def _pipeline_config(base: PipelineConfig, dataset: SyntheticDataset) -> Pipelin
     )
 
 
+def _check_panel(panel: PitPanel, dataset: SyntheticDataset) -> None:
+    truth = dataset.ground_truth
+    tickers = synthetic_tickers(truth.asset_names)
+    got = panel.features[[f"ret_{t}" for t in tickers]].to_numpy()[1:]
+    want = dataset.returns.to_numpy()[1:]
+    if not np.allclose(got, want, rtol=0.0, atol=1e-12):
+        raise RuntimeError("PIT panel returns do not reproduce the synthetic returns")
+
+    observed = sorted(observable_feature_names(truth))
+    syn = sorted(c.removeprefix("syn_") for c in panel.features.columns if c.startswith("syn_"))
+    if syn != observed:
+        raise RuntimeError(f"PIT panel features {syn} != observed features {observed}")
+    for name in observed:
+        got_f = panel.features[f"syn_{name}"].to_numpy(dtype="float64")
+        if got_f.tobytes() != dataset.features[name].to_numpy(dtype="float64").tobytes():
+            raise RuntimeError(f"syn_{name} is not the dataset's feature at lag 0, bit for bit")
+    latent = set(map(str, dataset.latents.columns)) - set(observed)
+    leaked = sorted(c for c in panel.features.columns if c.split("_", 1)[-1] in latent)
+    if leaked:
+        raise RuntimeError(f"oracle-only latents reached the PIT panel: {leaked}")
+
+
 def _write_placeholders(ledger: KillLedger) -> None:
     for signal_id, kill_stage in PLACEHOLDER_FATES.items():
         for stage in STAGE_ORDER:
@@ -122,20 +168,19 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     dataset = _dataset(args, base.seed)
     truth = dataset.ground_truth
-    snapshot = write_snapshot([synthetic_etf_payload(dataset)], settings.data_dir / "snapshots")
+    snapshot = write_snapshot(
+        [synthetic_etf_payload(dataset), synthetic_feature_payload(dataset)],
+        settings.data_dir / "snapshots",
+    )
     config = _pipeline_config(base, dataset)
     ctx = RunContext.create(config, snapshot.snapshot_id, settings=settings)
     try:
         panel = build_pit_panel(snapshot, config)
-        tickers = synthetic_tickers(truth.asset_names)
-        got = panel.features[[f"ret_{t}" for t in tickers]].to_numpy()[1:]
-        want = dataset.returns.to_numpy()[1:]
-        if not np.allclose(got, want, rtol=0.0, atol=1e-12):
-            raise RuntimeError("PIT panel returns do not reproduce the synthetic returns")
+        _check_panel(panel, dataset)
 
         _write_placeholders(KillLedger.open(ctx))
         score = score_run(ctx.run_dir, truth, snapshot)
-        if score.matrix != EXPECTED_MATRIX or not score.complete:
+        if score.matrix != expected_matrix(truth) or not score.complete:
             raise RuntimeError(f"unexpected score {score.matrix} (complete={score.complete})")
         if not score.contains_placeholders:
             raise RuntimeError("placeholder entries were not detected by the scorer")
@@ -146,6 +191,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     print(json.dumps(ctx.manifest().model_dump(mode="json"), indent=2, sort_keys=True))
     print(f"\nsnapshot {snapshot.snapshot_id}  panel {panel.features.shape}  run {ctx.run_dir}")
+    syn = [c for c in panel.features.columns if c.startswith("syn_")]
+    print(f"observed features in panel: {', '.join(syn)}")
     print(f"score (placeholders={score.contains_placeholders}): {score.matrix.model_dump()}")
     for row in score.signals:
         print(

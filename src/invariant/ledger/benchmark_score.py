@@ -298,6 +298,13 @@ def score_run(
             f"snapshot {snapshot.snapshot_id} holds dataset {params.get('dataset_sha256')}, "
             f"GroundTruth describes {truth.dataset_sha256}"
         )
+    if any(e.source is SourceName.SYNTHETIC for e in snapshot.manifest.sources):
+        features_sha = snapshot.manifest.source(SourceName.SYNTHETIC).params.get("dataset_sha256")
+        if features_sha != truth.dataset_sha256:
+            raise BenchmarkMismatchError(
+                f"snapshot {snapshot.snapshot_id} holds features of dataset {features_sha}, "
+                f"GroundTruth describes {truth.dataset_sha256}"
+            )
     timing = _run_target_timing(manifest)
     if timing != truth.target_timing:
         raise BenchmarkMismatchError(
