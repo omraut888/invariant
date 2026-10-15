@@ -52,7 +52,7 @@ from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
-from typing import Final
+from typing import Final, Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -68,10 +68,12 @@ from invariant.core.logging import get_logger
 from invariant.core.run_hash import RngFactory
 from invariant.ledger.benchmark_score import RateEstimate, wilson_interval
 from invariant.stages.causal.ci_tests import CITestName, make_ci_test
-from invariant.stages.causal.pcmci import run_pcmci
+from invariant.stages.causal.pcmci import DecisionTest, run_pcmci
 
 __all__ = [
     "DEFAULT_STUDY_CONFIG",
+    "STUDY1_GATES",
+    "STUDY2_GATES",
     "BenchmarkData",
     "CITestSpec",
     "FamilyRole",
@@ -86,6 +88,7 @@ __all__ = [
     "dataset_seed",
     "load_size_study_config",
     "null_config",
+    "pair_label",
     "pass_probability",
     "required_seeds",
     "run_scenarios",
@@ -132,6 +135,8 @@ class CITestSpec(_Frozen):
 
 
 class SizeStudyConfig(_Frozen):
+    scenario_set: Literal["study1", "study2"] = "study1"
+    """Which scenarios the script runs (ADR 0009); part of the config, so of the run key."""
     root_seed: int = Field(ge=0, lt=2**32)
     n_seeds: int | None = Field(default=None, ge=1)
     """``None``: use ``required_seeds`` for the configured rule."""
@@ -143,17 +148,47 @@ class SizeStudyConfig(_Frozen):
     all_pass_prob: float = Field(gt=0.0, lt=1.0)
     confidence: float = Field(default=0.95, gt=0.0, lt=1.0)
     tests: tuple[CITestSpec, ...] = Field(min_length=1)
+    decisions: tuple[DecisionTest, ...] = Field(default=(DecisionTest.MCI,), min_length=1)
+    """Signal -> R decision tests (``pcmci`` module docstring). A candidate is a (CI test,
+    decision test) pair, labelled ``pair_label(ci, decision)``."""
     selection_scenario: str
     selection_families: tuple[str, ...] = Field(min_length=1)
+    tie_break: Literal["runtime", "simplicity"] = "runtime"
+    """Among statistically tied candidates: lowest median runtime, or the first in
+    ``(decision_simplicity, ci_simplicity)`` lexicographic order."""
+    decision_simplicity: tuple[DecisionTest, ...] = ()
+    ci_simplicity: tuple[str, ...] = ()
 
     @model_validator(mode="after")
     def _check(self) -> SizeStudyConfig:
         labels = [t.label for t in self.tests]
         if len(set(labels)) != len(labels):
             raise ValueError(f"test labels must be unique: {labels}")
+        if any("|" in label for label in labels):
+            raise ValueError("test labels must not contain '|'")
+        if len(set(self.decisions)) != len(self.decisions):
+            raise ValueError("decisions must be unique")
         if self.size_cutoff <= self.alpha:
             raise ValueError("size_cutoff must exceed alpha")
+        if self.tie_break == "simplicity" and (
+            sorted(self.decision_simplicity) != sorted(self.decisions)
+            or sorted(self.ci_simplicity) != sorted(labels)
+        ):
+            raise ValueError("simplicity orders must list every decision test and CI test once")
         return self
+
+    @property
+    def labels(self) -> tuple[str, ...]:
+        return tuple(pair_label(t.label, d) for t in self.tests for d in self.decisions)
+
+
+def pair_label(ci_label: str, decision: DecisionTest) -> str:
+    return f"{ci_label}|{decision.value}"
+
+
+def _split_label(label: str) -> tuple[str, DecisionTest]:
+    ci, dec = label.split("|")
+    return ci, DecisionTest(dec)
 
 
 def load_size_study_config(path: Path | None = None) -> SizeStudyConfig:
@@ -274,12 +309,11 @@ def _fam(
     return LinkFamily(name=name, source=source, target=target, lags=tuple(lags), role=role)
 
 
-def _global_null_families(tau_max: int, gating: bool) -> tuple[LinkFamily, ...]:
+def _global_null_families(tau_max: int) -> tuple[LinkFamily, ...]:
     lags = range(1, tau_max + 1)
-    role = FamilyRole.GATING_NULL if gating else FamilyRole.NULL
     out: list[LinkFamily] = []
     for sig in (*SIGNAL_NODES, "z"):
-        out.append(_fam(f"{sig}->R", sig, lags, role))
+        out.append(_fam(f"{sig}->R", sig, lags, FamilyRole.NULL))
         out.append(_fam(f"{sig}->R@1", sig, [1], FamilyRole.NULL))
         out.append(_fam(f"R->{sig}", TARGET, lags, FamilyRole.NULL, target=sig))
     out.append(_fam("R->R", TARGET, lags, FamilyRole.NULL))
@@ -287,11 +321,11 @@ def _global_null_families(tau_max: int, gating: bool) -> tuple[LinkFamily, ...]:
     return tuple(out)
 
 
-def _planted_families(tau_max: int, gating: bool) -> tuple[LinkFamily, ...]:
+def _planted_families(tau_max: int) -> tuple[LinkFamily, ...]:
     lags = range(1, tau_max + 1)
     alt, null = FamilyRole.ALTERNATIVE, FamilyRole.NULL
     return (
-        _fam("s_conf->R", "s_conf", lags, FamilyRole.GATING_NULL if gating else null),
+        _fam("s_conf->R", "s_conf", lags, null),
         _fam("s_conf->R@1", "s_conf", [1], null),
         _fam("s_noise->R", "s_noise", lags, null),
         _fam("s_noise->R@1", "s_noise", [1], null),
@@ -306,35 +340,75 @@ def _planted_families(tau_max: int, gating: bool) -> tuple[LinkFamily, ...]:
     )
 
 
-def benchmark_scenarios(tau_max: int) -> tuple[Scenario, ...]:
-    """E1, E2, E3 (= E5 default) and E5 realistic. E4 lives in tests/fixtures/vol_null.py."""
+STUDY1_GATES: Final[dict[str, frozenset[str]]] = {
+    "e2_garch_null": frozenset(f"{sig}->R" for sig in (*SIGNAL_NODES, "z")),
+    "e3_default": frozenset({"s_conf->R"}),
+}
+"""Gating families of study 1 (CI test choice), as pre-registered in ADR 0009."""
+
+STUDY2_GATES: Final[dict[str, frozenset[str]]] = {
+    "e2_garch_null": frozenset(f"{sig}->R" for sig in SIGNAL_NODES),
+    "e3_default": frozenset({"s_conf->R", "s_noise->R"}),
+}
+"""Benchmark gates of study 2 (decision test x CI test), ADR 0009. Z is not a candidate."""
+
+
+def _gate(scenario: Scenario, gated: frozenset[str]) -> Scenario:
+    names = {f.name for f in scenario.families}
+    if not gated <= names:
+        raise ValueError(f"{scenario.name}: unknown gated families {sorted(gated - names)}")
+    fams = []
+    for f in scenario.families:
+        if f.name in gated:
+            if f.role is FamilyRole.ALTERNATIVE:
+                raise ValueError(f"{scenario.name}/{f.name}: an alternative cannot gate")
+            f = f.model_copy(update={"role": FamilyRole.GATING_NULL})
+        fams.append(f)
+    return Scenario(scenario.name, scenario.description, scenario.build, tuple(fams))
+
+
+def benchmark_scenarios(
+    tau_max: int,
+    gates: dict[str, frozenset[str]] = STUDY1_GATES,
+    names: Sequence[str] | None = None,
+) -> tuple[Scenario, ...]:
+    """E1, E2, E3 (= E5 default) and E5 realistic. E4 and E6 live in tests/fixtures/.
+
+    ``gates`` maps a scenario name to the families that gate in it; every other null family
+    is reported only. ``names`` selects scenarios (default: all four).
+    """
     base = load_benchmark_config(None)
-    return (
+    all_scenarios = (
         Scenario(
             "e1_iid_null",
             "Global null, i.i.d. Student-t(6) residuals (GARCH off). Control.",
             BenchmarkData(null_config(base, garch=False)),
-            _global_null_families(tau_max, gating=False),
+            _global_null_families(tau_max),
         ),
         Scenario(
             "e2_garch_null",
             "Global null, GARCH(1,1)-t(6) residuals (all ICs 0).",
             BenchmarkData(null_config(base, garch=True)),
-            _global_null_families(tau_max, gating=True),
+            _global_null_families(tau_max),
         ),
         Scenario(
             "e3_default",
             "Default preset, Z observed: conditional nulls and power.",
             BenchmarkData(base),
-            _planted_families(tau_max, gating=True),
+            _planted_families(tau_max),
         ),
         Scenario(
             "e5_realistic",
             "Realistic preset (IC 0.02): power.",
             BenchmarkData(load_benchmark_config("realistic")),
-            _planted_families(tau_max, gating=False),
+            _planted_families(tau_max),
         ),
     )
+    unknown = set(gates) - {s.name for s in all_scenarios}
+    if unknown:
+        raise ValueError(f"gates name unknown scenarios: {sorted(unknown)}")
+    chosen = [s for s in all_scenarios if names is None or s.name in names]
+    return tuple(_gate(s, gates.get(s.name, frozenset())) for s in chosen)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -356,7 +430,10 @@ def dataset_seed(root_seed: int, index: int) -> int:
 
 
 class SeedRecord(_Frozen):
-    """One scenario's results on one seed. ``p[family][test]``: p-values at the family's lags."""
+    """One scenario's results on one seed.
+
+    ``p[family][pair_label]``: p-values at the family's lags. ``seconds`` is keyed by CI test.
+    """
 
     scenario: str
     index: int
@@ -372,6 +449,7 @@ def run_seed(scenario: Scenario, cfg: SizeStudyConfig, index: int) -> SeedRecord
     ds_seed = _u32(factory, "dataset")
     data, names = scenario.build(ds_seed, cfg.n_obs)
     p: dict[str, dict[str, tuple[float, ...]]] = {f.name: {} for f in scenario.families}
+    links = sorted({(f.source, f.target) for f in scenario.families})
     seconds: dict[str, float] = {}
     for spec in cfg.tests:
         test = make_ci_test(
@@ -380,13 +458,24 @@ def run_seed(scenario: Scenario, cfg: SizeStudyConfig, index: int) -> SeedRecord
             wls_window=spec.wls_window,
         )
         t0 = time.perf_counter()
-        out = run_pcmci(data, names, test, tau_max=cfg.tau_max, pc_alpha=cfg.pc_alpha)
+        out = run_pcmci(
+            data,
+            names,
+            test,
+            tau_max=cfg.tau_max,
+            pc_alpha=cfg.pc_alpha,
+            decision_links=links,
+            decisions=cfg.decisions,
+        )
         seconds[spec.label] = time.perf_counter() - t0
         for fam in scenario.families:
-            vals = out.link_p(fam.source, fam.target, fam.lags)
-            if not np.isfinite(vals).all():
-                raise RuntimeError(f"{scenario.name}/{fam.name}/{spec.label}: non-finite p")
-            p[fam.name][spec.label] = tuple(float(v) for v in vals)
+            for decision in cfg.decisions:
+                all_lags = out.decision_p[(decision, fam.source, fam.target)]
+                vals = all_lags[[lag - 1 for lag in fam.lags]]
+                label = pair_label(spec.label, decision)
+                if not np.isfinite(vals).all():
+                    raise RuntimeError(f"{scenario.name}/{fam.name}/{label}: non-finite p")
+                p[fam.name][label] = tuple(float(v) for v in vals)
     return SeedRecord(
         scenario=scenario.name, index=index, dataset_seed=ds_seed, p=p, seconds=seconds
     )
@@ -492,7 +581,7 @@ def summarize(
     git_dirty: bool | None,
 ) -> StudyReport:
     """Rates, admissibility and the selected test (see module docstring for the rules)."""
-    labels = [t.label for t in cfg.tests]
+    labels = list(cfg.labels)
     n_seeds = len({r.index for r in records})
     families: list[FamilySummary] = []
     failed: dict[str, list[str]] = {label: [] for label in labels}
@@ -532,7 +621,10 @@ def summarize(
         label: np.mean([_decisions(records, sel_sc, f, label, cfg.alpha) for f in sel_fams], axis=0)
         for label in labels
     }
-    seconds = {label: statistics.median(r.seconds[label] for r in records) for label in labels}
+    seconds = {
+        label: statistics.median(r.seconds[_split_label(label)[0]] for r in records)
+        for label in labels
+    }
     candidates = [label for label in labels if admissible[label]]
     power: list[PowerComparison] = []
     selected: str | None = None
@@ -554,10 +646,20 @@ def summarize(
             )
             if label in candidates and mean - half <= 0.0:
                 tied.append(label)
-        selected = min(tied, key=lambda lab: seconds[lab])
+        if cfg.tie_break == "simplicity":
+
+            def rank(lab: str) -> tuple[int, int]:
+                ci, dec = _split_label(lab)
+                return cfg.decision_simplicity.index(dec), cfg.ci_simplicity.index(ci)
+
+            selected = min(tied, key=rank)
+            how = "simplest"
+        else:
+            selected = min(tied, key=lambda lab: seconds[lab])
+            how = "cheapest"
         reason = (
             f"admissible: {candidates}; highest power: {best}; "
-            f"statistically tied with it: {tied}; cheapest of those: {selected}"
+            f"statistically tied with it: {tied}; {how} of those: {selected}"
         )
     else:
         reason = "no candidate is admissible; no test selected"

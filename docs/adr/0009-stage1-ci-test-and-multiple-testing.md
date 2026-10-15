@@ -1,7 +1,9 @@
-# ADR 0009: Stage 1 CI test choice (size study)
+# ADR 0009: Stage 1 CI test and decision test (size studies)
 
-Status: in progress. The pre-registered design (this section through "Rules") was written before
-any full-M result existed. Results and the decision are appended below it.
+Status: in progress. Two pre-registered studies. Study 1 (CI test) is complete and its results
+are recorded below. Study 2 (decision test x CI test) was pre-registered and committed before
+its full-M run. Each study's design and rules were written before any of its full-M results
+existed.
 
 ## Context
 Stage 1 runs PCMCI (Runge et al. 2019) and kills a signal when no lag in [1, tau_max] has a
@@ -158,5 +160,92 @@ robust .409. wls10 minus parcorr: +.047 [+.031, +.064] (paired).
    When PC1 misses `s_real_{t-1}` (it often does at this power), the lag-2 value stands in for
    it. The signal-level decision is unaffected, but a "best lag" must not be read as the true lag.
 
-## Decision
-Pending review of findings 2–5 (see the open questions in the conversation of 2026-10-14).
+## Decision (study 1)
+Not adopted on its own. On review (2026-10-14), findings 2 and 4 were judged to need a second
+study before any choice. The CI test and the signal -> R decision test are now chosen jointly
+in study 2.
+
+---
+
+# Study 2: decision test x CI test (pre-registered 2026-10-14, before the full-M run)
+
+## Questions
+- **A.** Which conditioning set should decide signal -> R, given finding 4 (MCI's power loss on
+  persistent signals) and the risks a smaller set brings back: confounding through a parent of
+  X that PC1 did not select for R, and Stambaugh bias?
+- **B.** Is wls10's E4 calibration robust, or a side effect of its weight at t including
+  `|resid_t|` (finding 2)?
+
+## Candidates: (CI test, decision test) pairs, 7 x 3 = 21
+Every decision test uses the same PCMCI run: the same PC1 parents P(.) and the same CI test.
+For `X_{t-tau} -> R_t`:
+
+| Decision test | Conditions on |
+|---|---|
+| (a) `mci` | `P(R) \ {X_{t-tau}}` plus `P(X)` shifted by tau (tigramite's MCI set; reproduces `p_matrix` exactly, tests/unit/test_pcmci.py) |
+| (b) `parents_r` | `P(R) \ {X_{t-tau}}` |
+| (c) `hybrid` | (b) plus the shifted parents of X other than X's own lags |
+
+CI tests:
+- `parcorr`.
+- `wls5`, `wls10`, `wls20`: tigramite's `ParCorrWLS` estimator, whose weight at t includes
+  `|resid_t|`.
+- `loo5`, `loo10`, `loo20`: `LeaveCurrentOutParCorrWLS`, whose weights come from
+  `|resid_{t-w..t-1}|` only. The weights are a one-step variance forecast with no
+  self-normalisation. The first w rows use the mean of the first w residuals.
+
+## Scenarios
+Root seed 20261014, the same as study 1, so seed i gives the same datasets. Each scenario has
+T = 6000. E1 is dropped: it was a control, and it answers neither A nor B.
+
+| | DGP | Gates (Bonferroni over lags 1..5) |
+|---|---|---|
+| E2 | benchmark, all ICs 0, GARCH-t | s_real, s_conf, s_decay, s_noise -> R (z is not a candidate: reported only) |
+| E3 | default preset, Z observed | s_conf -> R, s_noise -> R; power: s_real, s_decay |
+| E4 | log h_{t+1} signal, GARCH .06/.92 | s_vol -> R |
+| E4-lo | as E4, GARCH .10/.80 (persistence .90) | s_vol -> R |
+| E4-hi | as E4, GARCH .04/.95 (persistence .99) | s_vol -> R |
+| E4-rv | as E4, signal = log 22-day trailing realized variance | s_vol -> R |
+| E6 | test-only Stambaugh null: x AR(1) rho .99, R = mu + e, corr(u, e) = -0.8, Gaussian | s_stam -> R |
+| E5 | realistic preset | none (power, reported) |
+
+That is 11 gates. E2's s_real and s_decay gates go beyond the A list asked for. Under the
+global null they are candidate signals Stage 1 decides on, and leaving them out would test
+less, not more.
+
+E4 variants and E6 are test-only (tests/fixtures/). The realized-vol signal and E6's x use
+only data up to t (tests/leakage/test_vol_null_timing.py, by construction for E6).
+
+## Rules
+- **Admissible**: the Wilson 95% upper bound of the rejection rate at alpha = 0.05 is <= 0.075
+  on all 11 gates. This is study 1's rule.
+- **M** = `required_seeds(0.05, 0.075, 11, 0.90)` = **1785**. A true-0.05 pair passes one gate
+  with probability 0.9928, and all 11 with probability >= 0.92 (union bound). A true-0.06 pair
+  passes one gate with probability 0.708, a true-0.075 pair with 0.025, a true-0.10 pair with
+  1.5e-8.
+- **Selection**: among admissible pairs, the highest mean E3 power over s_real -> R and
+  s_decay -> R (decision unit). Pairs whose paired per-seed power difference from the best has a
+  95% CI containing 0 are tied. Ties go to the simpler pair: first by decision test
+  `parents_r < hybrid < mci` (fewer conditioning variables), then by CI test `parcorr < wls10 <
+  wls5 < wls20 < loo10 < loo5 < loo20` (unweighted, then the published estimator with its
+  default window first, then our variant). If no pair is admissible, nothing is selected and
+  the decision returns to review.
+- **B is answered by the same table.** If wls_w passes the E4 variants and loo_w does not, the
+  self-normalisation hypothesis is supported. If both pass, the variance estimate is enough. In
+  either case the rule above makes the choice, and B's reading is reported.
+
+## Consistency check (pre-registered)
+With the same root seed, every `parcorr|mci` and `wls10|mci` cell on E2, E3, E4 and E5 for
+seeds < 1654 must equal study 1's record bit for bit. A smoke run at M = 8 matched on all 720
+overlapping cells. Its rates (CI width ~ +/-0.3) were not used for anything. Any mismatch in the
+full run invalidates it.
+
+## Follow-ups bound by this study, whatever wins
+1. Stage 1 records the MCI p-value (decision test (a)) in the kill ledger as a diagnostic next to
+   the deciding p-value, even when (a) is not the deciding test.
+2. GroundTruth gains the expected t of the chosen decision test (the population partial
+   correlation for its conditioning set, times sqrt(n - 1)), so `low_power` flags the method
+   actually used.
+
+## Study 2 results
+Pending: `uv run python -m scripts.causal_ci_size_study --config configs/causal_decision_study.yaml`.

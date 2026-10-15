@@ -58,3 +58,31 @@ def test_make_ci_test_returns_fresh_instances() -> None:
     a = make_ci_test(CITestName.PARCORR_WLS, seed=1)
     b = make_ci_test(CITestName.PARCORR_WLS, seed=1)
     assert a is not b
+
+
+def test_leave_current_out_weights_exclude_current_residual() -> None:
+    from invariant.stages.causal.ci_tests import LeaveCurrentOutParCorrWLS
+
+    rng = np.random.default_rng(0)
+    arr = rng.standard_normal((2, 200))  # dim 2: residual = |y|
+    test = LeaveCurrentOutParCorrWLS(window_size=5)
+    base = test._estimate_std_time(arr, 1)
+    bumped = arr.copy()
+    bumped[1, 100] += 10.0
+    after = test._estimate_std_time(bumped, 1)
+    changed = np.flatnonzero(after != base)
+    assert changed.tolist() == [101, 102, 103, 104, 105]  # t+1..t+w, never t itself
+    np.testing.assert_allclose(base[50], np.abs(arr[1, 45:50]).mean())
+    np.testing.assert_allclose(base[:5], np.abs(arr[1, :5]).mean())
+    # tigramite's estimator includes t
+    assert (
+        ParCorrWLS(window_size=5)._estimate_std_time(bumped, 1)[100]
+        != (ParCorrWLS(window_size=5)._estimate_std_time(arr, 1)[100])
+    )
+
+
+def test_make_ci_test_loo() -> None:
+    from invariant.stages.causal.ci_tests import LeaveCurrentOutParCorrWLS
+
+    t = make_ci_test(CITestName.PARCORR_WLS_LOO, seed=1, wls_window=20)
+    assert isinstance(t, LeaveCurrentOutParCorrWLS) and t.window_size == 20

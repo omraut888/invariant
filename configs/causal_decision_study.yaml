@@ -1,0 +1,31 @@
+# Stage 1 study 2: signal -> R decision test x CI test (docs/adr/0009, "Study 2").
+# Read by scripts/causal_ci_size_study.py --config configs/causal_decision_study.yaml.
+# The rules were fixed before any result of this study was seen.
+
+scenario_set: study2
+root_seed: 20261014     # same as study 1: common random numbers, so every */mci cell on
+                        # E2/E3/E4/E5 must reproduce study 1 exactly (seeds < 1654)
+n_seeds: null           # required_seeds(alpha, size_cutoff, n_gating = 11, all_pass_prob)
+n_obs: 6000
+tau_max: 5
+pc_alpha: 0.2
+alpha: 0.05
+size_cutoff: 0.075
+all_pass_prob: 0.90
+confidence: 0.95
+tests:
+  - {label: parcorr, test: parcorr}
+  - {label: wls5, test: parcorr_wls, wls_window: 5}
+  - {label: wls10, test: parcorr_wls, wls_window: 10}
+  - {label: wls20, test: parcorr_wls, wls_window: 20}
+  - {label: loo5, test: parcorr_wls_loo, wls_window: 5}
+  - {label: loo10, test: parcorr_wls_loo, wls_window: 10}
+  - {label: loo20, test: parcorr_wls_loo, wls_window: 20}
+decisions: [mci, parents_r, hybrid]
+selection_scenario: e3_default
+selection_families: ["s_real->R", "s_decay->R"]
+tie_break: simplicity
+# "Simpler" = fewer conditioning variables: P(R) < P(R) + other parents of X < P(R) + P(X).
+decision_simplicity: [parents_r, hybrid, mci]
+# Unweighted, then tigramite's published estimator (default window first), then our variant.
+ci_simplicity: [parcorr, wls10, wls5, wls20, loo10, loo5, loo20]

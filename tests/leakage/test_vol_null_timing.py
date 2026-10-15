@@ -21,3 +21,13 @@ def test_signal_is_a_function_of_past_returns() -> None:
     for t in range(1, len(r)):
         h[t + 1] = g.omega + g.alpha * a[t] ** 2 + g.beta * h[t]
     np.testing.assert_allclose(np.log(h[2:]), s[1:], rtol=1e-10)
+
+
+def test_realized_vol_signal_reads_only_past_returns() -> None:
+    from tests.fixtures.vol_null import RV_WINDOW
+
+    data, _ = VolNullData(vol_null_config(), signal="rv22")(4, 600)
+    s, r = data[:, 0], data[:, 1]
+    # For t >= 21 the window lies inside the returned rows: S_t = log mean(r_{t-21..t}^2).
+    for t in range(RV_WINDOW - 1, 600, 37):
+        assert np.log(np.mean(r[t - RV_WINDOW + 1 : t + 1] ** 2)) == pytest.approx(s[t], rel=1e-12)

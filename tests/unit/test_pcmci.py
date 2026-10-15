@@ -65,3 +65,80 @@ def test_link_lags_validated() -> None:
         out.link_p("x", "y", [0])
     with pytest.raises(ValueError, match="lags"):
         out.link_p("x", "y", [3])
+
+
+# -- decision tests ---------------------------------------------------------------------------
+
+_PARENTS: dict[int, list[tuple[int, int]]] = {
+    0: [(0, -1), (2, -1)],  # X: own lag and a "confounder" 2
+    1: [(1, -2), (0, -1), (2, -1)],  # Y
+    2: [(2, -1)],
+}
+
+
+def test_conditioning_sets() -> None:
+    from invariant.stages.causal.pcmci import DecisionTest, conditioning_set
+
+    # X_{t-1} -> Y_t: drop X_{t-1} from P(Y); shift P(X) by 1.
+    assert conditioning_set(DecisionTest.PARENTS_R, _PARENTS, 0, 1, 1) == [(1, -2), (2, -1)]
+    assert conditioning_set(DecisionTest.MCI, _PARENTS, 0, 1, 1) == [
+        (1, -2),
+        (2, -1),
+        (0, -2),
+        (2, -2),
+    ]
+    # hybrid: P(X) minus X's own lags.
+    assert conditioning_set(DecisionTest.HYBRID, _PARENTS, 0, 1, 1) == [(1, -2), (2, -1), (2, -2)]
+    # A lag that is not a parent keeps P(Y) whole.
+    assert conditioning_set(DecisionTest.PARENTS_R, _PARENTS, 0, 1, 3) == _PARENTS[1]
+
+
+@pytest.mark.parametrize("name", list(CITestName))
+def test_mci_decision_reproduces_tigramite_p_matrix(name: CITestName) -> None:
+    from invariant.stages.causal.pcmci import DecisionTest
+
+    data = _var(2, 1500)
+    out = run_pcmci(
+        data,
+        ["x", "y", "w"],
+        make_ci_test(name, seed=0),
+        tau_max=3,
+        pc_alpha=0.2,
+        decision_links=[("x", "y"), ("w", "y"), ("y", "y")],
+        decisions=list(DecisionTest),
+    )
+    for src in ("x", "w", "y"):
+        np.testing.assert_array_equal(
+            out.decision_p[(DecisionTest.MCI, src, "y")], out.link_p(src, "y", [1, 2, 3])
+        )
+        np.testing.assert_array_equal(
+            out.decision_val[(DecisionTest.MCI, src, "y")], out.link_val(src, "y", [1, 2, 3])
+        )
+    assert ("x", 2) in out.parents["y"]
+
+
+def test_parents_r_regains_power_on_a_persistent_cause() -> None:
+    """MCI tests only X's innovation; parents_r uses all of X's variation (ADR 0009, finding 4)."""
+    from invariant.stages.causal.pcmci import DecisionTest
+
+    rng = np.random.default_rng(5)
+    t = 20_000  # se of a partial correlation ~ 0.007
+    e = rng.standard_normal((t, 2))
+    x, y = np.zeros(t), np.zeros(t)
+    for s in range(1, t):
+        x[s] = 0.95 * x[s - 1] + e[s, 0]
+        y[s] = 0.1 * x[s - 1] + e[s, 1]
+    out = run_pcmci(
+        np.column_stack([x, y]),
+        ["x", "y"],
+        make_ci_test(CITestName.PARCORR, seed=0),
+        tau_max=1,
+        pc_alpha=0.2,
+        decision_links=[("x", "y")],
+        decisions=list(DecisionTest),
+    )
+    mci = abs(out.decision_val[(DecisionTest.MCI, "x", "y")][0])
+    pr = abs(out.decision_val[(DecisionTest.PARENTS_R, "x", "y")][0])
+    # Population (simulated at T = 400k): parents_r 0.297, MCI 0.101 = 0.1 sd(u) / sd(y).
+    assert pr == pytest.approx(0.297, abs=0.03)
+    assert mci == pytest.approx(0.101, abs=0.03)

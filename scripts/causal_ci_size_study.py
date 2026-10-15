@@ -1,4 +1,4 @@
-"""Stage 1 CI-test size and power study (E1-E5, docs/adr/0009).
+"""Stage 1 size and power studies (docs/adr/0009): study 1 (CI test), study 2 (decision test).
 
 Runs PCMCI with every candidate CI test on M seeds of each scenario, then writes
 ``runs/causal_ci_study/<key>/report.json`` and prints the results table. ``<key>`` hashes the
@@ -6,9 +6,10 @@ study config, M and the git state. Records are checkpointed to ``records.jsonl``
 directory, so a rerun with the same key resumes.
 
 Run from the repo root as a module, so the test-only E4 DGP (tests/fixtures/vol_null.py) is
-importable:
+importable. ``scenario_set`` in the config picks the scenarios:
 
-    uv run python -m scripts.causal_ci_size_study [--n-jobs N] [--n-seeds M] [--n-obs T]
+    uv run python -m scripts.causal_ci_size_study [--config PATH] [--n-jobs N] [--n-seeds M]
+                                                  [--n-obs T]
 """
 
 from __future__ import annotations
@@ -21,13 +22,18 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from tests.fixtures.vol_null import vol_null_scenario
+from tests.fixtures.stambaugh import stambaugh_scenario
+from tests.fixtures.vol_null import vol_null_scenario, vol_null_variants
 
 from invariant.config.settings import find_project_root
 from invariant.core.logging import LogMode, configure_logging
 from invariant.core.run_hash import canonical_json, read_git_state
 from invariant.stages.causal.calibration import (
+    STUDY1_GATES,
+    STUDY2_GATES,
     FamilyRole,
+    Scenario,
+    SizeStudyConfig,
     StudyReport,
     benchmark_scenarios,
     load_size_study_config,
@@ -39,7 +45,7 @@ from invariant.stages.causal.calibration import (
 
 
 def _table(report: StudyReport) -> str:
-    labels = [t.label for t in report.config.tests]
+    labels = list(report.config.labels)
     rows: dict[tuple[str, str, str], dict[str, str]] = {}
     for f in report.families:
         r = f.rate
@@ -62,6 +68,18 @@ def _table(report: StudyReport) -> str:
     return "\n".join(lines)
 
 
+def scenarios_for(cfg: SizeStudyConfig) -> tuple[Scenario, ...]:
+    if cfg.scenario_set == "study1":
+        return (*benchmark_scenarios(cfg.tau_max, STUDY1_GATES), vol_null_scenario(cfg.tau_max))
+    return (
+        *benchmark_scenarios(
+            cfg.tau_max, STUDY2_GATES, names=("e2_garch_null", "e3_default", "e5_realistic")
+        ),
+        *vol_null_variants(cfg.tau_max),
+        stambaugh_scenario(cfg.tau_max),
+    )
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--n-jobs", type=int, default=os.cpu_count() or 1)
@@ -74,7 +92,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     cfg = load_size_study_config(args.config)
     if args.n_obs is not None:
         cfg = cfg.model_copy(update={"n_obs": args.n_obs})
-    scenarios = (*benchmark_scenarios(cfg.tau_max), vol_null_scenario(cfg.tau_max))
+    scenarios = scenarios_for(cfg)
     n_gating = sum(f.role is FamilyRole.GATING_NULL for s in scenarios for f in s.families)
     m_req = required_seeds(cfg.alpha, cfg.size_cutoff, n_gating, cfg.all_pass_prob, cfg.confidence)
     m = args.n_seeds or cfg.n_seeds or m_req

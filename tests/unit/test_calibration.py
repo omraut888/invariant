@@ -9,6 +9,7 @@ from invariant.benchmark.config import load_benchmark_config
 from invariant.benchmark.synthetic import generate_market
 from invariant.ledger.benchmark_score import wilson_interval
 from invariant.stages.causal.calibration import (
+    STUDY2_GATES,
     BenchmarkData,
     CITestSpec,
     FamilyRole,
@@ -22,12 +23,14 @@ from invariant.stages.causal.calibration import (
     dataset_seed,
     load_size_study_config,
     null_config,
+    pair_label,
     pass_probability,
     required_seeds,
     run_scenarios,
     summarize,
 )
 from invariant.stages.causal.ci_tests import CITestName
+from invariant.stages.causal.pcmci import DecisionTest
 
 
 def _cfg(**update: object) -> SizeStudyConfig:
@@ -184,15 +187,19 @@ def test_parallel_results_identical_to_serial(tmp_path: Path) -> None:
 # -- summary rules ------------------------------------------------------------------------------
 
 
+def _mci(label: str) -> str:
+    return label if "|" in label else pair_label(label, DecisionTest.MCI)
+
+
 def _records(
     n: int, null_reject: dict[str, int], alt_reject: dict[str, int], seconds: dict[str, float]
 ) -> list[SeedRecord]:
-    """Hand-built records: test ``lab`` rejects the null on the first ``null_reject[lab]`` seeds
-    and the alternative on the first ``alt_reject[lab]`` seeds."""
+    """Hand-built records: ``lab`` rejects the null on the first ``null_reject[lab]`` seeds and
+    the alternative on the first ``alt_reject[lab]`` seeds. A bare CI label means ``|mci``."""
     out = []
     for i in range(n):
-        p_null = {lab: (0.001 if i < k else 0.9, 0.9) for lab, k in null_reject.items()}
-        p_alt = {lab: (0.001 if i < k else 0.9, 0.9) for lab, k in alt_reject.items()}
+        p_null = {_mci(lab): (0.001 if i < k else 0.9, 0.9) for lab, k in null_reject.items()}
+        p_alt = {_mci(lab): (0.001 if i < k else 0.9, 0.9) for lab, k in alt_reject.items()}
         out.append(
             SeedRecord(
                 scenario="sc",
@@ -219,9 +226,9 @@ def test_oversized_test_is_inadmissible_and_never_selected() -> None:
         {"parcorr": 1.0, "wls10": 2.0},
     )
     rep = _summary(recs)
-    assert rep.admissible == {"parcorr": False, "wls10": True}
-    assert rep.failed_gates["parcorr"] == ("sc/null",)
-    assert rep.selected == "wls10"
+    assert rep.admissible == {"parcorr|mci": False, "wls10|mci": True}
+    assert rep.failed_gates["parcorr|mci"] == ("sc/null",)
+    assert rep.selected == "wls10|mci"
 
 
 def test_more_powerful_admissible_test_wins_over_cheaper() -> None:
@@ -231,7 +238,7 @@ def test_more_powerful_admissible_test_wins_over_cheaper() -> None:
         {"parcorr": 500, "wls10": 700},
         {"parcorr": 1.0, "wls10": 2.0},
     )
-    assert _summary(recs).selected == "wls10"
+    assert _summary(recs).selected == "wls10|mci"
 
 
 def test_statistical_tie_goes_to_cheaper_test() -> None:
@@ -243,9 +250,9 @@ def test_statistical_tie_goes_to_cheaper_test() -> None:
     )
     # Shift wls10's alternative rejections by a few seeds: same rate, imperfectly paired.
     for r in recs[495:505]:
-        r.p["alt"]["wls10"] = (0.001, 0.9) if r.index >= 500 else (0.9, 0.9)
+        r.p["alt"]["wls10|mci"] = (0.001, 0.9) if r.index >= 500 else (0.9, 0.9)
     rep = _summary(recs)
-    assert rep.selected == "parcorr"
+    assert rep.selected == "parcorr|mci"
 
 
 def test_no_admissible_test_selects_nothing() -> None:
@@ -272,3 +279,83 @@ def test_rates_and_ks_reported() -> None:
     assert {f.rate.successes for f in null} == {20}
     assert all(f.ks_uniform_p is None for f in null)  # two lags: no KS
     assert np.isclose(rep.per_family_pass_prob_at_alpha, pass_probability(400, 0.05, 0.075, 0.95))
+
+
+# -- study 2: decision tests and simplicity tie-break -------------------------------------------
+
+
+def _cfg2(**update: object) -> SizeStudyConfig:
+    return _cfg(
+        decisions=(DecisionTest.MCI, DecisionTest.PARENTS_R),
+        tie_break="simplicity",
+        decision_simplicity=(DecisionTest.PARENTS_R, DecisionTest.MCI),
+        ci_simplicity=("parcorr", "wls10"),
+        **update,
+    )
+
+
+def test_labels_are_ci_decision_pairs() -> None:
+    assert _cfg2().labels == ("parcorr|mci", "parcorr|parents_r", "wls10|mci", "wls10|parents_r")
+    with pytest.raises(ValueError, match="simplicity"):
+        SizeStudyConfig.model_validate(
+            {**_cfg2().model_dump(), "decision_simplicity": [DecisionTest.MCI]}
+        )
+
+
+def test_simplicity_tie_break_prefers_simpler_decision_test() -> None:
+    labels = _cfg2().labels
+    recs = _records(
+        1000, dict.fromkeys(labels, 40), dict.fromkeys(labels, 500), {"parcorr": 2.0, "wls10": 1.0}
+    )
+    rep = summarize(
+        recs, [_tiny_scenario()], _cfg2(), tigramite_version="x", git_sha=None, git_dirty=None
+    )
+    # All four tie; parents_r beats mci, then parcorr beats wls10, whatever the runtime.
+    assert rep.selected == "parcorr|parents_r"
+
+
+def test_inadmissible_simple_test_loses_to_admissible_complex_one() -> None:
+    labels = _cfg2().labels
+    null = dict.fromkeys(labels, 40) | {"parcorr|parents_r": 200, "wls10|parents_r": 200}
+    recs = _records(1000, null, dict.fromkeys(labels, 500), {"parcorr": 1.0, "wls10": 1.0})
+    rep = summarize(
+        recs, [_tiny_scenario()], _cfg2(), tigramite_version="x", git_sha=None, git_dirty=None
+    )
+    assert rep.selected == "parcorr|mci"
+
+
+def test_study2_gates() -> None:
+    sc = benchmark_scenarios(5, STUDY2_GATES, names=("e2_garch_null", "e3_default"))
+    gating = sorted(
+        f"{s.name}/{f.name}" for s in sc for f in s.families if f.role is FamilyRole.GATING_NULL
+    )
+    assert gating == sorted(
+        [f"e2_garch_null/{s}->R" for s in ("s_real", "s_conf", "s_decay", "s_noise")]
+        + ["e3_default/s_conf->R", "e3_default/s_noise->R"]
+    )
+    with pytest.raises(ValueError, match="alternative"):
+        benchmark_scenarios(5, {"e3_default": frozenset({"s_real->R"})})
+
+
+def test_required_seeds_for_study2_rule() -> None:
+    """Study 2 has 11 gates: M = 1785 (ADR 0009)."""
+    assert required_seeds(0.05, 0.075, 11, 0.90) == 1785
+
+
+def test_parallel_identical_to_serial_with_decision_tests() -> None:
+    sc, cfg = _tiny_scenario(), _cfg2()
+    serial = run_scenarios([sc], cfg, 3, n_jobs=1)
+    parallel = run_scenarios([sc], cfg, 3, n_jobs=2, chunk_size=2)
+    assert _strip(serial) == _strip(parallel)
+    assert set(serial[0].p["alt"]) == set(cfg.labels)
+
+
+def test_mci_decision_reproduces_study1_records() -> None:
+    """Adding decision tests must not change the MCI p-values (study 2 reuses study 1's seeds)."""
+    sc = _tiny_scenario()
+    one = run_scenarios([sc], _cfg(), 2, n_jobs=1)
+    two = run_scenarios([sc], _cfg2(), 2, n_jobs=1)
+    for a, b in zip(one, two, strict=True):
+        for fam in a.p:
+            for lab, vals in a.p[fam].items():
+                assert b.p[fam][lab] == vals
