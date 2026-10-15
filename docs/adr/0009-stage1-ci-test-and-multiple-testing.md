@@ -98,5 +98,65 @@ review.
 (tests/unit/test_calibration.py). The output directory is keyed by a hash of (study config, M,
 git state), and the uncommitted patch is saved next to the report.
 
-## Results
-Pending: `uv run python -m scripts.causal_ci_size_study`.
+## Results (M = 1654, T = 6000, report `runs/causal_ci_study/487866d2fda16623/report.json`)
+Code: commit `09d3f44`. The run was recorded as `54a4ffe` + `dirty.patch`, and that tree is
+identical to `09d3f44` outside `docs/adr/` (verified).
+
+Rejection rate at alpha = 0.05 with 95% Wilson CI. Gates are marked *. Bold marks a failed gate.
+
+| Family (decision unit) | parcorr | wls10 | wls50 | robust |
+|---|---|---|---|---|
+| E2 s_real->R * | .054 [.044,.066] | .057 [.047,.069] | .059 [.049,.072] | .054 [.044,.066] |
+| E2 s_conf->R * | .053 [.043,.064] | .048 [.038,.059] | .047 [.037,.058] | .047 [.038,.058] |
+| E2 s_decay->R * | .042 [.034,.053] | .045 [.036,.056] | .043 [.034,.054] | .043 [.034,.054] |
+| E2 s_noise->R * | .046 [.037,.057] | .045 [.036,.056] | .045 [.036,.056] | .040 [.031,.050] |
+| E2 z->R * | **.066 [.055,.079]** | .046 [.037,.057] | .062 [.051,.074] | .062 [.051,.074] |
+| E3 s_conf->R * | .055 [.045,.067] | .048 [.039,.060] | .048 [.038,.059] | .048 [.039,.060] |
+| E4 s_vol->R * | **.198 [.179,.218]** | .034 [.026,.044] | **.126 [.111,.143]** | **.074 [.063,.088]** |
+| E1 R->R (no GARCH) | .056 | .039 | .056 | .056 |
+| E2 R->R | .244 | .047 | .099 | .118 |
+| E1 z->R (no GARCH) | .065 [.054,.078] | .045 | .065 | .065 |
+| E3 s_real->R lags 2..5 | .102 | .092 | .099 | .099 |
+| E3 power s_real->R | .346 | .401 | .413 | .403 |
+| E3 power s_decay->R | .358 | .397 | .396 | .414 |
+| E5 power s_real->R | .082 | .097 | .099 | .102 |
+| E5 power s_decay->R | .059 | .081 | .070 | .071 |
+| median s / PCMCI run | 1.19 | 1.51 | 1.61 | 3.90 |
+
+Selection-score power (mean of the two E3 families): parcorr .352, wls10 .399, wls50 .404,
+robust .409. wls10 minus parcorr: +.047 [+.031, +.064] (paired).
+
+**Rule outcome: `wls10` is the only admissible test and is selected.**
+
+## Findings
+1. **The prior expectation held.** In E2, ParCorr is at nominal size on every S -> R link
+   whose regressor is independent of volatility. Its GARCH inflation sits on R -> R (.244, against
+   .056 without GARCH in E1), and on the vol-correlated null E4 (.198, four times nominal).
+   wls10 is calibrated on both (.047, .034), and its fixed-lag E4 rate is .050 (KS p .16).
+2. **The window result is not monotone: wls10 passes E4, wls50 fails it.** A longer window
+   should estimate a GARCH variance with persistence 0.98 *better*. The likely reason is that
+   tigramite's weight at t includes `|resid_t|` itself, so with window 10 each residual is
+   partly self-normalised (bounded influence). With window 50 that effect is 5x weaker. If so,
+   wls10's calibration may come from that self-normalisation and not from variance estimation,
+   and it may not carry over to other vol-correlated nulls. Not yet tested.
+3. **z -> R is oversized for parcorr, wls50 and robust in E1, without GARCH** (.065
+   [.054, .078]). This is not a heteroskedasticity effect. Z has phi = 0.99. A likely cause is
+   post-selection: PC1 picks a near-unit-root regressor's lags on the same data that MCI then
+   tests. Not established. wls10 is at .045 here.
+4. **MCI has low power on persistent signals. This is a property of the method, not of the CI
+   test.** MCI conditions on the parents of the cause, so it uses only the cause's innovation.
+   Its t-stat is about `sqrt(1 - rho^2)` times the predictive-regression t-stat that
+   `GroundTruth.expected_t` reports. From population moments, the ratio is 0.43 for
+   s_real/s_decay (rho 0.9) and 0.15 for Z (phi 0.99). The expected MCI t is 1.92 for s_real
+   against an expected_t of 4.43. The predicted lag-1 power of 0.485 matches the observed .518
+   (parcorr). Consequences:
+   - In the default preset Stage 1 will pass s_real and s_decay only ~40% of the time, before
+     any cross-signal FDR. `GroundTruth.low_power` (expected_t < 3) does not flag this.
+   - s_conf is still killed at nominal rates even though Z -> R is rarely found (power .12).
+     MCI conditions on s_conf's own parent `Z_{t-2}`, and that blocks the confounding path.
+5. **Lags are not identified.** s_real at lags 2..5 rejects ~.10 given the conditioning set.
+   When PC1 misses `s_real_{t-1}` (it often does at this power), the lag-2 value stands in for
+   it. The signal-level decision is unaffected, but a "best lag" must not be read as the true lag.
+
+## Decision
+Pending review of findings 2–5 (see the open questions in the conversation of 2026-10-14).
