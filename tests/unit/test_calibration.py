@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -359,3 +360,48 @@ def test_mci_decision_reproduces_study1_records() -> None:
         for fam in a.p:
             for lab, vals in a.p[fam].items():
                 assert b.p[fam][lab] == vals
+
+
+# -- study 3 ----------------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class _LengthCheck:
+    """Builder that records the sample length it was asked for (as a 1-column feature)."""
+
+    def __call__(self, seed: int, n_obs: int) -> tuple[np.ndarray, tuple[str, ...]]:
+        rng = np.random.default_rng(seed)
+        return rng.standard_normal((n_obs, 2)), ("s_noise", "asset_00")
+
+
+def test_scenario_n_obs_overrides_study_length() -> None:
+    fam = LinkFamily(
+        name="null", source="s_noise", target="asset_00", lags=(1,), role=FamilyRole.NULL
+    )
+    long = Scenario("long", "", _LengthCheck(), (fam,))
+    short = Scenario("short", "", _LengthCheck(), (fam,), n_obs=250)
+    cfg = _cfg(n_obs=400)
+    for sc, expected in ((long, 400), (short, 250)):
+        rec = run_scenarios([sc], cfg, 1, n_jobs=1)[0]
+        data, _ = sc.build(rec.dataset_seed, sc.n_obs or cfg.n_obs)
+        assert data.shape[0] == expected
+    assert benchmark_scenarios(5, STUDY2_GATES, names=("e3_default",))[0].n_obs is None
+
+
+def test_study3_scenarios_and_gates() -> None:
+    from scripts.causal_ci_size_study import STUDY3_SHORT_T, scenarios_for
+
+    cfg = load_size_study_config(Path("configs/causal_study3.yaml"))
+    scenarios = scenarios_for(cfg)
+    gates = [
+        f"{s.name}/{f.name}"
+        for s in scenarios
+        for f in s.families
+        if f.role is FamilyRole.GATING_NULL
+    ]
+    assert len(gates) == 11
+    short = next(s for s in scenarios if s.name == "e6_stambaugh_short")
+    assert short.n_obs == STUDY3_SHORT_T
+    assert all(f.role is not FamilyRole.GATING_NULL for f in short.families)
+    assert required_seeds(cfg.alpha, cfg.size_cutoff, len(gates), cfg.all_pass_prob) == 1785
+    assert cfg.labels[:2] == ("parcorr|hybrid", "parcorr|mci")

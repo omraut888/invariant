@@ -1,6 +1,6 @@
 # ADR 0009: Stage 1 CI test and decision test (size studies)
 
-Status: in progress. Two pre-registered studies. Study 1 (CI test) is complete and its results
+Status: in progress. Three pre-registered studies. Study 1 (CI test) is complete and its results
 are recorded below. Study 2 (decision test x CI test) was pre-registered and committed before
 its full-M run. Each study's design and rules were written before any of its full-M results
 existed.
@@ -303,3 +303,69 @@ Consequences:
 ## Decision (study 2)
 None. The CI-test choice returns to review with a corrected weighted test and/or an HC-robust
 test. The decision test is provisionally `hybrid`, pending a valid CI test that passes E4.
+
+## Upstream assessment of the ParCorrWLS defect (2026-10-16)
+**Verdict: a bug, not a documented or an undocumented assumption.**
+- *Not documented as an assumption.* The class docstring, the CI-test tutorial's assumption
+  table and the dedicated ParCorrWLS tutorial (tigramite repo, `tutorials/causal_discovery/`)
+  never require zero-mean or standardized inputs. The tutorial's toy data has
+  `noise_means=[0.]`, so the case never arises there.
+- *Contradicted by tigramite's own docstring.* `ParCorrWLS._get_single_residuals` documents
+  `standardize ... (default: True) ... Must be used for partial correlation`, but its signature
+  is `standardize=False`.
+- *Location invariance is a property of partial correlation.* `ParCorr` and `RobustParCorr`
+  have it. Reproduction with tigramite alone (`scripts/repro_tigramite_parcorrwls_location.py`,
+  T = 1000, 400 reps): with Z = {} and a true effect, power is .988 at mean(X) = 0 and **.048**
+  at mean(X) = 10. Size is .045 and .015.
+- No upstream issue mentions ParCorrWLS. The fix is not on `master`. The issue is drafted in
+  `docs/upstream/tigramite-parcorrwls-location-dependence.md` and has not been filed.
+
+---
+
+# Study 3: corrected weighted tests and HC3 (pre-registered 2026-10-16, before the full-M run)
+
+## Question
+Which CI test is valid on the vol-correlated nulls (E4 variants) without giving up calibration
+elsewhere? And, given that test, is `hybrid` still the decision test? `parents_r` is dropped:
+it fails S_conf (.446 under parcorr), and that failure comes from its conditioning set, not
+its CI test.
+
+## Candidates: 8 CI tests x {hybrid, mci} = 16 pairs
+- `parcorr`.
+- `hc3`: `ParCorrHC3`. ParCorr's statistic, with the p-value from White's HC3 t-test on X's
+  coefficient in `Y ~ 1 + X + Z`. Equals statsmodels' HC3 p-value (tests/unit/test_ci_invariance.py).
+- `cwls5`, `cwls10`, `cwls20`: `CenteredParCorrWLS`, with an intercept in both regressions and
+  the variance from `|residual|`. The trailing window includes `|resid_t|`.
+- `cloo5`, `cloo10`, `cloo20`: as `cwlsW`, but the window ends at t - 1.
+
+Every candidate's p-value is invariant to affine transforms of X, Y and Z (Hypothesis property
+test, all three conditioning-set shapes). The defective classes are pinned as still defective.
+
+## Scenarios and gates
+As study 2: the same 11 gates (E2 s_real/s_conf/s_decay/s_noise, E3 s_conf/s_noise, E4 /
+E4-lo / E4-hi / E4-rv, E6) and the same root seed, so M = **1785**, with the same pass
+probabilities.
+
+Added, **non-gating diagnostic**: `e6_stambaugh_short`, E6 at T = 500 (two trading years,
+`T(1 - rho) = 5`), where Stambaugh bias should matter. It reports size for each pair.
+
+## Rules
+- Admissible, power and ties: as study 2. Power is the mean E3 decision-unit rejection over
+  s_real and s_decay, and a tie is a paired 95% CI on the difference that contains 0.
+- **Tie-break (simplicity)**: by decision test `hybrid < mci` (fewer conditioning variables),
+  then by CI test `parcorr < hc3 < cwls10 < cwls5 < cwls20 < cloo10 < cloo5 < cloo20` (fewer
+  tuning parameters: none, then none with a robust SE, then one window, then one window plus
+  the leave-current-out choice; tigramite's default window first).
+- If nothing is admissible, nothing is selected and the decision returns to review.
+
+## Consistency check (pre-registered)
+Every `parcorr|hybrid` and `parcorr|mci` cell at T = 6000 must equal study 2's record bit for
+bit (same seeds, same code path). A smoke run at M = 8 matched on all 944 overlapping cells.
+Its rates were not used. Any mismatch in the full run invalidates it.
+
+## Bound follow-ups (unchanged from study 2)
+The MCI p-value is recorded in the ledger as a diagnostic. GroundTruth gains the chosen
+decision test's expected t, so `low_power` matches the method in use.
+
+## Study 3 results
+Pending: `uv run python -m scripts.causal_ci_size_study --config configs/causal_study3.yaml`.

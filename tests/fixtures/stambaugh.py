@@ -51,20 +51,19 @@ class StambaughData:
         return np.column_stack([x, self.mu + e]), (SIGNAL, TARGET)
 
 
-def stambaugh_scenario(tau_max: int) -> Scenario:
+def stambaugh_scenario(
+    tau_max: int, *, n_obs: int | None = None, gating: bool = True, name: str = "e6_stambaugh"
+) -> Scenario:
+    """E6. ``n_obs`` overrides the study's T; a non-gating short-T run is a diagnostic."""
     lags = tuple(range(1, tau_max + 1))
+    role = FamilyRole.GATING_NULL if gating else FamilyRole.NULL
     return Scenario(
-        "e6_stambaugh",
-        "Null; persistent signal (rho .99) with innovations correlated -0.8 with returns.",
+        name,
+        "Null; persistent signal (rho .99) with innovations correlated -0.8 with returns"
+        + (f"; T = {n_obs}." if n_obs else "."),
         StambaughData(),
         (
-            LinkFamily(
-                name=f"{SIGNAL}->R",
-                source=SIGNAL,
-                target=TARGET,
-                lags=lags,
-                role=FamilyRole.GATING_NULL,
-            ),
+            LinkFamily(name=f"{SIGNAL}->R", source=SIGNAL, target=TARGET, lags=lags, role=role),
             LinkFamily(
                 name=f"{SIGNAL}->R@1",
                 source=SIGNAL,
@@ -73,4 +72,5 @@ def stambaugh_scenario(tau_max: int) -> Scenario:
                 role=FamilyRole.NULL,
             ),
         ),
+        n_obs,
     )

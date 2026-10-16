@@ -31,6 +31,7 @@ from invariant.core.run_hash import canonical_json, read_git_state
 from invariant.stages.causal.calibration import (
     STUDY1_GATES,
     STUDY2_GATES,
+    STUDY3_GATES,
     FamilyRole,
     Scenario,
     SizeStudyConfig,
@@ -68,16 +69,27 @@ def _table(report: StudyReport) -> str:
     return "\n".join(lines)
 
 
+STUDY3_SHORT_T = 500  # two trading years: T(1 - rho) = 5 for rho = .99
+
+
 def scenarios_for(cfg: SizeStudyConfig) -> tuple[Scenario, ...]:
     if cfg.scenario_set == "study1":
         return (*benchmark_scenarios(cfg.tau_max, STUDY1_GATES), vol_null_scenario(cfg.tau_max))
-    return (
+    gates = STUDY2_GATES if cfg.scenario_set == "study2" else STUDY3_GATES
+    scenarios = (
         *benchmark_scenarios(
-            cfg.tau_max, STUDY2_GATES, names=("e2_garch_null", "e3_default", "e5_realistic")
+            cfg.tau_max, gates, names=("e2_garch_null", "e3_default", "e5_realistic")
         ),
         *vol_null_variants(cfg.tau_max),
         stambaugh_scenario(cfg.tau_max),
     )
+    if cfg.scenario_set == "study3":  # short-T Stambaugh diagnostic (ADR 0009, study 3)
+        scenarios += (
+            stambaugh_scenario(
+                cfg.tau_max, n_obs=STUDY3_SHORT_T, gating=False, name="e6_stambaugh_short"
+            ),
+        )
+    return scenarios
 
 
 def main(argv: Sequence[str] | None = None) -> int:

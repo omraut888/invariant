@@ -1,0 +1,31 @@
+# Stage 1 study 3: corrected weighted tests and HC3, x {hybrid, mci} (docs/adr/0009, "Study 3").
+# Read by scripts/causal_ci_size_study.py --config configs/causal_study3.yaml.
+# The rules were fixed before any result of this study was seen.
+
+scenario_set: study3
+root_seed: 20261014     # as studies 1-2: every parcorr|* cell at T = 6000 must equal study 2
+n_seeds: null           # required_seeds(alpha, size_cutoff, n_gating = 11, all_pass_prob) = 1785
+n_obs: 6000
+tau_max: 5
+pc_alpha: 0.2
+alpha: 0.05
+size_cutoff: 0.075
+all_pass_prob: 0.90
+confidence: 0.95
+tests:
+  - {label: parcorr, test: parcorr}
+  - {label: hc3, test: parcorr_hc3}
+  - {label: cwls10, test: parcorr_wls_centered, wls_window: 10}
+  - {label: cwls5, test: parcorr_wls_centered, wls_window: 5}
+  - {label: cwls20, test: parcorr_wls_centered, wls_window: 20}
+  - {label: cloo10, test: parcorr_wls_centered_loo, wls_window: 10}
+  - {label: cloo5, test: parcorr_wls_centered_loo, wls_window: 5}
+  - {label: cloo20, test: parcorr_wls_centered_loo, wls_window: 20}
+decisions: [hybrid, mci]
+selection_scenario: e3_default
+selection_families: ["s_real->R", "s_decay->R"]
+tie_break: simplicity
+decision_simplicity: [hybrid, mci]
+# Fewer tuning parameters wins: parcorr (0) < hc3 (0, robust SE) < wls (window) < loo (window,
+# leave-current-out). Within a family, tigramite's default window 10 first, then 5, then 20.
+ci_simplicity: [parcorr, hc3, cwls10, cwls5, cwls20, cloo10, cloo5, cloo20]

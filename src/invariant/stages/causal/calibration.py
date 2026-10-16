@@ -74,6 +74,7 @@ __all__ = [
     "DEFAULT_STUDY_CONFIG",
     "STUDY1_GATES",
     "STUDY2_GATES",
+    "STUDY3_GATES",
     "BenchmarkData",
     "CITestSpec",
     "FamilyRole",
@@ -135,7 +136,7 @@ class CITestSpec(_Frozen):
 
 
 class SizeStudyConfig(_Frozen):
-    scenario_set: Literal["study1", "study2"] = "study1"
+    scenario_set: Literal["study1", "study2", "study3"] = "study1"
     """Which scenarios the script runs (ADR 0009); part of the config, so of the run key."""
     root_seed: int = Field(ge=0, lt=2**32)
     n_seeds: int | None = Field(default=None, ge=1)
@@ -267,6 +268,8 @@ class Scenario:
     description: str
     build: DataBuilder
     families: tuple[LinkFamily, ...]
+    n_obs: int | None = None
+    """Sample length for this scenario; ``None`` uses the study's ``n_obs``."""
 
     def __post_init__(self) -> None:
         names = [f.name for f in self.families]
@@ -352,6 +355,9 @@ STUDY2_GATES: Final[dict[str, frozenset[str]]] = {
 }
 """Benchmark gates of study 2 (decision test x CI test), ADR 0009. Z is not a candidate."""
 
+STUDY3_GATES: Final[dict[str, frozenset[str]]] = STUDY2_GATES
+"""Study 3 reruns study 2's gates with corrected and new CI tests (ADR 0009)."""
+
 
 def _gate(scenario: Scenario, gated: frozenset[str]) -> Scenario:
     names = {f.name for f in scenario.families}
@@ -364,7 +370,9 @@ def _gate(scenario: Scenario, gated: frozenset[str]) -> Scenario:
                 raise ValueError(f"{scenario.name}/{f.name}: an alternative cannot gate")
             f = f.model_copy(update={"role": FamilyRole.GATING_NULL})
         fams.append(f)
-    return Scenario(scenario.name, scenario.description, scenario.build, tuple(fams))
+    return Scenario(
+        scenario.name, scenario.description, scenario.build, tuple(fams), scenario.n_obs
+    )
 
 
 def benchmark_scenarios(
@@ -447,7 +455,7 @@ def run_seed(scenario: Scenario, cfg: SizeStudyConfig, index: int) -> SeedRecord
     """Pure in everything but ``seconds``: depends only on ``(scenario, cfg, index)``."""
     factory = _seed_factory(cfg.root_seed, index)
     ds_seed = _u32(factory, "dataset")
-    data, names = scenario.build(ds_seed, cfg.n_obs)
+    data, names = scenario.build(ds_seed, scenario.n_obs or cfg.n_obs)
     p: dict[str, dict[str, tuple[float, ...]]] = {f.name: {} for f in scenario.families}
     links = sorted({(f.source, f.target) for f in scenario.families})
     seconds: dict[str, float] = {}

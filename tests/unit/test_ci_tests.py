@@ -86,3 +86,34 @@ def test_make_ci_test_loo() -> None:
 
     t = make_ci_test(CITestName.PARCORR_WLS_LOO, seed=1, wls_window=20)
     assert isinstance(t, LeaveCurrentOutParCorrWLS) and t.window_size == 20
+
+
+@pytest.mark.parametrize("loo", [False, True])
+def test_centered_wls_window_alignment(loo: bool) -> None:
+    from invariant.stages.causal.ci_tests import CenteredParCorrWLS
+
+    rng = np.random.default_rng(1)
+    arr = rng.standard_normal((2, 200)) + np.array([[5.0], [-3.0]])  # nonzero means
+    test = CenteredParCorrWLS(window_size=5, leave_current_out=loo)
+    base = test._estimate_std_time(arr, 1)
+    bumped = arr.copy()
+    bumped[1, 100] += 10.0
+    bumped[1, 160] -= 10.0  # mean-preserving, so the intercept (and every other residual) stays
+    changed = np.flatnonzero(~np.isclose(test._estimate_std_time(bumped, 1), base))
+    first = 101 if loo else 100  # leave-current-out: the window of t ends at t - 1
+    expected = [*range(first, first + 5), *range(first + 60, first + 65)]
+    assert changed.tolist() == expected
+    resid = np.abs(arr[1] - arr[1].mean())
+    window = resid[45:50] if loo else resid[46:51]
+    np.testing.assert_allclose(base[50], window.mean())
+    assert np.all(base > 0)
+
+
+def test_make_ci_test_new_names() -> None:
+    from invariant.stages.causal.ci_tests import CenteredParCorrWLS, ParCorrHC3
+
+    assert isinstance(make_ci_test(CITestName.PARCORR_HC3, seed=1), ParCorrHC3)
+    c = make_ci_test(CITestName.PARCORR_WLS_CENTERED_LOO, seed=1, wls_window=20)
+    assert isinstance(c, CenteredParCorrWLS) and c.leave_current_out and c.window_size == 20
+    with pytest.raises(ValueError, match="window_size"):
+        make_ci_test(CITestName.PARCORR_WLS_CENTERED, seed=1, wls_window=1)
