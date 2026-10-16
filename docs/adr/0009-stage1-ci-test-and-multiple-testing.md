@@ -247,5 +247,59 @@ full run invalidates it.
    correlation for its conditioning set, times sqrt(n - 1)), so `low_power` flags the method
    actually used.
 
-## Study 2 results
-Pending: `uv run python -m scripts.causal_ci_size_study --config configs/causal_decision_study.yaml`.
+## Study 2 results (M = 1785, commit `e3217bc`, clean tree; report `runs/causal_ci_study/c7cb0210a18a30fd/report.json`)
+The consistency check passed: 148,860 overlapping `*|mci` cells equal study 1 bit for bit.
+
+The rule selected `wls20|hybrid`. **That selection is void: see the defect below.**
+
+Rejection rates (decision unit, alpha .05). `*` marks a failed gate (Wilson upper > .075).
+
+| pair | E2 real/conf/dec/noise | E3 conf/noise | E4 / lo / hi / rv | E6 | E3 power real/dec | E5 power real/dec |
+|---|---|---|---|---|---|---|
+| parcorr\|mci | .056 .053 .045 .046 | .055 .045 | .198* .235* .160* .096* | .013 | .342 .361 | .084 .063 |
+| parcorr\|parents_r | .041 .026 .035 .030 | **.446*** .026 | .147* .206* .118* .089* | .019 | .915 .896 | .284 .107 |
+| parcorr\|hybrid | .043 .029 .036 .029 | .031 .026 | .148* .207* .118* .090* | .020 | .894 .895 | .239 .110 |
+| wls10\|mci | .057 .048 .048 .045 | .049 .044 | .033 .047 .027 .051 | .010 | .404 .398 | .095 .082 |
+| wls10\|hybrid | .049 .042 .044 .040 | .040 .045 | **.000 .000 .000 .000** | .024 | .901 .908 | .232 .125 |
+| wls20\|hybrid | .047 .038 .043 .041 | .039 .039 | **.000 .000 .000 .000** | .023 | .907 .929 | .252 .128 |
+| loo10\|hybrid | .042 .041 .052 .042 | .039 .045 | .018 .030 .010 .027 | .026 | .894 .882 | .210 .124 |
+
+The full 21-pair table is in the report.
+
+## Defect: tigramite's ParCorrWLS is not location-invariant (found 2026-10-15)
+Every tigramite-WLS pair with `parents_r` or `hybrid` rejects **0 of 1785** seeds on all four E4
+variants. Its lag-1 p-values lie in [.78, .99] (1st percentile .778). That is a degenerate test,
+not a calibrated one. Cause, in tigramite 5.2.10.1:
+- `ParCorrWLS._get_single_residuals` defaults to `standardize=False` (ParCorr's default is
+  `True`), and `get_dependence_measure` calls it without the flag.
+- The regressions have no intercept.
+- With an empty conditioning set, the "time-dependent std" is a window mean of `|level|`,
+  not of `|residual|`.
+
+So a variable whose mean is far from 0 (E4's `log h` ~ -9.2) is weighted into a near-constant.
+Check: adding +10 to X changes `parcorr_wls`'s p-value from .27 to .44 (Z empty) or .70 (Z = X's
+own lag). `parcorr` and `robust_parcorr` are unchanged. `FastParCorrWLS` and
+`LeaveCurrentOutParCorrWLS` inherit the defect (they mirror tigramite exactly).
+
+Consequences:
+- **Void**: the study 2 selection; every WLS/LOO cell on E4 (both studies), including study 1's
+  "wls10 is calibrated on E4" and finding 2 (window non-monotonicity), which are likely artifacts.
+- **Likely small, not verified**: WLS cells on E2/E3/E5. Benchmark signals are ~N(0, 1), and
+  returns have mean .0003 against sd .01, so the level effect there is small but not zero.
+- **Valid**: every `parcorr` and `robust_parcorr` cell, and every comparison between decision
+  tests within `parcorr`.
+
+## What the valid evidence (parcorr) says
+1. **parents_r is ruled out.** It falsely passes S_conf in E3 at .446 (Wilson upper .469), as
+   predicted on review: Z -> R is rarely selected, so Z is rarely in P(R).
+2. **hybrid keeps S_conf killed (.031) and recovers power**: .894/.895 against MCI's .342/.361
+   on s_real/s_decay in E3. In E5 its power is .239/.110 against .084/.063.
+3. **Stambaugh (E6) is not a problem at T = 6000** for any decision test (.013 to .020, lag-1
+   .045). The `T(1 - rho) = 60` horizon is long enough that the slope bias is negligible.
+   Limitation: a shorter sample or rho closer to 1 could change this, and it was not tested.
+4. **The heteroskedasticity question is still open.** parcorr fails every E4 variant with every
+   decision test (.09 to .24). No valid heteroskedasticity-robust test has been measured yet.
+
+## Decision (study 2)
+None. The CI-test choice returns to review with a corrected weighted test and/or an HC-robust
+test. The decision test is provisionally `hybrid`, pending a valid CI test that passes E4.
