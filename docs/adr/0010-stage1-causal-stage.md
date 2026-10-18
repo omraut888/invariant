@@ -1,7 +1,7 @@
 # ADR 0010: Stage 1, the causal screen
 
 Status: accepted (2026-10-18). The M = 500 validation below was pre-registered and pushed before
-its run. Its results will be appended in a final section.
+its run (commit `ba43129`). Every acceptance criterion passed (final section).
 
 ## Context
 ADR 0009 chose the method: PCMCI with `ParCorrHC3` as the CI test and `hybrid` as the decision
@@ -174,3 +174,73 @@ The rule's limits, stated before the run:
 
 If any criterion fails, Stage 1 is not done and the decision returns to review. No threshold
 is changed after the run.
+
+## Validation results (M = 500, commit `ba43129`, clean tree; report `runs/causal_stage_validation/76b2880f3c8dd866/report.json`)
+tigramite 5.2.10.1. Every replication completed and every ledger chain verified (A4). Median
+runtime is 1.8 to 2.4 s per replication, including the snapshot, the panel and the ledger.
+
+**Pass rate by signal, with 95% Wilson CIs.** Expected verdicts at Stage 1: s_real pass, s_decay
+pass, s_conf kill, s_noise kill.
+
+| preset | s_real | s_decay | s_conf | s_noise | kill precision | kill recall |
+|---|---|---|---|---|---|---|
+| base | **.844** [.810, .873] | **.834** [.799, .864] | **.034** [.021, .054] | **.018** [.009, .034] | .858 | .974 |
+| realistic | .140 [.112, .173] | .034 [.021, .054] | .014 [.007, .029] | .016 [.008, .031] | .519 | .985 |
+| hidden_confounder | .890 [.860, .915] | .868 [.836, .895] | .730 [.689, .767] (not identifiable) | .022 [.012, .039] | .802 | .978 |
+
+Precision and recall are pooled over the four signals of each run, so their intervals are
+optimistic (`aggregate_scores`). In the realistic preset, precision is low because the true
+edges are killed for lack of power, and Stage 1 counts those as wrong kills.
+
+**Acceptance (base): accepted.**
+- A1, s_noise: upper bound .034 <= .075.
+- A2, s_conf: upper bound .054 <= .075.
+- A3, s_real: lower bound .810 >= .70.
+- A3, s_decay: lower bound .799 >= .70.
+- A4: all 500 replications complete.
+
+## Findings (validation)
+1. **The production path reproduces the study.** The pass rates on the base preset match the
+   prediction from study 3's stored p-values:
+   - s_real .844 against .852, and s_decay .834 against .839;
+   - s_noise .018 against .020;
+   - s_conf .034 against .018. Its CI [.021, .054] only just overlaps the prediction's
+     [.013, .025]. It is within the criterion, and still below alpha.
+
+   Most kills of the true edges are `no_significant_link`: 53 of 78 for s_real and 52 of 83
+   for s_decay. The BH step adds 25 and 31.
+2. **Hybrid has nearly 2.5 times MCI's power on the planted edges.** On the base preset, the
+   MCI family's rate is .364 for s_real and .318 for s_decay, against hybrid's .844 and .834.
+   On the nulls, MCI's rates are .032 to .044.
+3. **`expected_t_hybrid` overstates the realised t.**
+   - Mean realised lag-1 hybrid t on the base preset: s_real 3.78 (SE .08) against an
+     expected 4.42; s_decay 3.45 (SE .07) against 4.09. On hidden_confounder: s_real 3.98
+     against 6.01.
+   - The oracle set uses the true parents. PC1's estimated set differs: it adds a correlated
+     non-parent of R (s_conf, which proxies the hidden Z), or a lag-2 copy of the signal
+     itself. Either one removes part of the signal's own variation.
+   - This explanation is a hypothesis and was not tested here.
+   - Consequence: `expected_t_hybrid` is an upper bound for power, not a prediction. Its
+     two-sided Bonferroni power (.968 for s_real) is above the observed .844. In the realistic
+     preset, where power is low anyway, it matches better: .136 predicted, .140 observed.
+4. **The identifiability limit is measured.** With Z hidden, Stage 1 passes the confounded
+   s_conf in **73%** of runs [.689, .767]. Every observed adjustment set leaves the bias in
+   place. This is the cost of violating causal sufficiency. It is the size of the risk that
+   Stage 5's memo must state whenever a plausible confounder is unobserved.
+5. **Realistic-preset power is low.** At IC .02, s_real passes 14% and s_decay 3.4%. A real
+   edge that weak will usually be killed at Stage 1 at T = 6000. The memo should report a
+   Stage 1 kill as "not detectable at this sample size", not as "no causal effect".
+6. **The bootstrap interval undercovers.**
+   - Coverage of the population lag-1 r by the nominal 95% interval, among runs whose best link
+     is lag 1: s_real .858 [.819, .889] and s_decay .944 [.916, .963] on base; null signals .85
+     to .90.
+   - The likely causes are the persistence of the regressors (rho .9 to .99) and the
+     estimated-set bias of finding 3.
+   - The interval is descriptive, as designed. It must not be read as a calibrated 95% interval.
+
+## Consequences
+- Stage 1 is done on the planted benchmark. Real data comes next, with these documented limits:
+  confounding by unobserved variables, low power for weak edges, a lag that is not identified,
+  and an effect-size interval that runs narrow.
+- Open question for review: `expected_t_hybrid` could be replaced, or accompanied, by a
+  simulated power under estimated PC1 sets.
