@@ -4,8 +4,8 @@ Status: accepted (2026-10-18). Three pre-registered studies; study 3's decision 
 deviation from its pre-registered rule. Study 1 (CI test) is complete and its results
 are recorded below. Study 2 (decision test x CI test) was pre-registered and committed before
 its full-M run. A confirmation of study 3's deviation on a fresh root seed was
-pre-registered and pushed on 2026-10-18, before its run (last section). Each study's design and rules were written before any of its full-M results
-existed.
+pre-registered and pushed on 2026-10-18, before its run. **It confirmed `hc3|hybrid`** (last
+section). Each study's design and rules were written before any of its full-M results existed.
 
 ## Context
 Stage 1 runs PCMCI (Runge et al. 2019) and kills a signal when no lag in [1, tau_max] has a
@@ -465,3 +465,44 @@ pass all 11 gates on data it has never seen?
 - Known error rate of the rule: a pair truly at size 0.05 passes one gate with probability
   0.9928 and all 11 with probability >= 0.92 (union bound). A failure is therefore strong
   evidence of miscalibration, not proof. A true-0.06 pair passes one gate with probability 0.708.
+
+## Confirmation results (M = 1785, commit `694c75f`, clean tree; report `runs/causal_ci_study/617e5f4a76f2f39a/report.json`)
+**Outcome under the rule: confirmed.** `hc3|hybrid` is admissible on the fresh seed: no gate
+failed, and the largest Wilson upper bound is .058, on E2 s_decay. `cwls20|hybrid` is also
+admissible. The report's `selected` field (`cwls20|hybrid`) is not used, as pre-registered.
+
+Rejection rates (decision unit, alpha .05, 95% Wilson CI). Every row is a gate unless marked
+otherwise.
+
+| family | hc3\|hybrid | cwls20\|hybrid | study 3 hc3 / cwls20 |
+|---|---|---|---|
+| E2 s_real | .043 [.034, .053] | .044 [.036, .055] | .045 / .045 |
+| E2 s_conf | .029 [.022, .037] | .035 [.028, .045] | .029 / .037 |
+| E2 s_decay | .047 [.038, .058] | .050 [.041, .061] | .033 / .041 |
+| E2 s_noise | .034 [.027, .044] | .029 [.022, .037] | .029 / .040 |
+| E3 s_conf | .029 [.022, .038] | .036 [.029, .046] | .029 / .034 |
+| E3 s_noise | .031 [.024, .041] | .029 [.022, .037] | .026 / .035 |
+| E4 | .024 [.018, .032] | .026 [.019, .034] | .030 / .030 |
+| E4-lo | .039 [.031, .049] | .053 [.043, .064] | .046 / .055 |
+| E4-hi | .022 [.016, .030] | .021 [.016, .029] | .024 / .026 |
+| E4-rv | .026 [.020, .035] | .036 [.028, .046] | .021 / .032 |
+| E6 | .020 [.015, .028] | .020 [.014, .027] | .020 / .024 |
+| *E3 power s_real / s_decay* | .884 / .881 | .898 / .915 | .890 .887 / .907 .933 |
+| *E5 power s_real / s_decay* | .248 / .105 | .252 / .119 | .237 .111 / .243 .134 |
+| *E6 T = 500, family (lag 1)* | .050 (.077) | .035 (.053) | .039 (.082) / .032 (.058) |
+| *E2 R -> R* | .056 | .068 | .049 / .068 |
+
+E3 power (mean of the two families): hc3|hybrid .883, cwls20|hybrid .906. The paired difference
+is +.024 [+.012, +.035], against +.032 [+.020, +.043] in study 3.
+
+## Findings (confirmation)
+1. **Study 3's numbers replicate on new data.** Every `hc3|hybrid` gate rate is within about
+   .015 of study 3's.
+2. **The cost of the deviation replicates:** .024 of E3 power, with E5 level.
+3. **cwls20's edge behaviour replicates.** It is at .053 on E4-lo, and its R -> R rates are
+   .068 to .082 across scenarios, against .052 to .062 for hc3. This supports the deviation's
+   reasoning, but was not part of the rule.
+4. **The short-sample lag-1 problem replicates.** At T = 500, the fixed lag-1 hc3|hybrid test
+   rejects at .077 [.066, .091] (study 3: .082). The Bonferroni family is at .050. This
+   confirms the decision to decide on the family, never on a single lag. At T = 500 the family
+   is at nominal size, with no margin.
