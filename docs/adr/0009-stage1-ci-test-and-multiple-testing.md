@@ -3,7 +3,8 @@
 Status: accepted (2026-10-18). Three pre-registered studies; study 3's decision is a recorded
 deviation from its pre-registered rule. Study 1 (CI test) is complete and its results
 are recorded below. Study 2 (decision test x CI test) was pre-registered and committed before
-its full-M run. Each study's design and rules were written before any of its full-M results
+its full-M run. A confirmation of study 3's deviation on a fresh root seed was
+pre-registered and pushed on 2026-10-18, before its run (last section). Each study's design and rules were written before any of its full-M results
 existed.
 
 ## Context
@@ -433,3 +434,34 @@ Consequences:
 - The MCI p-value (`hc3|mci`) is recorded in the ledger as a diagnostic.
 - GroundTruth gains the expected t of the hybrid test.
 - The tigramite ParCorrWLS-derived classes are not used for decisions.
+
+---
+
+# Confirmation of the study 3 deviation (pre-registered 2026-10-18, before any run)
+
+## Question
+Study 3's decision (`hc3|hybrid`) departs from its pre-registered rule, and every number behind
+the decision came from one root seed, so it may be partly a winner's curse. Does `hc3|hybrid`
+pass all 11 gates on data it has never seen?
+
+## Design
+- Config `configs/causal_study3_confirm.yaml`. It has study 3's scenario set: the same 11 gates
+  and the non-gating T = 500 Stambaugh diagnostic.
+- **Fresh root seed 20261018.** Studies 1-3 all used 20261014. No dataset is shared with study 3,
+  so there is no consistency check.
+- Pairs: `hc3|hybrid` (under test) and `cwls20|hybrid` (the rule's outcome in study 3,
+  reported alongside). Both are run on the same datasets (common random numbers).
+- M = `required_seeds(0.05, 0.075, 11, 0.90)` = **1785**, T = 6000, tau_max 5, pc_alpha 0.2,
+  alpha 0.05, analytic p-values, as in study 3.
+- It is run from a clean worktree at the commit that adds this section, after that commit is pushed.
+
+## Rule
+- **Confirmed** iff `hc3|hybrid` is admissible: the upper bound of the 95% Wilson interval of
+  its decision-unit rejection rate is <= 0.075 on every one of the 11 gates.
+- `cwls20|hybrid` gates nothing. Its rates, E3/E5 power and the paired power difference are
+  reported. The report's `selected` field is not used.
+- **If not confirmed**, the CI-test decision returns to review. There is no automatic switch to
+  `cwls20|hybrid` or to any other pair.
+- Known error rate of the rule: a pair truly at size 0.05 passes one gate with probability
+  0.9928 and all 11 with probability >= 0.92 (union bound). A failure is therefore strong
+  evidence of miscalibration, not proof. A true-0.06 pair passes one gate with probability 0.708.

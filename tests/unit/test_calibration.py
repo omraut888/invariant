@@ -405,3 +405,29 @@ def test_study3_scenarios_and_gates() -> None:
     assert all(f.role is not FamilyRole.GATING_NULL for f in short.families)
     assert required_seeds(cfg.alpha, cfg.size_cutoff, len(gates), cfg.all_pass_prob) == 1785
     assert cfg.labels[:2] == ("parcorr|hybrid", "parcorr|mci")
+
+
+def test_confirmation_study_config() -> None:
+    from scripts.causal_ci_size_study import scenarios_for
+
+    cfg = load_size_study_config(Path("configs/causal_study3_confirm.yaml"))
+    study3 = load_size_study_config(Path("configs/causal_study3.yaml"))
+    scenarios = scenarios_for(cfg)
+    gates = [
+        f"{s.name}/{f.name}"
+        for s in scenarios
+        for f in s.families
+        if f.role is FamilyRole.GATING_NULL
+    ]
+    study3_gates = [
+        f"{s.name}/{f.name}"
+        for s in scenarios_for(study3)
+        for f in s.families
+        if f.role is FamilyRole.GATING_NULL
+    ]
+    assert gates == study3_gates
+    assert required_seeds(cfg.alpha, cfg.size_cutoff, len(gates), cfg.all_pass_prob) == 1785
+    assert cfg.labels == ("hc3|hybrid", "cwls20|hybrid")
+    assert cfg.root_seed != study3.root_seed
+    same = ("n_obs", "tau_max", "pc_alpha", "alpha", "size_cutoff", "all_pass_prob", "confidence")
+    assert all(getattr(cfg, k) == getattr(study3, k) for k in same)
