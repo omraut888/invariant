@@ -1,6 +1,7 @@
 # ADR 0009: Stage 1 CI test and decision test (size studies)
 
-Status: in progress. Three pre-registered studies. Study 1 (CI test) is complete and its results
+Status: accepted (2026-10-18). Three pre-registered studies; study 3's decision is a recorded
+deviation from its pre-registered rule. Study 1 (CI test) is complete and its results
 are recorded below. Study 2 (decision test x CI test) was pre-registered and committed before
 its full-M run. Each study's design and rules were written before any of its full-M results
 existed.
@@ -367,5 +368,68 @@ Its rates were not used. Any mismatch in the full run invalidates it.
 The MCI p-value is recorded in the ledger as a diagnostic. GroundTruth gains the chosen
 decision test's expected t, so `low_power` matches the method in use.
 
-## Study 3 results
-Pending: `uv run python -m scripts.causal_ci_size_study --config configs/causal_study3.yaml`.
+## Study 3 results (M = 1785, commit `ff38fc2`, clean tree; report `runs/causal_ci_study/188421e7d7adadc3/report.json`)
+The consistency check passed: 210,630 `parcorr|*` cells equal study 2 bit for bit. No admissible
+pair is degenerate: the 1% and 5% quantiles of its lag-1 null p-values are ~.01 and ~.05.
+
+Rejection rates (decision unit, alpha .05). `*` marks a failed gate.
+
+| pair | E2 re/co/de/no | E3 co/no | E4 / lo / hi / rv | E6 | E3 power re/de | E5 power re/de | E6 T=500 (lag 1) | E2 R->R |
+|---|---|---|---|---|---|---|---|---|
+| parcorr\|hybrid | .043 .029 .036 .029 | .031 .026 | .148* .207* .118* .090* | .020 | .894 .895 | .239 .110 | .039 (.082) | .246 |
+| hc3\|hybrid | .045 .029 .033 .029 | .029 .026 | .030 .046 .024 .021 | .020 | .890 .887 | .237 .111 | .039 (.082) | .049 |
+| hc3\|mci | .058 .053 .041 .045 | .054 .046 | .054 .049 .055 .043 | .013 | .352 .359 | .086 .062 | .012 (.017) | .049 |
+| cwls10\|hybrid | .044 .041 .045 .039 | .038 .044 | .018 .029 .019 .029 | .024 | .903 .912 | .232 .127 | .036 (.056) | .050 |
+| **cwls20\|hybrid** | .045 .037 .041 .040 | .034 .035 | .030 .055 .026 .032 | .024 | .907 .933 | .243 .134 | .032 (.058) | .068 |
+| cwls20\|mci | .058 .045 .046 .044 | .048 .044 | .066* .076* .055 .066* | .012 | .428 .419 | .105 .072 | .013 (.019) | .066 |
+| cloo10\|hybrid | .038 .044 .048 .047 | .042 .050 | .018 .030 .015 .031 | .024 | .889 .886 | .209 .123 | .029 (.046) | .048 |
+| cloo20\|hybrid | .041 .040 .043 .040 | .037 .040 | .035 .073* .029 .043 | .021 | .900 .922 | .234 .126 | .033 (.053) | .073 |
+
+The full 16-pair table is in the report. Admissible: hc3 x {hybrid, mci}, cwls5/10 x {hybrid,
+mci}, cwls20|hybrid, cloo5/10 x {hybrid, mci}.
+
+**Rule outcome: `cwls20|hybrid`** (power .920). It beats the next admissible pairs on paired
+power difference: cwls10|hybrid +.013 [+.003, +.023], hc3|hybrid +.032 [+.020, +.043].
+
+## Findings (study 3)
+1. **hybrid is confirmed as the decision test under every CI test.** Its power is .81 to .92,
+   against .31 to .43 for mci, with no admissibility cost.
+2. **HC3 fixes what ParCorr gets wrong.** Its E4 variants are at .021 to .046 (parcorr .090 to
+   .207), and E2 R -> R is at .049 (parcorr .246). Its lag-1 null p-values are KS-uniform on
+   every vol null (KS p .14 to .44). It gives up .032 of power against cwls20|hybrid, and is
+   level with it in E5.
+3. **cwls20|hybrid passes, but sits at the edge.** Its siblings fail the same nulls:
+   cwls20|mci fails three E4 gates and cloo20|hybrid fails E4-lo (.073). Its own E4-lo is .055,
+   E2 R -> R is .068, and its lag-1 null p-values are *not* uniform on E4, E4-rv and E2 (KS p
+   .000 to .001). Window 20 is also the largest of the windows tried, so it is the most
+   likely to be the winner's curse of a 6-way window search.
+4. **The two-sided decision unit holds Stambaugh at T = 500** (.029 to .039 for hybrid pairs).
+   The fixed lag-1 test does not for parcorr/hc3 hybrid (.082): bias appears in short samples,
+   and MCI's conditioning on X's past absorbs it (.012 to .028).
+5. **Realistic-preset power stays low** (.21 to .24 for s_real, .11 to .13 for s_decay). This is
+   a power result at IC .02 and T = 6000, as pre-registered.
+
+## Decision (study 3), 2026-10-18
+**Stage 1 uses `hc3|hybrid`: CI test `ParCorrHC3`, decision test `hybrid`.** This is a
+**recorded deviation** from the pre-registered rule, whose outcome was `cwls20|hybrid`.
+
+Reasons, all from results reported (not gated) under the pre-registration:
+- cwls20|hybrid sits at the edge of admissibility. Its nearest variants fail the same nulls:
+  cwls20|mci fails three E4 gates, and cloo20|hybrid fails E4-lo.
+- Its lag-1 null p-values are not uniform on E4, E4-rv and E2 (KS p <= .001). Its E2 R -> R is
+  .068.
+- Window 20 is the largest of six window settings tried, so its power lead (+.032 [+.020,
+  +.043]) is partly a winner's curse.
+- hc3|hybrid passes every gate with margin (E4 variants .021 to .046) and has no tuning
+  parameter. It matches statsmodels' HC3 exactly. Its lag-1 null p-values are KS-uniform on
+  every vol null (p .14 to .44), and it fixes parcorr's R -> R inflation (.049).
+
+Cost of the deviation: .032 of E3 power (s_real .890 vs .907, s_decay .887 vs .933). E5
+power is level.
+
+Consequences:
+- Stage 1 decides with the Bonferroni family over lags 1..tau_max, never with a single lag:
+  at T = 500 the lag-1 test is oversized under Stambaugh (.082).
+- The MCI p-value (`hc3|mci`) is recorded in the ledger as a diagnostic.
+- GroundTruth gains the expected t of the hybrid test.
+- The tigramite ParCorrWLS-derived classes are not used for decisions.
