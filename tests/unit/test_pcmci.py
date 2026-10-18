@@ -142,3 +142,33 @@ def test_parents_r_regains_power_on_a_persistent_cause() -> None:
     # Population (simulated at T = 400k): parents_r 0.297, MCI 0.101 = 0.1 sd(u) / sd(y).
     assert pr == pytest.approx(0.297, abs=0.03)
     assert mci == pytest.approx(0.101, abs=0.03)
+
+
+@pytest.mark.parametrize("decision", ["hybrid", "mci"])
+def test_lagged_design_reproduces_decision_statistic(decision: str) -> None:
+    from invariant.stages.causal.bootstrap import partial_corr
+    from invariant.stages.causal.ci_tests import hc3_p_value
+    from invariant.stages.causal.pcmci import DecisionTest, lagged_design
+
+    dt = DecisionTest(decision)
+    data = _var(4, 1200)
+    data[:, 2] += 0.6 * np.roll(data[:, 0], 1)  # give w a parent so the sets are non-trivial
+    names = ["x", "y", "w"]
+    out = run_pcmci(
+        data,
+        names,
+        make_ci_test(CITestName.PARCORR_HC3, seed=0),
+        tau_max=3,
+        pc_alpha=0.2,
+        decision_links=[("x", "y"), ("w", "y")],
+        decisions=[dt],
+    )
+    for src in ("x", "w"):
+        for lag in (1, 2, 3):
+            cond = out.conditions(dt, src, "y", lag)
+            d = lagged_design(data, names, src, "y", lag, cond, tau_max=3)
+            assert d.x.shape == (1200 - 6,)
+            r = partial_corr(d.x, d.y, d.z)
+            assert r == pytest.approx(out.decision_val[(dt, src, "y")][lag - 1], abs=1e-10)
+            p = hc3_p_value(np.vstack([d.x, d.y, d.z.T]))
+            assert p == pytest.approx(out.decision_p[(dt, src, "y")][lag - 1], rel=1e-8)

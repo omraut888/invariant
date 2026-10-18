@@ -322,6 +322,7 @@ class _AssetMoments:
     marginal_ic: FloatArray  # (5,) Corr(X_k,t-1, R_t), initial coefficients
     partial_ic: FloatArray  # (5,) given other observed parents, initial coefficients
     effective_partial_ic: FloatArray  # (5,) with S_decay at its average coefficient
+    effective_hybrid_ic: FloatArray  # (5,) given Stage 1's oracle hybrid set, S_decay averaged
 
 
 def _observed_parents(config: SyntheticMarketConfig) -> list[int]:
@@ -360,6 +361,45 @@ def _joint_cov(
     return joint
 
 
+def _joint_cov_two_lags(
+    config: SyntheticMarketConfig,
+    sigma: FloatArray,
+    coef: FloatArray,
+    market_beta: float,
+) -> FloatArray:
+    """Stationary covariance of ``(X_{t-1}, X_{t-2}, R_t)`` (indices 0-4, 5-9, 10).
+
+    ``X_{t-1} = A X_{t-2} + B e_{t-1}`` gives ``Cov(X_{t-1}, X_{t-2}) = A Sigma`` and
+    ``Cov(X_{t-2}, R_t) = (A Sigma)' coef``.
+    """
+    a, _ = transition_matrices(config)
+    one_lag = _joint_cov(config, sigma, coef, market_beta)
+    cross = a @ sigma
+    joint = np.zeros((11, 11))
+    joint[:5, :5] = sigma
+    joint[5:10, 5:10] = sigma
+    joint[:5, 5:10] = cross
+    joint[5:10, :5] = cross.T
+    joint[:5, 10] = joint[10, :5] = one_lag[:5, 5]
+    joint[5:10, 10] = joint[10, 5:10] = cross.T @ coef
+    joint[10, 10] = one_lag[5, 5]
+    return joint
+
+
+def hybrid_oracle_set(config: SyntheticMarketConfig, k: int) -> list[int]:
+    """Stage 1's ``hybrid`` conditioning set for ``X^k_{t-1} -> R_t`` with the true parents in
+    place of PC1's, as indices into ``(X_{t-1}, X_{t-2})``: the observed parents of ``R`` other
+    than ``X^k_{t-1}``, plus the observed parents of ``X^k`` other than its own lag, shifted by
+    one lag. In this SCM the only such parent is ``Z_{t-1}`` (so ``Z_{t-2}``), for a signal
+    that loads on Z, when Z is observed.
+    """
+    a, _ = transition_matrices(config)
+    cond = [p for p in _observed_parents(config) if p != k]
+    if k != _Z and config.observe_confounder and a[k, _Z] != 0.0:
+        cond.append(5 + _Z)
+    return cond
+
+
 def population_moments(
     config: SyntheticMarketConfig,
     loadings: RealizedLoadings,
@@ -393,7 +433,11 @@ def population_moments(
         partial_eff = np.array(
             [_partial_corr(joint_eff, k, 5, [p for p in parents if p != k]) for k in range(5)],
         )
-        out.append(_AssetMoments(marginal, partial, partial_eff))
+        joint2_eff = _joint_cov_two_lags(config, sigma, coef_eff, mb)
+        hybrid_eff = np.array(
+            [_partial_corr(joint2_eff, k, 10, hybrid_oracle_set(config, k)) for k in range(5)],
+        )
+        out.append(_AssetMoments(marginal, partial, partial_eff, hybrid_eff))
     return out
 
 
@@ -526,6 +570,9 @@ def _signal_truths(
                         float(m.effective_partial_ic[k]) for m in moments
                     ),
                     "expected_t": tuple(float(m.effective_partial_ic[k]) * root_n for m in moments),
+                    "expected_t_hybrid": tuple(
+                        float(m.effective_hybrid_ic[k]) * root_n for m in moments
+                    ),
                     "note": note,
                     **decay_kwargs,
                 },
@@ -640,11 +687,11 @@ def generate_market(config: SyntheticMarketConfig, seed: int) -> SyntheticDatase
     truth = build_ground_truth(config, seed, loadings, index, sha)
     log = get_logger(__name__)
     for s in truth.signals:
-        if s.has_causal_edge and min(s.expected_t) < DETECTABILITY_T:
+        if s.has_causal_edge and min(s.expected_t_hybrid) < DETECTABILITY_T:
             log.warning(
                 "benchmark_low_power",
                 signal=s.signal_id,
-                expected_t=min(s.expected_t),
+                expected_t_hybrid=min(s.expected_t_hybrid),
                 threshold=DETECTABILITY_T,
                 detail="a correct Stage 1 may fail to detect this true edge at this sample size",
             )

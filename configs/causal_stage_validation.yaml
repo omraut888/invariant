@@ -1,0 +1,18 @@
+# Stage 1 Monte Carlo validation on the planted-signal benchmark (docs/adr/0010, "Validation").
+# Read by scripts/causal_stage_validation.py --config configs/causal_stage_validation.yaml.
+# The acceptance criteria were fixed and pushed before any result of this run was seen.
+
+root_seed: 20261019     # fresh: not used by any Stage 1 study
+n_seeds: 500
+n_obs: null             # each preset's own n_obs (6000)
+presets: [base, realistic, hidden_confounder]
+confidence: 0.95
+n_boot: null            # the pipeline config's causal.bootstrap.n_boot (999)
+acceptance:
+  preset: base
+  # Expected kills at Stage 1. Their pass rate is Stage 1's false-pass rate.
+  null_signals: [s_conf, s_noise]
+  null_pass_upper_max: 0.075
+  # True edges. S_decay is killed at Stage 2, so it must pass Stage 1.
+  true_signals: [s_real, s_decay]
+  true_pass_lower_min: 0.70

@@ -83,6 +83,11 @@ class KillReason(StrEnum):
     # Only for ledger entries marked ``placeholder=True`` (smoke runs, tests); the kill ledger
     # rejects it otherwise. Never emitted by a real stage.
     PLACEHOLDER = "general.placeholder"
+    # Stage 1 (docs/adr/0010). No lag of any asset is significant after Bonferroni over the
+    # signal's (asset, lag) family, before any correction across signals.
+    CAUSAL_NO_SIGNIFICANT_LINK = "causal.no_significant_link"
+    # The family is significant on its own, but not after FDR control across signals.
+    CAUSAL_NOT_SIGNIFICANT_AFTER_CORRECTION = "causal.not_significant_after_correction"
 
     @property
     def stage(self) -> StageName | None:

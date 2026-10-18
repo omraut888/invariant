@@ -20,8 +20,9 @@ but kept out of the matrix, because no method can recover their status from the 
 variables (ADR 0003). A signal with no decision, or decisions that stop before the last
 evaluated stage without a kill, is ``undecided``: never a pass. A score with any undecided
 signal has ``complete=False``. Each row carries ``low_power`` (a true edge whose expected
-Stage-1 t-stat is below ``DETECTABILITY_T``), so a missed kill or wrong kill caused by lack of
-power can be told apart from a wrong method.
+t-stat under Stage 1's ``hybrid`` test, ``SignalTruth.expected_t_hybrid``, is below
+``DETECTABILITY_T``), so a missed kill or wrong kill caused by lack of power can be told apart
+from a wrong method.
 
 ``score_run`` refuses to grade a run that is not a run on this ``GroundTruth``'s dataset: the
 run's snapshot must be the given synthetic snapshot whose ``dataset_sha256`` matches, and its
@@ -157,7 +158,8 @@ def _expected(
 
 
 def _low_power(truth: SignalTruth) -> bool:
-    return truth.has_causal_edge and min(truth.expected_t) < DETECTABILITY_T
+    # Keyed to the test Stage 1 decides with (GroundTruth v3), not the predictive regression.
+    return truth.has_causal_edge and min(truth.expected_t_hybrid) < DETECTABILITY_T
 
 
 def score_fates(

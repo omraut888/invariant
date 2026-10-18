@@ -19,7 +19,7 @@ import re
 from collections.abc import Mapping
 from datetime import date
 from pathlib import Path
-from typing import Self
+from typing import Literal, Self
 
 import yaml
 from pydantic import (
@@ -37,6 +37,8 @@ from invariant.core.types import Frequency
 
 __all__ = [
     "AlfredConfig",
+    "CausalBootstrapConfig",
+    "CausalConfig",
     "ConfigError",
     "DataConfig",
     "DateRange",
@@ -226,6 +228,52 @@ class PitConfig(_Frozen):
     publication_lag_sessions: PublicationLags
 
 
+class CausalBootstrapConfig(_Frozen):
+    """Circular block bootstrap of the partial correlation at a signal's best (asset, lag)."""
+
+    n_boot: StrictInt = Field(ge=99, le=100_000)
+    block_length: StrictInt | None = Field(ge=1)
+    """``None``: ``ceil(n ** (1/3))``, the MSE-optimal rate for a block-bootstrap variance."""
+    confidence: float = Field(gt=0.5, lt=1.0)
+
+
+class CausalConfig(_Frozen):
+    """Stage 1 (``invariant.stages.causal.stage``; design and rationale in docs/adr/0010).
+
+    ``ci_test`` admits only the test selected in docs/adr/0009. Another test needs a size study
+    first: tigramite's ``ParCorrWLS`` and the classes derived from it are not even
+    location-invariant. ``decision``: ``hybrid`` decides; ``mci`` is the admissible but
+    low-power alternative. ``parents_r`` is not offered: it falsely passes a confounded signal.
+    ``signals``: the candidate signal ids (a ``syn_`` column's id is its name without the
+    prefix). ``None`` means every non-return feature column. Features that are not candidates
+    stay in the graph as conditioning variables.
+    """
+
+    ci_test: Literal["parcorr_hc3"]
+    decision: Literal["hybrid", "mci"]
+    tau_max: StrictInt = Field(ge=1, le=20)
+    pc_alpha: float = Field(gt=0.0, lt=1.0)
+    alpha: float = Field(gt=0.0, lt=0.5)
+    fdr: Literal["bh", "by"]
+    min_obs: StrictInt = Field(ge=50)
+    signals: tuple[str, ...] | None
+    bootstrap: CausalBootstrapConfig
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        if self.signals is not None:
+            if not self.signals:
+                raise ValueError("signals must be None (all features) or a non-empty list")
+            dupes = sorted({s for s in self.signals if self.signals.count(s) > 1})
+            if dupes:
+                raise ValueError(f"duplicate signals: {dupes}")
+        if self.min_obs <= 4 * self.tau_max:
+            raise ValueError(
+                f"min_obs {self.min_obs} leaves too few rows for tau_max {self.tau_max}"
+            )
+        return self
+
+
 class PipelineConfig(_Frozen):
     universe: UniverseConfig
     dates: DateRange
@@ -233,6 +281,7 @@ class PipelineConfig(_Frozen):
     seed: StrictInt = Field(ge=0, lt=2**32)
     data: DataConfig
     pit: PitConfig
+    causal: CausalConfig
 
 
 def deep_merge(base: Mapping[str, object], override: Mapping[str, object]) -> dict[str, object]:

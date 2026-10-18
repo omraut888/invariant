@@ -206,3 +206,50 @@ def test_unknown_lookups_raise() -> None:
         gt.node("nope")
     with pytest.raises(KeyError):
         gt.parents("nope")
+
+
+def test_expected_t_hybrid_nulls_and_identifiability_limit() -> None:
+    gt = _gt()
+    for sid in ("s_conf", "s_noise"):
+        assert gt.signal(sid).expected_t_hybrid[0] == pytest.approx(0.0, abs=1e-9)
+    hidden = _gt("hidden_confounder")
+    # Z hidden: no observed set blocks the confounding path, so the oracle test sees an effect.
+    assert abs(hidden.signal("s_conf").expected_t_hybrid[0]) > 0.5
+    assert hidden.signal("s_conf").expected_t_hybrid == hidden.signal("s_conf").expected_t
+    for sid in ("s_real", "s_decay"):
+        s = gt.signal(sid)
+        assert 0 < s.expected_t_hybrid[0] <= s.expected_t[0] + 1e-9
+    assert gt.schema_version == 3
+
+
+def test_hybrid_oracle_sets() -> None:
+    from invariant.benchmark.synthetic import hybrid_oracle_set
+
+    cfg = load_benchmark_config()
+    z, real, conf, decay, noise = range(5)
+    assert hybrid_oracle_set(cfg, real) == [z, decay, 5 + z]
+    assert hybrid_oracle_set(cfg, conf) == [z, real, decay, 5 + z]
+    assert hybrid_oracle_set(cfg, noise) == [z, real, decay]
+    hidden = load_benchmark_config("hidden_confounder")
+    assert hybrid_oracle_set(hidden, conf) == [real, decay]
+
+
+@pytest.mark.slow
+def test_expected_t_hybrid_matches_a_long_sample() -> None:
+    # Sample partial correlation of s_real_{t-1} and R_t given the oracle hybrid set, on one
+    # long path with S_decay's edge off (its coefficient is time-varying), against the export.
+    cfg = load_benchmark_config().model_copy(update={"n_obs": 200_000})
+    cfg = SyntheticMarketConfig.model_validate(
+        {**cfg.model_dump(), "decay": {**cfg.decay.model_dump(), "ic": 0.0}}
+    )
+    d = generate_market(cfg, 3)
+    f, r = d.features, d.returns.iloc[:, 0].to_numpy()
+    x = f["s_real"].to_numpy()[1:-1]
+    y = r[2:]
+    zs = np.column_stack([f["z"].to_numpy()[1:-1], f["z"].to_numpy()[:-2]])
+    a = np.column_stack([np.ones(len(y)), zs])
+    rx = x - a @ np.linalg.lstsq(a, x, rcond=None)[0]
+    ry = y - a @ np.linalg.lstsq(a, y, rcond=None)[0]
+    sample = rx @ ry / np.sqrt((rx @ rx) * (ry @ ry))
+    want = d.ground_truth.signal("s_real").expected_t_hybrid[0] / np.sqrt(cfg.n_obs - 1)
+    assert sample == pytest.approx(want, abs=4 / np.sqrt(len(y)))

@@ -48,7 +48,14 @@ from tigramite import data_processing as pp
 from tigramite.independence_tests.independence_tests_base import CondIndTest
 from tigramite.pcmci import PCMCI
 
-__all__ = ["DecisionTest", "PcmciOutput", "conditioning_set", "run_pcmci"]
+__all__ = [
+    "DecisionTest",
+    "LaggedDesign",
+    "PcmciOutput",
+    "conditioning_set",
+    "lagged_design",
+    "run_pcmci",
+]
 
 _FloatArray = npt.NDArray[np.float64]
 _Node = tuple[int, int]  # tigramite form: (variable index, -lag)
@@ -101,6 +108,18 @@ class PcmciOutput:
 
     def link_val(self, source: str, target: str, lags: Sequence[int]) -> _FloatArray:
         return self._link(self.val, source, target, lags)
+
+    def conditions(
+        self, decision: DecisionTest, source: str, target: str, lag: int
+    ) -> tuple[tuple[str, int], ...]:
+        """The conditioning set ``decision`` used for ``source_{t-lag} -> target_t``, as
+        ``(name, lag)``, rebuilt from the PC1 parents exactly as ``run_pcmci`` built it."""
+        raw = {
+            self.index(name): [(self.index(p), -p_lag) for p, p_lag in nodes]
+            for name, nodes in self.parents.items()
+        }
+        z = conditioning_set(decision, raw, self.index(source), self.index(target), lag)
+        return tuple((self.var_names[k], -k_tau) for k, k_tau in z)
 
     def _link(self, arr: _FloatArray, source: str, target: str, lags: Sequence[int]) -> _FloatArray:
         bad = [lag for lag in lags if not 1 <= lag <= self.tau_max]
@@ -168,4 +187,50 @@ def run_pcmci(
         parents={names[j]: tuple((names[i], -t) for i, t in raw_parents[j]) for j in raw_parents},
         decision_p=decision_p,
         decision_val=decision_val,
+    )
+
+
+@dataclass(frozen=True)
+class LaggedDesign:
+    """Rows ``t = 2 tau_max .. T-1`` of ``x_t = X_{t-lag}``, ``y_t = Y_t`` and ``z_t`` (one column
+    per conditioning node ``(name, lag)``): the sample tigramite's ``run_test`` uses with its
+    default ``cut_off='2xtau_max'``."""
+
+    x: _FloatArray
+    y: _FloatArray
+    z: _FloatArray  # (n_rows, n_conditions)
+
+
+def lagged_design(
+    data: _FloatArray,
+    var_names: Sequence[str],
+    source: str,
+    target: str,
+    lag: int,
+    conditions: Sequence[tuple[str, int]],
+    *,
+    tau_max: int,
+) -> LaggedDesign:
+    """The time-aligned design of the test of ``source_{t-lag} -> target_t`` given
+    ``conditions``. Its partial correlation equals the decision test's statistic
+    (tests/unit/test_pcmci.py)."""
+    names = list(var_names)
+    n = data.shape[0]
+    cut = 2 * tau_max
+    if not 1 <= lag <= tau_max:
+        raise ValueError(f"lag must be in [1, {tau_max}], got {lag}")
+    # A parent of X shifted by the tested lag can reach 2 tau_max: hence the cut-off.
+    if any(not 1 <= c_lag <= cut for _, c_lag in conditions):
+        raise ValueError(f"condition lags must be in [1, {cut}], got {list(conditions)}")
+    if n <= cut + 1:
+        raise ValueError(f"{n} rows leave no sample after the 2 * tau_max = {cut} cut-off")
+
+    def col(name: str, back: int) -> _FloatArray:
+        return np.asarray(data[cut - back : n - back, names.index(name)], dtype=np.float64)
+
+    z = np.column_stack([col(c, c_lag) for c, c_lag in conditions]) if conditions else None
+    return LaggedDesign(
+        x=col(source, lag),
+        y=col(target, 0),
+        z=z if z is not None else np.empty((n - cut, 0)),
     )

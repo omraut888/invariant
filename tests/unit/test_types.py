@@ -188,6 +188,8 @@ def test_enum_values_pinned() -> None:
         "general.data_validation_failed",
         "general.assumption_violation",
         "general.placeholder",
+        "causal.no_significant_link",
+        "causal.not_significant_after_correction",
     }
     assert [f.value for f in Frequency] == ["daily", "weekly", "monthly"]
 

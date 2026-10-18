@@ -44,3 +44,20 @@ pit:
     horizon: 1            # target y_t = r_{t+2} (sessions); see TargetConfig
   publication_lag_sessions:
     french: 42            # ~2 months: each library release covers data through the prior month
+
+# Stage 1: causal screen (docs/adr/0009 for the CI test and decision test, docs/adr/0010 for the
+# stage). A signal passes iff its Bonferroni (asset x lag) family p, FDR-adjusted across
+# signals, is < alpha.
+causal:
+  ci_test: parcorr_hc3    # ParCorr statistic, HC3 p-value; the only test validated (ADR 0009)
+  decision: hybrid        # parents of R plus X's non-own parents (ADR 0009, study 3)
+  tau_max: 5
+  pc_alpha: 0.2
+  alpha: 0.05
+  fdr: bh                 # bh | by; by is valid under any dependence between signals
+  min_obs: 500            # shortest T validated (T = 500 Stambaugh diagnostic, ADR 0009)
+  signals: null           # null: every non-return feature column is a candidate
+  bootstrap:
+    n_boot: 999
+    block_length: null    # null: ceil(n^(1/3))
+    confidence: 0.95

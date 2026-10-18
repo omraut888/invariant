@@ -17,6 +17,8 @@ from structlog.testing import capture_logs
 
 from invariant.config.settings import (
     AlfredConfig,
+    CausalBootstrapConfig,
+    CausalConfig,
     DataConfig,
     DateRange,
     FrenchConfig,
@@ -65,6 +67,18 @@ PIT = PitConfig(
     publication_lag_sessions=PublicationLags(french=42),
 )
 
+CAUSAL = CausalConfig(
+    ci_test="parcorr_hc3",
+    decision="hybrid",
+    tau_max=5,
+    pc_alpha=0.2,
+    alpha=0.05,
+    fdr="bh",
+    min_obs=500,
+    signals=None,
+    bootstrap=CausalBootstrapConfig(n_boot=999, block_length=None, confidence=0.95),
+)
+
 
 def _config(**overrides: object) -> PipelineConfig:
     base: dict[str, object] = {
@@ -74,6 +88,7 @@ def _config(**overrides: object) -> PipelineConfig:
         "seed": 42,
         "data": DATA,
         "pit": PIT,
+        "causal": CAUSAL,
     }
     base.update(overrides)
     return PipelineConfig.model_validate(base)
@@ -102,8 +117,8 @@ def test_same_inputs_same_run_id() -> None:
 
 def test_golden_run_id() -> None:
     # Pinned: if this changes without a change to the PipelineConfig schema, canonicalization
-    # changed and HASH_SCHEMA_VERSION must be bumped. (Last re-pinned when `pit` was added.)
-    assert compute_run_id(_inputs()) == "3856c2b6d5d63065"
+    # changed and HASH_SCHEMA_VERSION must be bumped. (Last re-pinned when `causal` was added.)
+    assert compute_run_id(_inputs()) == "82cf11e5d6eff023"
 
 
 @pytest.mark.parametrize(

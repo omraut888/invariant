@@ -65,7 +65,7 @@ __all__ = [
     "TargetTimingMismatchError",
 ]
 
-GROUND_TRUTH_SCHEMA_VERSION = 2  # 2: added target_timing
+GROUND_TRUTH_SCHEMA_VERSION = 3  # 2: added target_timing; 3: added expected_t_hybrid
 
 TIMING_CONVENTION = (
     "A value dated t is known at the close of trading day t. returns[t] is the log return from "
@@ -146,6 +146,14 @@ class SignalTruth(_Frozen):
     ``expected_t``: ``effective_partial_ic * sqrt(n_obs - 1)``, the approximate full-sample t-stat
     of a correctly specified linear test. Low-SNR approximation; ignores estimation of the
     conditioning coefficients.
+    ``expected_t_hybrid``: the same for the test Stage 1 decides with (``hybrid``, ADR 0009) at
+    lag 1: the population partial correlation of ``S_{t-1}`` and ``R_t`` given the *true*
+    observed parents of R other than S, and S's observed parents other than its own lag shifted
+    by one (``Z_{t-2}`` for a Z-loading signal when Z is observed), with S_decay at its average
+    coefficient, times ``sqrt(n_obs - 1)``. Stage 1 conditions on PC1's estimated parents, not
+    the true ones, and decides over several lags with Bonferroni, so this is a power proxy,
+    not an exact prediction. For S_conf with Z hidden it is nonzero: the bias no observed
+    adjustment set removes.
     """
 
     signal_id: str
@@ -157,6 +165,7 @@ class SignalTruth(_Frozen):
     partial_ic: tuple[float, ...]
     effective_partial_ic: tuple[float, ...]
     expected_t: tuple[float, ...]
+    expected_t_hybrid: tuple[float, ...]
     coef_half_life: float | None = None
     te_half_life_approx: float | None = None
     decay_start: date | None = None
@@ -227,7 +236,13 @@ class GroundTruth(_Frozen):
         if len(self.loadings.beta_z) != n_assets:
             raise ValueError("loadings must have one entry per asset")
         for s in self.signals:
-            for field in (s.marginal_ic, s.partial_ic, s.effective_partial_ic, s.expected_t):
+            for field in (
+                s.marginal_ic,
+                s.partial_ic,
+                s.effective_partial_ic,
+                s.expected_t,
+                s.expected_t_hybrid,
+            ):
                 if len(field) != n_assets:
                     raise ValueError(f"{s.signal_id}: per-asset fields need {n_assets} entries")
         k = len(self.state_order)
