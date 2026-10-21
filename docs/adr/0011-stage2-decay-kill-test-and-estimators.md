@@ -235,5 +235,20 @@ only rows inside that window.
 - **Correcting kills for multiplicity**: makes the pipeline more permissive as candidates are
   added (see the justification above).
 
+## KSG budget decision (smoke run, 2026-10-21; before the full run)
+The smoke run was M = 8, at commit `8d133ce` (clean tree), with 8 workers. Its timings are in
+`runs/decay_study/3d48cc9bc74b7ef8/ksg_budget.json`.
+- KSG wall time is **512 s per seed**, summed over d1–d3 under 8-way parallel load. The median
+  KSG task (one scenario) took 169 s, and the median main-arm task 7.2 s.
+- The projection is 512 × 1610 / 8 = **28.6 h**, against a budget of 6 h. **Over budget.**
+- By the pre-registered rule, **KSG is a reported-only arm** on the first **M_ksg =
+  floor(6 × 3600 × 8 / 512.2) = 337** seeds (`ksg_n_seeds: 337` in the config). It is **not
+  eligible for selection**. Selection is between (c) partial_corr and (b) gaussian_te, with
+  the same rule and tie-break.
+- **KSG was not fully evaluated, for compute reasons.** Its rates and intervals are reported
+  at M = 337, where a Wilson interval near .05 is about ±.025 wide. Its gates are shown but do
+  not decide anything.
+- The smoke run's rates were not used for anything.
+
 ## Results
-*Pending. The smoke-run budget decision is appended first, then the full-run results.*
+*Pending (full run).*

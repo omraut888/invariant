@@ -4,7 +4,7 @@
 
 root_seed: 20261021     # fresh: not used by any Stage 1 study or validation
 n_seeds: null           # required_seeds(0.05, 0.075, n_gating = 4 + 2 = 6, 0.90) = 1610
-ksg_n_seeds: null       # set from the M = 8 smoke run by the budget rule, before the full run
+ksg_n_seeds: 337        # budget rule, M = 8 smoke run: projected 28.6 h > 6 h -> reported-only arm (ADR 0011)
 ksg_budget_hours: 6.0   # KSG arm wall-clock budget at M, all cores (ADR 0011)
 n_obs: 6000
 tau_max: 5
