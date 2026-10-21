@@ -1,0 +1,33 @@
+# Stage 2 pre-registered study: kill-test size/power and half-life estimator comparison
+# (docs/adr/0011). Read by scripts/decay_study.py --config configs/decay_study.yaml.
+# Every rule below was fixed and pushed before any result of this study was seen.
+
+root_seed: 20261021     # fresh: not used by any Stage 1 study or validation
+n_seeds: null           # required_seeds(0.05, 0.075, n_gating = 4 + 2 = 6, 0.90) = 1610
+ksg_n_seeds: null       # set from the M = 8 smoke run by the budget rule, before the full run
+ksg_budget_hours: 6.0   # KSG arm wall-clock budget at M, all cores (ADR 0011)
+n_obs: 6000
+tau_max: 5
+pc_alpha: 0.2
+causal_alpha: 0.05      # Stage 1's alpha, to record each replication's Stage 1 verdict
+decline:
+  alpha: 0.05
+  n_boot: 999
+  trim: 0.15
+  step: 25
+window: 252             # non-overlapping, end-aligned (spec's longest window)
+grid:
+  tau_step: 21
+  hl_min: 5.0           # TE-scale half-life grid, rows (trading days)
+  hl_max: 50000.0
+  n_hl: 121
+size_cutoff: 0.075
+all_pass_prob: 0.90
+coverage_min: 0.90
+confidence: 0.95
+kill_gates: [d1_base, k_garch_hi, k_rho99, k_realistic]   # s_real false-decay
+estimator_gates: [d1_base, d2_ident]                      # s_real false-decay
+coverage_gates: [d2_ident, d3_ident_fast]                 # s_decay CI coverage of H/2
+selection_scenario: d2_ident
+simplicity: [partial_corr, gaussian_te, ksg]              # (c) < (b) < (a)
+n_rmse_boot: 2000
