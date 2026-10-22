@@ -124,3 +124,22 @@ def test_run_seed_is_deterministic() -> None:
     assert set(a.signals["s_decay"].fits) == {"partial_corr", "gaussian_te"}
     other = run_seed(sc, cfg, 1, "main")
     assert other.dataset_seed != a.dataset_seed
+
+
+@pytest.mark.parametrize("arm", ["main", "ksg"])
+def test_every_arm_runs_end_to_end_on_a_tiny_seed(arm: str) -> None:
+    """Every estimator arm, KSG included, through the study's own code path. The empty-Z KSG
+    crash of the first full run (docs/adr/0011) was in an arm the fast suite never ran."""
+    base = load_decay_study_config()
+    cfg = base.model_copy(
+        update={
+            "root_seed": 1,
+            "n_obs": 1000,
+            "decline": base.decline.model_copy(update={"n_boot": 99}),
+        }
+    )
+    sc = next(s for s in decay_scenarios() if s.name == "d2_ident")
+    rec = run_seed(sc, cfg, 0, arm)  # type: ignore[arg-type]
+    want = {"ksg"} if arm == "ksg" else {"partial_corr", "gaussian_te"}
+    for sig in ("s_real", "s_decay"):
+        assert set(rec.signals[sig].fits) == want

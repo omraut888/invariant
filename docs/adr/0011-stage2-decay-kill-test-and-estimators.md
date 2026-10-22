@@ -250,5 +250,49 @@ The smoke run was M = 8, at commit `8d133ce` (clean tree), with 8 workers. Its t
   not decide anything.
 - The smoke run's rates were not used for anything.
 
+## Post-launch bug fix (2026-10-22): KSG crash on an empty conditioning set
+This fix does **not change the pre-registered design.** The estimators, scenarios, seeds, M,
+M_ksg, rules and budget are all as above. No partial result or rate was looked at before or
+during the fix.
+
+**What happened.** The full run (commit `f7b4e5c`, clean tree, run directory
+`runs/decay_study/01df4c82cfd33b73`) stopped with `TypeError: corrcoef() got an unexpected
+keyword argument 'ddof'`, raised in a joblib worker. The crash came in the first chunk of the
+KSG arm. Main-arm tasks run first, then KSG tasks, and at that point the checkpoint held
+20,928 of the 20,930 main-arm records: everything except `p_onset0.8_h500` seeds 1608 and
+1609. It held **no** KSG records.
+
+**Cause.** The bug is in tigramite 5.2.10.1, not in our code.
+- When Z is empty (Stage 1's hybrid conditioning set for the best link can be empty),
+  `CMIknn.get_shuffle_significance` falls back to a block shuffle.
+- Its block length comes from `CondIndTest._get_acf`, which calls `np.corrcoef(y1, y2,
+  ddof=0)`.
+- numpy 2.x removed `ddof` from `corrcoef`. It had been a documented no-op since numpy 1.10,
+  because the normalisation cancels in a correlation.
+- ADR 0009's numpy compatibility check never exercised this path, and neither did our tests:
+  every KSG test used a non-empty Z, and the fast suite never ran the KSG arm.
+
+**Fix (smallest correct change).** `te.CMIknnNumpy2` subclasses `CMIknn` and overrides only
+`_get_acf`. The body is the same code without `ddof`. `ksg_windows` uses it. Tests:
+- an empty-Z `ksg_windows` regression test. It fails with the original `CMIknn` and the same
+  `TypeError`.
+- the overridden ACF against an independent reference (Hypothesis);
+- `CMIknnNumpy2` against `CMIknn` with a non-empty Z: the value, p and null distribution are
+  bit-identical;
+- an end-to-end run of **every** study arm, KSG included, on one tiny seed in the fast suite.
+
+**Restart: resumed from the checkpoint, not rerun from scratch.**
+- *Static:* the fix changes only `stages/decay/te.py`. `ksg_windows` and `CMIknnNumpy2` are
+  reached only from the `arm == "ksg"` branch of `study.run_seed`. The main arm (PCMCI,
+  windows, the half-life fits (c) and (b), the decline test) does not call them.
+- *Empirical:* 4 checkpointed main-arm records, sampled at random (`random.Random(0)`), were
+  recomputed with the fixed code and are bit-identical, wall time excluded. That compared
+  equality only, and printed no rates.
+- *No KSG records existed*, so nothing produced by the broken path is reused.
+
+The 20,928 main-arm records were copied unchanged into the new run's directory (the run key
+includes the git SHA). The remaining 2 main-arm tasks and all 1,011 KSG tasks run at the
+commit that adds this section. The old directory is kept.
+
 ## Results
 *Pending (full run).*

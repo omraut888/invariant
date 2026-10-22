@@ -15,11 +15,13 @@ with a conditioning set chosen by causal discovery, and not a fixed embedding.
   causality log variance ratio (Barnett, Barrett & Seth 2009). It is a function of ``|r|``, so
   it carries the same information as the partial correlation, minus the sign.
 - **KSG TE**: the Frenzel-Pompe (2007) k-nearest-neighbour CMI estimator (the conditional
-  form of Kraskov, Stögbauer & Grassberger 2004). It uses tigramite's ``CMIknn`` with its
-  defaults: ``knn = 0.2 T``, rank transform, 5 shuffle neighbours, 500 surrogates. Its
+  form of Kraskov, Stögbauer & Grassberger 2004). It uses tigramite's ``CMIknn`` (through
+  ``CMIknnNumpy2``, which fixes one numpy-2 incompatibility in a helper) with its defaults:
+  ``knn = 0.2 T``, rank transform, 5 shuffle neighbours, 500 surrogates. Its
   significance comes from the local-permutation surrogate test of Runge (2018): Y is permuted
   only among samples whose Z values are near neighbours, so the surrogates keep the X-Z and
-  Y-Z dependence and break only the X-Y link given Z. The surrogate distribution's mean
+  Y-Z dependence and break only the X-Y link given Z. With an empty Z, tigramite falls back to
+  a block shuffle of Y. The surrogate distribution's mean
   estimates the estimator's finite-sample floor under conditional independence. Its standard
   deviation sets the window's noise scale in the half-life fit.
 
@@ -49,10 +51,31 @@ import numpy as np
 import numpy.typing as npt
 from tigramite.independence_tests.cmiknn import CMIknn
 
-__all__ = ["KsgWindows", "gaussian_te", "ksg_windows"]
+__all__ = ["CMIknnNumpy2", "KsgWindows", "gaussian_te", "ksg_windows"]
 
 _FloatArray = npt.NDArray[np.float64]
 _IntArray = npt.NDArray[np.int64]
+
+
+class CMIknnNumpy2(CMIknn):  # type: ignore[misc]  # tigramite is untyped
+    """tigramite's ``CMIknn``, with one numpy-2 incompatibility in a base-class helper fixed.
+
+    With an empty Z, ``CMIknn``'s surrogate test falls back to a block shuffle. Its block
+    length comes from ``CondIndTest._get_acf``, which calls ``np.corrcoef(..., ddof=0)``.
+    numpy 2.x removed ``ddof`` from ``corrcoef``, so that path raises ``TypeError``
+    (tigramite 5.2.10.1, numpy 2.4.6). ``ddof`` was a documented no-op in ``corrcoef`` since
+    numpy 1.10 (it cancels in a correlation), so this override is the same computation
+    without the argument. The estimator and every non-empty-Z path are unchanged
+    (tests/unit/test_decay_te.py; docs/adr/0011, "Post-launch bug fix").
+    """
+
+    def _get_acf(self, series: _FloatArray, max_lag: int | None = None) -> _FloatArray:
+        if max_lag is None:
+            max_lag = int(max(5, 0.1 * len(series)))
+        autocorr = np.ones(max_lag + 1)
+        for lag in range(1, max_lag + 1):
+            autocorr[lag] = np.corrcoef(series[lag:], series[: len(series) - lag])[0, 1]
+        return autocorr
 
 
 def gaussian_te(r: _FloatArray) -> _FloatArray:
@@ -94,7 +117,7 @@ def ksg_windows(
     out = np.empty((4, len(bounds)))
     for j, (a, b) in enumerate(bounds):
         array = np.vstack([x[a:b], y[a:b], z[a:b].T]).astype(np.float64)
-        test = CMIknn(seed=seeds[j], workers=workers)
+        test = CMIknnNumpy2(seed=seeds[j], workers=workers)
         value = float(test.get_dependence_measure(array.copy(), xyz))
         p, null = test.get_shuffle_significance(array.copy(), xyz, value, return_null_dist=True)
         out[:, j] = (value, float(np.mean(null)), float(np.std(null, ddof=1)), float(p))
