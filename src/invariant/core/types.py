@@ -88,6 +88,9 @@ class KillReason(StrEnum):
     CAUSAL_NO_SIGNIFICANT_LINK = "causal.no_significant_link"
     # The family is significant on its own, but not after FDR control across signals.
     CAUSAL_NOT_SIGNIFICANT_AFTER_CORRECTION = "causal.not_significant_after_correction"
+    # Stage 2 (docs/adr/0011, 0012). The one-sided sup-split test finds that the edge of the
+    # Stage 1 link was stronger before some break than after it (p < alpha).
+    DECAY_EDGE_DECLINING = "decay.edge_declining"
 
     @property
     def stage(self) -> StageName | None:

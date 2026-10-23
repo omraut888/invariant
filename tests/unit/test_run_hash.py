@@ -21,6 +21,7 @@ from invariant.config.settings import (
     CausalConfig,
     DataConfig,
     DateRange,
+    DecayConfig,
     FrenchConfig,
     HttpConfig,
     PipelineConfig,
@@ -79,6 +80,8 @@ CAUSAL = CausalConfig(
     bootstrap=CausalBootstrapConfig(n_boot=999, block_length=None, confidence=0.95),
 )
 
+DECAY = DecayConfig(alpha=0.05, n_boot=999, trim=0.15, break_step=25, min_obs=5000)
+
 
 def _config(**overrides: object) -> PipelineConfig:
     base: dict[str, object] = {
@@ -89,6 +92,7 @@ def _config(**overrides: object) -> PipelineConfig:
         "data": DATA,
         "pit": PIT,
         "causal": CAUSAL,
+        "decay": DECAY,
     }
     base.update(overrides)
     return PipelineConfig.model_validate(base)
@@ -117,8 +121,8 @@ def test_same_inputs_same_run_id() -> None:
 
 def test_golden_run_id() -> None:
     # Pinned: if this changes without a change to the PipelineConfig schema, canonicalization
-    # changed and HASH_SCHEMA_VERSION must be bumped. (Last re-pinned when `causal` was added.)
-    assert compute_run_id(_inputs()) == "82cf11e5d6eff023"
+    # changed and HASH_SCHEMA_VERSION must be bumped. (Last re-pinned when `decay` was added.)
+    assert compute_run_id(_inputs()) == "6b24e63ac1f49496"
 
 
 @pytest.mark.parametrize(

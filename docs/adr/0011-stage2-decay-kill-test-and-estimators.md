@@ -411,3 +411,5 @@ reasons. It would not have changed the outcome: it fails the same gates at M = 3
 - **Co-parent leak in the decline test** (finding 1): s_real rejects at .055 and .058 when a
   strong decaying co-parent is held at a constant coefficient. A regime-aware residualisation
   could be measured against this.
+- **The decline test at T < 6000.** Its size and power are unmeasured there, so Stage 2's
+  `min_obs` is 5000 design rows (ADR 0012). A shorter-sample study would allow a lower floor.

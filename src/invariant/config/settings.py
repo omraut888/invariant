@@ -42,6 +42,7 @@ __all__ = [
     "ConfigError",
     "DataConfig",
     "DateRange",
+    "DecayConfig",
     "FrenchConfig",
     "HttpConfig",
     "PipelineConfig",
@@ -274,6 +275,25 @@ class CausalConfig(_Frozen):
         return self
 
 
+class DecayConfig(_Frozen):
+    """Stage 2 (``invariant.stages.decay.stage``; docs/adr/0011 for the test, 0012 for the stage).
+
+    A signal Stage 1 passed is killed when the one-sided sup-split decline test of its best
+    link gives ``p < alpha``. ``n_boot`` sets the replicates of the fixed-regressor wild
+    bootstrap, and ``trim`` and ``break_step`` set the break grid. ``min_obs`` is the minimum
+    number of design rows. The test's size and power were measured only at T = 6000
+    (ADR 0011), so a shorter sample is killed with ``general.insufficient_data`` rather than
+    decided by an unvalidated test. Stage 2 reports no half-life: no estimator was admissible
+    (ADR 0011).
+    """
+
+    alpha: float = Field(gt=0.0, lt=0.5)
+    n_boot: StrictInt = Field(ge=99, le=100_000)
+    trim: float = Field(gt=0.0, lt=0.5)
+    break_step: StrictInt = Field(ge=1)
+    min_obs: StrictInt = Field(ge=100)
+
+
 class PipelineConfig(_Frozen):
     universe: UniverseConfig
     dates: DateRange
@@ -282,6 +302,7 @@ class PipelineConfig(_Frozen):
     data: DataConfig
     pit: PitConfig
     causal: CausalConfig
+    decay: DecayConfig
 
 
 def deep_merge(base: Mapping[str, object], override: Mapping[str, object]) -> dict[str, object]:

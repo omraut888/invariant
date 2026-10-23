@@ -1,0 +1,20 @@
+# Stage 2 Monte Carlo validation on the planted-signal benchmark (docs/adr/0012, "Validation").
+# Read by scripts/decay_stage_validation.py --config configs/decay_stage_validation.yaml.
+# The acceptance criteria were fixed and pushed before any result of this run was seen.
+
+root_seed: 20261023     # fresh: not used by any Stage 1 or Stage 2 study or validation
+n_seeds: 1000           # chosen on 2026-10-23 over 500: see ADR 0012 for the pass probabilities
+n_obs: null             # each preset's own n_obs (6000)
+presets: [base, realistic, hidden_confounder]
+confidence: 0.95
+n_boot: null            # Stage 1's causal.bootstrap.n_boot (999); descriptive only
+min_obs: null           # the pipeline config's decay.min_obs (5000)
+acceptance:
+  preset: base
+  # Constant-coefficient true edge: its Stage 2 kill rate given a Stage 1 pass is the false-decay rate.
+  null_signals: [s_real]
+  null_kill_upper_max: 0.075
+  # Decaying edge: its Stage 2 kill rate given a Stage 1 pass is the power. Measured .622
+  # [.596, .648] in ADR 0011.
+  decay_signals: [s_decay]
+  decay_kill_lower_min: 0.52

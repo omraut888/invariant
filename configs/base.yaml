@@ -61,3 +61,14 @@ causal:
     n_boot: 999
     block_length: null    # null: ceil(n^(1/3))
     confidence: 0.95
+
+# Stage 2: decay validation (docs/adr/0011 for the kill test, docs/adr/0012 for the stage). A
+# signal Stage 1 passed is killed iff the one-sided sup-split decline test of its best link
+# (Andrews 1993; Hansen 2000 fixed-regressor wild bootstrap) gives p < alpha. No half-life is
+# reported: no estimator was admissible in ADR 0011.
+decay:
+  alpha: 0.05
+  n_boot: 999
+  trim: 0.15              # break fractions in [0.15, 0.85]
+  break_step: 25          # rows between candidate breaks
+  min_obs: 5000           # design rows; size and power were measured only at T = 6000

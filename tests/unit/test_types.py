@@ -190,6 +190,7 @@ def test_enum_values_pinned() -> None:
         "general.placeholder",
         "causal.no_significant_link",
         "causal.not_significant_after_correction",
+        "decay.edge_declining",
     }
     assert [f.value for f in Frequency] == ["daily", "weekly", "monthly"]
 
