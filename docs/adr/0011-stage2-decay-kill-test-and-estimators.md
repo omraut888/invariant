@@ -1,8 +1,12 @@
 # ADR 0011: Stage 2 decay validation: kill test and half-life estimator (pre-registered study)
 
-Status: **pre-registered (2026-10-21)**. The design, rules and compute-budget rule below were
-committed and pushed before any smoke or full run of the study. Results will be appended
-below. Nothing above the results section changes after a run.
+Status: **accepted (2026-10-23)**.
+- **The kill rule is adopted** (sup-split decline test, p < .05).
+- **No half-life estimator is admissible**, so Stage 2 reports no half-life.
+- The design, rules and compute-budget rule were pre-registered and pushed on 2026-10-21
+  (`8d133ce`), before any smoke or full run, and nothing above "KSG budget decision" changed
+  after a run.
+- One post-launch bug fix (`fe3bd87`) did not change the design. It is described below.
 
 ## Context
 Stage 2 takes each signal that passed Stage 1 (ADR 0010) and decides whether its edge is
@@ -263,6 +267,8 @@ KSG arm. Main-arm tasks run first, then KSG tasks, and at that point the checkpo
 1609. It held **no** KSG records.
 
 **Cause.** The bug is in tigramite 5.2.10.1, not in our code.
+- Location: `tigramite/independence_tests/independence_tests_base.py`, line 1093, in
+  `CondIndTest._get_acf`. Our code never calls `corrcoef`.
 - When Z is empty (Stage 1's hybrid conditioning set for the best link can be empty),
   `CMIknn.get_shuffle_significance` falls back to a block shuffle.
 - Its block length comes from `CondIndTest._get_acf`, which calls `np.corrcoef(y1, y2,
@@ -272,7 +278,7 @@ KSG arm. Main-arm tasks run first, then KSG tasks, and at that point the checkpo
 - ADR 0009's numpy compatibility check never exercised this path, and neither did our tests:
   every KSG test used a non-empty Z, and the fast suite never ran the KSG arm.
 
-**Fix (smallest correct change).** `te.CMIknnNumpy2` subclasses `CMIknn` and overrides only
+**Fix (smallest correct change; commit `fe3bd87`, pushed before the restart).** `te.CMIknnNumpy2` subclasses `CMIknn` and overrides only
 `_get_acf`. The body is the same code without `ddof`. `ksg_windows` uses it. Tests:
 - an empty-Z `ksg_windows` regression test. It fails with the original `CMIknn` and the same
   `TypeError`.
@@ -290,9 +296,118 @@ KSG arm. Main-arm tasks run first, then KSG tasks, and at that point the checkpo
   equality only, and printed no rates.
 - *No KSG records existed*, so nothing produced by the broken path is reused.
 
-The 20,928 main-arm records were copied unchanged into the new run's directory (the run key
-includes the git SHA). The remaining 2 main-arm tasks and all 1,011 KSG tasks run at the
-commit that adds this section. The old directory is kept.
+The 20,928 main-arm records were copied byte for byte (checked with `cmp`) into the new run
+directory, `runs/decay_study/3566ebefd08713f9`. The run key includes the git SHA, so the
+directory is new. The restarted run reported `n_reused=20928`. It ran the remaining 2
+main-arm tasks and all 1,011 KSG tasks at `fe3bd87` and finished without error. The old
+directory (`01df4c82cfd33b73`) and both logs are kept.
 
-## Results
-*Pending (full run).*
+## Results (M = 1610, M_ksg = 337, commit `fe3bd87`, clean tree; report `runs/decay_study/3566ebefd08713f9/report.json`)
+Main-arm records 0–20,927 came from the run at `f7b4e5c` (see the post-launch bug fix above).
+Everything else ran at `fe3bd87`. No crash. All rates are decision-unit rates at α = .05 with
+95% Wilson CIs.
+
+### Kill test (sup-split, wild bootstrap): **admissible, all 4 gates pass**
+False-decay on s_real (`*` = gate). Each cell gives the unconditional rate, then the rate
+given a Stage 1 pass.
+
+| scenario | s_real rate | given a Stage 1 pass | trend diagnostic |
+|---|---|---|---|
+| d1_base * | .043 [.035, .055] | .044 [.034, .056] | .055 |
+| k_garch_hi * | .044 [.035, .055] | .045 [.036, .058] | .055 |
+| k_rho99 * | .048 [.038, .059] | .048 [.038, .061] | .040 |
+| k_realistic * | .051 [.041, .063] | .046 [.025, .082] | .049 |
+| k_hidden | .048 [.039, .060] | .050 [.040, .063] | .053 |
+| d2_ident | .055 [.045, .068] | .059 [.048, .072] | .057 |
+| d3_ident_fast | .058 [.047, .070] | .061 [.050, .075] | .055 |
+
+Power on s_decay:
+
+| scenario (onset / H) | unconditional | given a Stage 1 pass | trend | pre-study prediction |
+|---|---|---|---|---|
+| p .3 / 250 | .606 | .638 | .610 | .78 |
+| p .6 / 125 | .632 | .661 | .639 | .81 |
+| **d1_base .6 / 250** | **.593 [.569, .617]** | **.622 [.596, .648]** | .607 | .75 |
+| p .6 / 500 | .517 | .544 | .525 | .65 |
+| p .8 / 125 | .443 | .464 | .358 | .54 |
+| p .8 / 250 | .348 | .366 | .300 | .44 |
+| p .8 / 500 | .221 | .229 | .214 | .26 |
+| k_realistic (ic .02) | .104 | .207 | .122 | – |
+| d2 / d3 (ic .25) | .986 / .991 | .986 / .993 | .982 / .988 | – |
+
+### Half-life estimators: **none admissible**
+| scenario / signal | partial_corr (c) | gaussian_te (b) | ksg (a), M = 337, reported only |
+|---|---|---|---|
+| d1 s_real false-decay * | **.116 [.101, .132]** | **.104 [.090, .120]** | .116 [.086, .154] |
+| d2 s_real false-decay * | **.121 [.106, .138]** | **.118 [.103, .135]** | .107 [.078, .144] |
+| d2 s_decay coverage * | **.889 [.873, .903]** | **.900 [.884, .914]** | .843 [.800, .878] |
+| d3 s_decay coverage * | .915 [.900, .928] | .951 [.939, .960] | .920 [.886, .944] |
+| d2 λ bias / SD / RMSE (truth .00277) | +.020 / .043 / .047 | +.038 / .054 / .066 | +.050 / .060 / .078 |
+| d2 median TE half-life (truth 250) | 215 | 171 | 79 |
+| d1 s_decay claims decay | .726 | .487 | .243 |
+
+Bold marks a failed gate. **Rule outcome: no estimator is admissible, so none is selected.**
+As pre-registered, Stage 2 reports no half-life, and the half-life question returns to review.
+The kill rule does not depend on this outcome. KSG was not fully evaluated, for compute
+reasons. It would not have changed the outcome: it fails the same gates at M = 337.
+
+## Findings
+1. **The kill test is calibrated across every null, including the ones outside its
+   assumptions.**
+   - The four gates sit at .043 to .051.
+   - The hidden confounder (an omitted persistent parent, which violates the MDS assumption)
+     gives .048.
+   - Conditioning on a Stage 1 pass changes nothing measurable (finding 5 of the pre-study).
+   - Mild size elevation, not gated: s_real in d2 and d3 rejects at .055 and .058. There
+     s_decay is a strong, decaying *co-parent* of R. Its coefficient is held constant in the
+     partial-change residualisation, which violates the "only the signal's coefficient
+     changes" assumption. Both CIs include .05, so this is consistent with a small leak and
+     not established.
+2. **Power is about 15 points below the pre-study prediction** (.59 against .75 at the
+   default preset). The prediction used an oracle conditioning set, i.i.d. Gaussian x and
+   Gaussian noise. The benchmark has GARCH-t(6) residuals, which a wild bootstrap with HC0
+   segment variances uses less efficiently than the Gaussian likelihood, plus a persistent
+   x and PC1's estimated conditioning set. The ordering across onsets is as predicted: recent
+   decay is the hardest case (.22 to .44 at onset .8). The trend test is level with sup-split
+   for early onsets and worse for recent ones (.36 vs .44 at .8 / 125), which supports the
+   choice made on 2026-10-21.
+3. **Through Stage 1 and Stage 2 together, s_decay is killed at Stage 2 in about .52 of runs**
+   at the default preset: a Stage 1 pass rate of .834 (ADR 0010) times .622. Most of the
+   remaining s_decay runs reach Stage 3 with a declining edge. **This is a power limit at
+   ic .08 and T = 6000, not a defect,** and the memo must say so for any signal Stage 2
+   passes.
+4. **The profile-LR half-life interval is anti-conservative under no decay, as the Davies
+   caveat warned.** On s_real, every estimator excludes "no decay" 10–12% of the time against
+   a nominal 5%. τ is unidentified there, and the χ²₁ critical value is too small for a
+   supremum over τ. Coverage also falls just short in d2 (.889 and .900 against the ≥ .90
+   lower-bound rule) and passes in d3. Every estimator overestimates the decay rate (positive
+   λ bias: half-lives too short), which is consistent with τ being selected on the noise.
+5. **At the default SNR the half-life is uninformative, as finding 1 predicted.** On d1,
+   s_decay's median MLE sits at the grid floor (5 days): a step change fits as well as an
+   exponential. Coverage of .997 to 1.000 comes from intervals that span almost the whole
+   grid.
+6. **The simpler estimators were the more accurate ones.** RMSE(λ) on d2 is .047 for (c),
+   .066 for (b) and .078 for KSG. This was not a selection, because none was admissible.
+
+## Decision (accepted 2026-10-23)
+- **Kill rule: adopted as pre-registered.** Stage 2 kills `decay.edge_declining` iff the
+  sup-split decline test gives p < .05.
+- **Half-life: not reported by Stage 2** until a calibrated interval exists (see Backlog).
+- Stage 2's M = 500 validation acceptance threshold for s_decay is set from the measured
+  power: .622 given a Stage 1 pass at the default preset.
+- Stage 2 itself, and its validation, are in ADR 0012.
+
+## Backlog (future work, deferred 2026-10-23)
+- **A calibrated half-life interval.** This needs a new pre-registered study. The leading
+  candidate replaces the χ²₁ cutoff of the profile LR with one simulated under the null (a
+  parametric bootstrap of the sup-over-τ LR). That addresses finding 4 directly, the Davies
+  problem behind the 10–12% false-decay rate. The study must:
+  - use a fresh root seed, never 20261021;
+  - keep this study's gates (false-decay ≤ .075 upper bound; coverage lower bound ≥ .90 on
+    identifiable scenarios);
+  - take (c) partial_corr as the first candidate, since it was the most accurate here.
+- **KSG at full M.** It is only worth doing if a compute budget allows it and a calibrated
+  interval exists to compare. At M = 337 it failed the same gates as (b) and (c).
+- **Co-parent leak in the decline test** (finding 1): s_real rejects at .055 and .058 when a
+  strong decaying co-parent is held at a constant coefficient. A regime-aware residualisation
+  could be measured against this.
