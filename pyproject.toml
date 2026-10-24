@@ -70,6 +70,13 @@ module = [
 ]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+# cvxpy ships py.typed but star-exports its atoms, so mypy sees no `cp.norm` and an untyped
+# `Problem.solve`. Skipped (treated as Any); contained in stages/dro/robust.py and its tests.
+module = ["cvxpy", "cvxpy.*"]
+follow_imports = "skip"
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 # Repo root on sys.path so tests can share helpers as `tests.fixtures.<module>`.
