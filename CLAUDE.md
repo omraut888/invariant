@@ -75,6 +75,25 @@ say so instead of implementing it as written.
 - Don't silently change public interfaces.
 - End each task with a suggested conventional commit message.
 
+### Method choices
+- Any choice between methods is made by a pre-registered study. The ADR states the rule, the
+  gates, how M is derived and the tie-break, and it is committed and pushed before any full
+  run. Results are committed afterwards, in a separate section, and never edited into the
+  pre-registration.
+- Size M so that a correctly behaving method passes each gate with high probability, and
+  state the pass probabilities (at the expected rate and at the failure rate) in the ADR.
+- A departure from a rule's outcome is recorded as a deviation, with its reasons, and
+  confirmed on fresh seeds where possible.
+- Every arm of a study runs on one tiny seed in the fast suite, so a smoke run can't miss a
+  crashing code path.
+- Long runs use a git worktree, so edits in the main tree can't change the code the workers
+  import.
+- Post-launch bug fixes are documented in the ADR: the cause, the fix commit, and whether the
+  run resumed from checkpoints or restarted, with the reason.
+
 ## Current phase
-Phase 0, foundations: config, run hashing, synthetic benchmark, point-in-time data layer,
-kill ledger. No stage logic yet.
+- Phase 0 (foundations) is done.
+- Stage 1 (causal, `hc3|hybrid`; ADRs 0009–0010) is accepted on the benchmark.
+- Stage 2 (decay: a one-sided sup-split decline test, no half-life reported; ADRs 0011–0012)
+  is accepted on the benchmark.
+- Next: Stage 3, Wasserstein DRO portfolio construction.

@@ -25,9 +25,51 @@ uv run mypy                                       # strict, over src/, tests/ an
 uv run python scripts/phase0_smoke.py --n-obs 600 # end-to-end Phase 0 smoke run
 ```
 
-## Phase 0 status: foundations
+## Results so far
 
-No stage logic exists yet. These components are built, tested and documented:
+Both stages are accepted on the planted-signal benchmark (default preset, T = 6000, Wilson 95%
+CIs). Real data has not been run yet.
+
+**Stage 1, causal screen** ([ADR 0009](docs/adr/0009-stage1-ci-test-and-multiple-testing.md),
+[0010](docs/adr/0010-stage1-causal-stage.md)). PCMCI with an HC3 partial-correlation test and
+the `hybrid` decision test, Bonferroni over lags, then BH across signals. M = 500 runs:
+
+| signal | truth | Stage 1 pass rate |
+|---|---|---|
+| s_real | true edge | .844 [.810, .873] |
+| s_decay | true edge that decays | .834 [.799, .864] |
+| s_conf | confounded, no edge | .034 [.021, .054] |
+| s_noise | no edge | .018 [.009, .034] |
+
+Caveats:
+- At a realistic IC (.02), s_real passes only 14%. That is a power limit, so a Stage 1 kill
+  means "not detectable at this sample size", not "no effect".
+- The best lag is not identified.
+- The effect-size bootstrap interval undercovers (as low as .86 for a nominal .95, on s_real).
+
+**Stage 2, decay** ([ADR 0011](docs/adr/0011-stage2-decay-kill-test-and-estimators.md),
+[0012](docs/adr/0012-stage2-decay-stage.md)). A one-sided sup-split test of whether the edge
+declined, with a wild-bootstrap p-value; it kills at p < .05. M = 1000 runs, rates among
+signals that passed Stage 1:
+- s_real (no decay) is killed at **.054 [.041, .071]**. That is the false-decay rate.
+- s_decay is killed at **.663 [.630, .694]**. That is the power.
+
+Caveats:
+- No half-life is reported. It is not identifiable at the benchmark's SNR, and the candidate
+  estimators' intervals claimed decay 10–12% of the time when there was none.
+- Power is lowest for a decay that started recently (.22–.44 when it starts at 0.8 T).
+- s_decay still passes both stages in 28% of runs.
+- Stage 2 needs at least 5000 rows, the only length at which it was validated.
+
+**Structural limit: no stage fixes a hidden confounder.** When the common cause Z is
+unobserved, Stage 1 passes the confounded s_conf in 73% of runs. Stage 2 kills only 4.5% of
+those, because a spurious edge need not decay. So s_conf passes both stages in 70% of runs. No
+observational adjustment can remove this, and the memo must state it whenever a plausible
+confounder is missing from the data.
+
+## Phase 0: foundations (done)
+
+These components are built, tested and documented:
 
 | Component | Where | ADR |
 |---|---|---|
@@ -68,5 +110,4 @@ Its output says nothing about any method; it only proves the plumbing works.
 - Macro features are levels only for now; within-vintage changes come next.
 - Per-signal verdicts for the DRO and adversarial stages are an open design question (ADR 0007).
 
-**Next: Phase 1.** The causal discovery stage, validated on the benchmark through `score_run`
-with `stages=[causal]`, with surrogate significance tests and FDR control across candidates.
+**Next: Stage 3.** Wasserstein distributionally robust portfolio construction.
