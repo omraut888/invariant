@@ -1,8 +1,7 @@
 # ADR 0012: Stage 2, the decay stage
 
-Status: **pre-registered (2026-10-23)**. The stage is implemented. The validation below was
-committed and pushed before its run. Results will be appended. Nothing above "Validation
-results" changes after the run.
+Status: **accepted (2026-10-23)**. The M = 1000 validation below was pre-registered and pushed
+before its run (commit `90ce789`). Every acceptance criterion passed (final section).
 
 ## Context
 ADR 0011 adopted the kill rule: the one-sided sup-split decline test (Andrews 1993) with a
@@ -144,5 +143,61 @@ Limits of the rule, stated before the run:
 If any criterion fails, Stage 2 is not done and the decision returns to review. No threshold
 changes after the run.
 
-## Validation results
-*Pending.*
+## Validation results (M = 1000, commit `90ce789`, clean tree; report `runs/decay_stage_validation/41068846d9e5ae98/report.json`)
+Every replication completed and every ledger chain verified (B3). The median runtime per
+replication, both stages included, was 3.5–4.5 s.
+
+**Base preset.** Wilson 95% CIs. "Given a Stage 1 pass" is the Stage 2 rate.
+
+| signal | Stage 1 pass | Stage 2 kill, given a Stage 1 pass | trend diagnostic | passes both |
+|---|---|---|---|---|
+| s_real | .882 [.861, .901] | **.054 [.041, .071]** (n = 882) | .052 | .834 |
+| s_decay | .830 [.805, .852] | **.663 [.630, .694]** (n = 830) | .661 | .280 |
+| s_conf | .022 | .045 (n = 22) | .045 | .021 |
+| s_noise | .030 | .000 (n = 30) | .067 | .030 |
+
+Pooled over (causal, decay), with optimistic intervals: kill precision .941 and kill recall .890.
+
+**Acceptance (base): accepted.**
+- B1, s_real false-decay: upper bound **.0714** ≤ .075.
+- B2, s_decay kill rate: lower bound **.630** ≥ .52.
+- B3: all 1000 replications completed.
+
+**Other presets (reported).**
+
+| preset | s_real S2 kill given S1 pass | s_decay S2 kill given S1 pass | s_conf S2 kill given S1 pass |
+|---|---|---|---|
+| realistic | .077 [.041, .140] (n = 117) | .083 [.033, .196] (n = 48) | .083 (n = 12) |
+| hidden_confounder | .054 [.041, .071] (n = 904) | .659 [.627, .690] (n = 851) | .045 [.032, .062] (n = 735) |
+
+## Findings (validation)
+1. **The production path reproduces the study, within noise. Both rates sit above their
+   point predictions.**
+   - s_real's false-decay rate is .054 against the study's .044 [.034, .056]. The intervals
+     overlap, and both include .05. B1 passed with a margin of .004 on its upper bound, so it
+     came close. It is consistent with a size at or slightly above nominal. This is not a
+     size certificate: ADR 0011's gate (.043 [.035, .055] at M = 1610) is.
+   - s_decay's power is .663 against .622 [.596, .648]. The intervals overlap.
+   - The differences between the study and this run are the PIT panel path, fresh seeds, and
+     a different set of Stage 1 passes (s_real .882 here against .844 in ADR 0010).
+2. **Across both stages, s_decay is killed at Stage 2 in 55% of runs** (.830 × .663), and it
+   passes both stages in 28%. Most of those 28% are runs where the decline was not detected.
+   That is the power limit of ADR 0011, and the memo must report it for any signal that passes
+   Stage 2.
+3. **Stage 2 does not kill confounded signals, which is correct.** With Z hidden, s_conf
+   passes Stage 1 in 73.5% of runs (the identifiability limit, ADR 0010). Stage 2 kills only
+   4.5% of those, because s_conf's (spurious) edge does not decay. Stage 2 cannot remove that
+   failure of causal sufficiency, and the memo must still state it.
+4. **Realistic preset: few signals reach Stage 2, and the rates have wide intervals.**
+   s_real's false-decay rate is .077 [.041, .140] on n = 117, which is uninformative about
+   size.
+
+## Consequences
+- **Stage 2 is done on the planted benchmark**, with these documented limits:
+  - no half-life is reported;
+  - power is .6–.66 at default SNR and lowest for recent decay;
+  - `min_obs` is 5000 design rows;
+  - only the best link is tested;
+  - the decline test cannot detect unobserved confounding (it is not its job).
+- The ADR 0011 backlog holds the follow-ups: a calibrated half-life, decline-test size at
+  shorter T, and the co-parent leak.
