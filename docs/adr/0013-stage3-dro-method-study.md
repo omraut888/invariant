@@ -1,6 +1,6 @@
 # ADR 0013: Stage 3 Wasserstein DRO portfolio construction (pre-registered method study)
 
-Status: **pre-registered (2026-10-24); pilot pending**. The theory section records what was
+Status: **pre-registered (2026-10-24); pilot recorded, full run pending**. The theory section records what was
 transcribed and verified before any Stage 3 code. The study design, rules, c and the M formula
 below were fixed and pushed before the pilot ran. The pilot's outputs (M, the budget plan)
 are recorded afterwards, under "Pilot", and pushed before the full run. Results go in a separate
@@ -314,3 +314,42 @@ tiny seed (n_obs 2500, window 300):
 - The pilot and the full run execute from a git worktree at the pushed commit.
 - Post-launch bug fixes are recorded here with their cause, fix commit, and resume or restart
   decision.
+
+## Pilot (recorded 2026-10-24, after the pre-registration commit 5b5c19e and before the full run)
+The pilot ran from a worktree at 5b5c19e: 20 seeds from root 20261024, every scenario and task
+kind, on 8 workers. Only the quantities below were printed. Its rates and means were not looked
+at or used.
+
+- **σ̂ by candidate pair** (SD of the per-seed difference in annualised Sharpe, d1_base):
+
+  | pair | σ̂ |
+  |---|---|
+  | Markowitz – DRO-FC | **.2323** (the largest) |
+  | DRO-FC – DRO-CV | .2263 |
+  | DRO-FC – Ridge-CV | .2012 |
+  | Markowitz – DRO-CV | .1246 |
+  | Markowitz – Ridge-CV | .1051 |
+  | Ridge-CV – DRO-CV | .0676 |
+
+- **M_sel:**
+  - σ_U = 1.370 × .2323 = .318, so the formula gives ⌈(3.2415 × .318 / .10)²⌉ = 107.
+  - The floor applies: **M_sel = 200**.
+- **Mean task seconds** (wall time under 8-way load):
+
+  | scenario / task | seconds |
+  |---|---|
+  | d1 main | 148.5 |
+  | d1 loso | 211.4 |
+  | d1 pipeline | 126.2 |
+  | d1 c_sens | 203.6 |
+  | d2 main | 167.7 |
+  | d3 main | 119.8 |
+  | d4 main | 134.8 |
+  | d5 main | 119.3 |
+
+- **Budget plan:**
+  - the core (d3 and d5 at 1683, d1 at 200) projects to 15.0 h;
+  - with the reported tasks at 200 seeds, 20.9 h, within the 24 h budget;
+  - feasible, so **M_rep = 200** (no reduction).
+- **Recorded in `configs/dro_study.yaml`:** `n_select_seeds: 200`, `n_report_seeds: 200`.
+- **Full run:** 2 × 1683 + 200 + 2 × 200 + 3 × 200 = **4566 tasks**, root seed 20261025.

@@ -6,8 +6,8 @@ root_seed: 20261025         # fresh: not used by any Stage 1 or Stage 2 study or
 pilot_root_seed: 20261024   # pilot only (separate seeds; its rates are not used)
 pilot_seeds: 20
 n_gate_seeds: null          # required_seeds(0.05, 0.075, n_gating = 2 x 4 = 8, 0.90) = 1683
-n_select_seeds: null        # selection_seeds(pilot sigma_hat): recorded here after the pilot
-n_report_seeds: null        # = n_select_seeds unless the budget rule lowers it
+n_select_seeds: 200         # pilot (2026-10-24): sigma_hat .2323 -> formula 107 -> floor 200 (ADR 0013)
+n_report_seeds: 200         # budget rule: projected 20.9 h <= 24 h, so no reduction (ADR 0013)
 n_obs: null                 # multi_asset's own n_obs (6000)
 c_annual: 0.5               # investor-stated Sharpe hurdle; c = 0.5 / sqrt(252) daily (ADR 0013)
 c_sensitivity: [0.25, 1.0]  # reported only
