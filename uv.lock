@@ -954,7 +954,7 @@ name = "invariant"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "cvxpy" },
+    { name = "clarabel" },
     { name = "exchange-calendars" },
     { name = "httpx" },
     { name = "joblib" },
@@ -976,6 +976,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "cvxpy" },
     { name = "hypothesis" },
     { name = "ipykernel" },
     { name = "mypy" },
@@ -990,7 +991,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "cvxpy", specifier = ">=1.9.3" },
+    { name = "clarabel", specifier = ">=0.11.1" },
     { name = "exchange-calendars", specifier = ">=4.13.2" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "joblib", specifier = ">=1.6.0" },
@@ -1010,6 +1011,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "cvxpy", specifier = ">=1.9.3" },
     { name = "hypothesis", specifier = ">=6.168.4" },
     { name = "ipykernel", specifier = ">=7.4.0" },
     { name = "mypy", specifier = ">=2.4.0" },

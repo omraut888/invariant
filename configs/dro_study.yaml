@@ -1,0 +1,40 @@
+# Stage 3 pre-registered method study (docs/adr/0013). Read by scripts/dro_study.py.
+# Every rule below was fixed and pushed before the pilot ran. The pilot's rates and means are
+# never used; only its dispersion (for M) and its timings (for the budget).
+
+root_seed: 20261025         # fresh: not used by any Stage 1 or Stage 2 study or validation
+pilot_root_seed: 20261024   # pilot only (separate seeds; its rates are not used)
+pilot_seeds: 20
+n_gate_seeds: null          # required_seeds(0.05, 0.075, n_gating = 2 x 4 = 8, 0.90) = 1683
+n_select_seeds: null        # selection_seeds(pilot sigma_hat): recorded here after the pilot
+n_report_seeds: null        # = n_select_seeds unless the budget rule lowers it
+n_obs: null                 # multi_asset's own n_obs (6000)
+c_annual: 0.5               # investor-stated Sharpe hurdle; c = 0.5 / sqrt(252) daily (ADR 0013)
+c_sensitivity: [0.25, 1.0]  # reported only
+signals: [s_real, s_decay]  # the planted true causes
+walk:
+  window: 1260              # 5 years of daily rows
+  refit_every: 21
+  cv_every: 252
+  cv_valid: 252
+  fc_alpha: 0.05
+  fc_draws: 4000
+  ridge_grid: [0.0, 0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0]
+  eps_grid: [0.0, 0.0025, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]
+lw_alpha: 0.05              # the kill test: one-sided Ledoit-Wolf against 1/N
+lw_n_boot: 999
+cost_bp: 5.0                # reported sensitivity, per unit of one-way turnover
+size_cutoff: 0.075
+all_pass_prob: 0.90
+confidence: 0.95
+size_gates: [d3_null, d5_null_heavy]
+selection_scenario: d1_base
+reported_scenarios: [d2_realistic, d4_heavy]
+simplicity: [markowitz, dro_fc, ridge_cv, dro_cv]
+delta_sharpe: 0.10          # annualised Sharpe difference to detect
+power: 0.90
+sigma_confidence: 0.95      # upper bound on the pilot SD (chi-square, 19 df)
+min_select_seeds: 200
+n_diff_boot: 2000
+budget_hours: 24.0          # wall clock, all 8 cores of the run machine
+min_report_seeds: 100

@@ -1,8 +1,10 @@
 # ADR 0013: Stage 3 Wasserstein DRO portfolio construction (pre-registered method study)
 
-Status: **draft**. This is not yet a pre-registration. The theory section below records what
-was transcribed and verified before any Stage 3 code. The study design, rules, the value of c
-and M are added before the pilot, and the file is committed and pushed before any full run.
+Status: **pre-registered (2026-10-24); pilot pending**. The theory section records what was
+transcribed and verified before any Stage 3 code. The study design, rules, c and the M formula
+below were fixed and pushed before the pilot ran. The pilot's outputs (M, the budget plan)
+are recorded afterwards, under "Pilot", and pushed before the full run. Results go in a separate
+section and are never edited into the pre-registration.
 
 ## Decisions already taken (user, 2026-10-23)
 - **Kill rule: A, with B as a diagnostic.**
@@ -122,9 +124,193 @@ the idea of enlarging the radius for regression error. **What does not carry ove
 ### Esfahani & Kuhn (2018)
 **Not cited as the basis for anything.** Its theorems have not been transcribed.
 
-## Pending (before pre-registration)
-- The value of c, and its justification.
-- Transcriptions of Ledoit & Wolf (2008) and Bailey & López de Prado (2014), before either is
-  used.
-- The scenarios, gates, selection rule and tie-break.
-- The pilot-based formula for M and the compute budget.
+## Pre-registration (fixed 2026-10-24, before the pilot)
+
+### Approved departures (user, 2026-10-24)
+Each was reported with the step-3 code and approved before the pilot. Each departs from a
+transcribed method, and each reason is recorded here.
+
+| # | departure | reason |
+|---|---|---|
+| 1 | Ledoit–Wolf test is **one-sided** (`alternative="greater"`), p = (#{(Δ* − Δ)/s* ≥ Δ/s} + 1)/(M + 1) | The kill rule asks a one-sided question: does the arm beat 1/N? |
+| 2 | **Fixed block size** ⌈T^{1/3}⌉ (17 at T = 4739) in place of LW's Algorithm 3.1, and the **block-sum** Ψ estimator for the original data in place of a prewhitened QS HAC | Accepted because the test's size is **gated empirically** on the null scenarios d3 and d5 below, rather than assumed. |
+| 3 | **Walk-forward CV** folds (fit on the first 1008 rows of the window, validate on the last 252), ties to the smallest grid value, in place of KBL's random K-fold (their §6) | Random K-folds leak under serial dependence: validation rows would sit between training rows. |
+| 4 | DRO-FC's radius uses the **Newey–West rule-of-thumb bandwidth** ⌊4(n/100)^{2/9}⌋ (7 lags at n = 1260) | Kept. Stage 1 already showed this bandwidth struggles with the φ = .99 confounder, so the radius's coverage against the true conditional mean is **reported** per scenario (O1 and O2 means), not assumed. |
+| 5 | **c = 0.5/√252** (daily) | Below. |
+
+### The value of c (fixed now, before the pilot; never tuned on it)
+- c is the **investor-stated annualised Sharpe hurdle of 0.5**. Under gross ≤ 1, the robust
+  objective is positively homogeneous, so a portfolio is held only when some fully invested
+  direction's forecast Sharpe exceeds c, plus the DRO penalty. c is therefore a statement of
+  what is worth trading. It is not a risk-aversion parameter to be fitted.
+- 0.5 is anchored near 1/N's population Sharpe on multi_asset, about 0.45 from the configured
+  drift and volatilities. A strategy that cannot clear the hurdle 1/N roughly clears without
+  forecasting has no reason to take risk.
+- The value was chosen from those two facts, before any Stage 3 run. **0.25 and 1.0 are reported
+  only** (task `c_sens`) and never feed a decision.
+
+### Implementation change made before the pilot (no study run had used the old code)
+- `MeanStdProblem` now passes the same SOCP to **Clarabel directly**, instead of through cvxpy.
+  Profiling showed cvxpy's canonicalisation took about 3.7 ms per solve, against 0.6 ms for
+  Clarabel's own solve. Per-seed time on one core fell from about 240 s to about 41 s.
+- The formulation is unchanged. A Hypothesis test checks the solution against the cvxpy
+  formulation (60 random instances, values to 1e-6 relative).
+- Cash detection is now scale-free: a value ≤ 1e-9 or a gross exposure ≤ 1e-6 means cash.
+- Dependencies: `clarabel` is a runtime dependency, added directly because it was previously
+  transitive. cvxpy moved to the dev group, where it is used only as the test reference and
+  for the Gelbrich SDP check.
+
+### Scenarios
+Every scenario is a deep merge onto the `multi_asset` preset: 5 assets, n_obs = 6000, a
+latent GARCH-t market factor, and loading dispersion .25.
+
+| name | role | change |
+|---|---|---|
+| d1_base | **selection** | none |
+| d2_realistic | reported | daily ICs .02 (factor, real, decay) |
+| d3_null | **size gate** | μ = 0 and every IC 0 |
+| d4_heavy | reported | Student-t(5) innovations in both GARCH processes (fourth-moment condition .989 < 1) |
+| d5_null_heavy | **size gate** | d3 with t(5) innovations |
+
+- **The nulls set μ = 0 as well as the ICs.** With drift, portfolios that tilt towards
+  low-beta assets have a higher population Sharpe than 1/N, so H0 would not hold. With no
+  drift and no signal, E[r_{t+1} | F_t] = 0 and every arm's w_t is F_t-measurable. Every arm
+  then has population Sharpe 0, which is H0's boundary, where the test's size is its level.
+- Heavy tails make t(4.5) invalid at the configured GARCH (fourth-moment condition 1.011), so
+  t(5) is the heaviest valid choice.
+
+### Arms, signals and walk-forward (all fixed)
+- **Arms**:
+  - 1/N (the kill-test baseline);
+  - the candidates, in simplicity order: **Markowitz < DRO-FC < Ridge-CV < DRO-CV**.
+- **Why that order:** Markowitz has no tuning. DRO-FC has a closed-form radius and no tuning
+  loop. Ridge-CV and DRO-CV each choose from an 8-value grid by walk-forward CV. Ridge comes
+  first because its effect, shrinking the covariance, is the more conventional.
+- **Signals:** the planted true causes, {s_real, s_decay}. The selection does not depend on
+  Stage 1–2 randomness. The pipeline's own passed set is reported on d1 (task `pipeline`:
+  Stages 1–2 through the production path, on the same market).
+- **Walk-forward settings:**
+  - window 1260;
+  - refit every 21 rows;
+  - CV every 252 rows, on the last 252 rows of the window;
+  - DRO-FC α = .05, with 4000 seeded draws;
+  - ridge grid {0, .01, .03, .1, .3, 1, 3, 10} × tr(Σ̂)/N;
+  - ε grid {0, .0025, .005, .01, .02, .05, .1, .2} × √(tr(Σ̂)/N).
+- **Test dates:** 1260 … 5998, so T = 4739 out-of-sample days.
+- **Oracles:**
+  - O1 is the exact projection on the arm's signals;
+  - O2 uses every observed state node;
+  - both are solved with the same c and constraint.
+- **An all-cash path has Sharpe ratio 0**, since it earns the zero risk-free rate.
+
+### Kill rule (Stage 3, as built after this study)
+**A.** The strategy is killed if the selected arm does not beat 1/N out of sample. The test is
+a one-sided Ledoit–Wolf at α = .05, with B = 999 and block ⌈T^{1/3}⌉. An arm that stays in cash
+throughout has p = 1. Every member signal is killed, or passes, with it.
+**B (diagnostic, never kills).** Each signal's marginal value is Sharpe(all signals) −
+Sharpe(without it), and it goes in each member's ledger metrics. The study reports B for every
+candidate on d1 (task `loso`), with seed-bootstrap CIs.
+
+### Gates (decide admissibility)
+For each candidate and each null scenario (d3_null, d5_null_heavy): the kill-test rejection
+rate has a **Wilson 95% upper bound ≤ .075**. That makes 8 gates. A candidate that fails
+either of its gates is inadmissible.
+
+### Selection rule and tie-break
+- Among admissible candidates, the one with the **highest mean annualised out-of-sample
+  Sharpe on d1_base** is best (gross of costs). O1 is shared by all arms within a seed, so this
+  is the same as the lowest mean O1 regret.
+- A candidate is **tied** with the best when the paired seed-bootstrap 95% CI (2000
+  resamples) of the mean Sharpe difference contains 0.
+- The **first tied candidate in simplicity order is selected.**
+- If Markowitz is selected, Stage 3 uses Markowitz, and the memo states that Wasserstein
+  robustness did not earn its place on the benchmark.
+- If no candidate is admissible, the stage is not built and the design goes back to review.
+
+### M
+- **Gated scenarios (d3, d5):**
+  - M_gate = `required_seeds(0.05, 0.075, 8, 0.90)` = **1683**.
+  - Pass probability per gate: **.990** at true size .05, **.025** at .075, and **0.000** at .10.
+    It is 1.000 at .03.
+  - All 8 pass with probability ≥ .918 at .05 (union bound; .921 if the gates were
+    independent).
+- **Selection scenario (d1):**
+  - M_sel = max(200, ⌈((z.975 + z.90) σ_U / 0.10)²⌉).
+  - σ̂ is the largest SD, over the 20 pilot seeds, of any candidate pair's per-seed Sharpe
+    difference.
+  - σ_U = σ̂ √(19/χ²_{.05,19}) = 1.370 σ̂ is its one-sided 95% upper bound.
+  - With that σ_U, a true mean Sharpe difference of **0.10 (annualised)** gives a CI that
+    excludes 0 with probability ≥ .90. A truly equal pair is tied with probability about .95.
+  - Examples: σ̂ = .2 → 79 (raised to the 200 floor); .3 → 178 (floor, 200); .4 → 316.
+  - The floor keeps the reported rates' Wilson half-widths at ≤ .07.
+- **Reported tasks** run on the first M_rep = M_sel seeds, unless the budget rule lowers M_rep:
+  - main on d2 and d4;
+  - loso, pipeline and c_sens on d1.
+
+### Pilot
+- 20 seeds from **root seed 20261024**, separate from the study's **20261025**. Neither root
+  seed is used by any Stage 1 or 2 study or validation.
+- The pilot runs every scenario and every task kind.
+- It is used **only** for σ̂ (above) and the per-task timings (below). Its rates and means are
+  neither printed nor used (`scripts/dro_study.py --pilot` prints only the SDs, M_sel and the
+  budget plan).
+
+### Compute budget (mechanical; not revisited after results)
+- **Budget:** 24 h wall clock on all 8 cores of the run machine.
+- **Projection:** Σ over tasks of (the pilot's mean seconds for that scenario and kind) / 8.
+- The core is the gated scenarios at M_gate plus d1 at M_sel.
+  - If core + the reported tasks at M_sel fit, everything runs at those sizes.
+  - Otherwise M_rep is the largest value that fits.
+  - If M_rep would fall below 100, or the core alone exceeds the budget, **the study is not
+    run** and the design goes back to the user. The gates and M_gate are never weakened to fit.
+
+### Reported for every arm (never gated)
+For every arm, by scenario:
+- mean Sharpe, gross and **net of 5 bp** per unit of one-way turnover;
+- O1 and O2 regret;
+- the kill-test rejection rate against 1/N (power on d1, d2 and d4);
+- **daily exposure** (share of days fully invested, in cash, or partial) and mean daily
+  **turnover**;
+- the DSR (Bailey & López de Prado 2014). It uses N = 4 candidate trials and the trials'
+  Sharpe variance within the seed (ddof 1), and is reported as a mean and as the share of
+  seeds with DSR > .95;
+- for DRO-FC, the radius's **empirical coverage**: the share of days with ‖μ̂_t − μ_t‖₂ ≤ ε_t,
+  against O1's mean and against O2's mean.
+
+Also reported:
+- the CV arms' chosen grid values;
+- B per signal;
+- the distribution of the pipeline's passed signal sets, and the arms on them;
+- the c = 0.25 and c = 1.0 sensitivities.
+
+### Fast-suite coverage
+`tests/integration/test_dro_study_tasks.py` runs every scenario and every task kind on one
+tiny seed (n_obs 2500, window 300):
+- the pipeline path, with Stage 1 passing s_real so the arms run on it;
+- the summary rules;
+- the pilot report;
+- the budget plan.
+
+`tests/unit/test_dro_study.py` tests:
+- the M formula;
+- the budget plan;
+- the gates;
+- the tie-break;
+- the scenario configs.
+
+### Limitations stated in advance
+- Selection is on one scenario (d1). d2 and d4 are reported, so a ranking that is fragile to
+  SNR or tails will be visible, but it will not change the choice.
+- The selection uses the true signal set. The pipeline's own set, which can include a
+  false positive or miss s_decay, is reported, not selected on.
+- The size gates hold at H0's boundary with zero-mean returns. Under drift the null is
+  composite. Arms that sit in cash have p = 1, which makes the test conservative for them, and
+  exposure is reported so that this is visible.
+- The DSR's N = 4 ignores the CV grids. Their choices are made walk-forward, inside the arm,
+  and are not seen out of sample.
+- Gross selection: turnover costs are reported (5 bp), not optimised.
+
+### Run discipline
+- The pilot and the full run execute from a git worktree at the pushed commit.
+- Post-launch bug fixes are recorded here with their cause, fix commit, and resume or restart
+  decision.

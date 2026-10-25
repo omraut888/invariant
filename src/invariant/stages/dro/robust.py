@@ -24,7 +24,10 @@ unit of gross exposure.
 
 Numerics: the problem is solved in rescaled units (returns divided by the mean daily
 volatility). Raw daily units, with covariances around 1e-4, made SCS inaccurate (docs/adr/0013).
-The solution w is invariant to this rescaling.
+The solution w is invariant to this rescaling. The second-order cone program is passed to
+Clarabel (Goulart & Chen 2024) directly: through cvxpy, canonicalisation cost about 3.7 ms per
+solve against 0.6 ms for the solve itself, and the study makes millions of solves. The tests
+check it against the same problem written in cvxpy.
 
 Assumptions: the centre is an empirical distribution, so sd is its 1/n standard deviation. The
 closed form needs c ≥ 0. The ball's guarantee concerns the nominal distribution only; nothing
@@ -36,9 +39,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Final
 
-import cvxpy as cp
+import clarabel
 import numpy as np
 import numpy.typing as npt
+import scipy.sparse as sp
 
 __all__ = [
     "MeanStdProblem",
@@ -50,6 +54,7 @@ __all__ = [
 
 _FloatArray = npt.NDArray[np.float64]
 _CASH_TOL: Final = 1e-9
+_CASH_GROSS: Final = 1e-6
 
 
 def mean_std_risk(samples: _FloatArray, w: _FloatArray, c: float) -> float:
@@ -102,51 +107,78 @@ class Solution:
 
 
 class MeanStdProblem:
-    """``max μᵀw - c‖Lw‖₂ - κ‖w‖₂ s.t. ‖w‖₁ ≤ 1``, compiled once and re-solved with new data.
+    """``max μᵀw - c‖Lw‖₂ - κ‖w‖₂ s.t. ‖w‖₁ ≤ 1``, solved as a second-order cone program.
 
-    ``c`` is fixed per instance. μ, L and κ are cvxpy Parameters, so a re-solve does not
-    recompile (DPP). The default solver is Clarabel.
+    ``c`` is fixed per instance. The variables are ``z = (w, u, s, v)`` and the program is
+
+        min  -μᵀw + c·s + κ·v
+        s.t. u - w ≥ 0,  u + w ≥ 0,  1 - Σu ≥ 0,  (s, Lw) ∈ SOC,  (v, w) ∈ SOC,
+
+    in Clarabel's form ``Az + slack = b`` with the slack in the cones. Only L changes between
+    solves.
     """
 
-    def __init__(self, n_assets: int, c: float, *, solver: str = cp.CLARABEL) -> None:
+    def __init__(self, n_assets: int, c: float) -> None:
         if c < 0:
             raise ValueError("c must be non-negative")
         self.n_assets = n_assets
         self.c = c
-        self._solver = solver
-        self._mu = cp.Parameter(n_assets)
-        self._chol = cp.Parameter((n_assets, n_assets))
-        self._kappa = cp.Parameter(nonneg=True)
-        self._w = cp.Variable(n_assets)
-        objective = (
-            self._mu @ self._w
-            - c * cp.norm(self._chol @ self._w, 2)
-            - self._kappa * cp.norm(self._w, 2)
+        n = n_assets
+        eye, zero = np.eye(n), np.zeros((n, n))
+        e_s = np.r_[np.zeros(2 * n), 1.0, 0.0]
+        e_v = np.r_[np.zeros(2 * n), 0.0, 1.0]
+        self._a = np.vstack(
+            [
+                np.hstack([eye, -eye, np.zeros((n, 2))]),
+                np.hstack([-eye, -eye, np.zeros((n, 2))]),
+                np.r_[np.zeros(n), np.ones(n), 0.0, 0.0][None],
+                -e_s[None],
+                np.zeros((n, 2 * n + 2)),  # -L w, filled per solve
+                -e_v[None],
+                np.hstack([-eye, zero, np.zeros((n, 2))]),
+            ]
         )
-        self._problem = cp.Problem(cp.Maximize(objective), [cp.norm(self._w, 1) <= 1])
+        self._l_rows = slice(2 * n + 2, 3 * n + 2)
+        self._b = np.r_[np.zeros(2 * n), 1.0, np.zeros(2 * (n + 1))]
+        self._p = sp.csc_matrix((2 * n + 2, 2 * n + 2))
+        self._cones = [
+            clarabel.NonnegativeConeT(2 * n + 1),
+            clarabel.SecondOrderConeT(n + 1),
+            clarabel.SecondOrderConeT(n + 1),
+        ]
+        self._settings = clarabel.DefaultSettings()
+        self._settings.verbose = False
 
     def solve(self, mu: _FloatArray, cov: _FloatArray, kappa: float) -> Solution:
         """Solve for forecast ``mu`` and covariance ``cov`` with norm penalty ``kappa``.
 
         ``kappa = eps·sqrt(1+c²)`` for DRO, 0 for Markowitz and ridge (pass ``cov + λI``).
-        A value within tolerance of 0 means cash: the returned w is then exactly 0.
-        Raises ``RuntimeError`` if the solver does not reach an optimal status.
+        The optimum is bang-bang (gross exposure 0 or 1), so a value within tolerance of 0, or an
+        interior-point solution with gross exposure ``<= 1e-6``, means cash: the returned w is
+        then exactly 0.
+        Raises ``RuntimeError`` if the solver does not reach a solved status.
         """
-        if mu.shape != (self.n_assets,) or cov.shape != (self.n_assets, self.n_assets):
+        n = self.n_assets
+        if mu.shape != (n,) or cov.shape != (n, n):
             raise ValueError("mu and cov must match n_assets")
+        if kappa < 0:
+            raise ValueError("kappa must be non-negative")
         scale = 1.0 / float(np.sqrt(np.mean(np.diag(cov))))
         sym = 0.5 * (cov + cov.T) * scale**2
-        chol = np.linalg.cholesky(sym + 1e-14 * np.eye(self.n_assets)).T  # upper: LᵀL = Σ
-        self._mu.value = mu * scale
-        self._chol.value = chol
-        self._kappa.value = float(kappa) * scale
-        self._problem.solve(solver=self._solver)
-        status = str(self._problem.status)
-        if status not in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE) or self._w.value is None:
+        chol = np.linalg.cholesky(sym + 1e-14 * np.eye(n)).T  # upper: LᵀL = Σ
+        a = self._a.copy()
+        a[self._l_rows, :n] = -chol
+        q = np.r_[-mu * scale, np.zeros(n), self.c, float(kappa) * scale]
+        solver = clarabel.DefaultSolver(
+            self._p, q, sp.csc_matrix(a), self._b, self._cones, self._settings
+        )
+        sol = solver.solve()
+        status = str(sol.status)
+        if sol.status not in (clarabel.SolverStatus.Solved, clarabel.SolverStatus.AlmostSolved):
             raise RuntimeError(f"portfolio solve failed: {status}")
-        w = np.asarray(self._w.value, dtype=np.float64)
-        value_scaled = float(self._problem.value)
-        if value_scaled <= _CASH_TOL:
-            return Solution(w=np.zeros(self.n_assets), value=0.0, status=status)
+        value_scaled = -float(sol.obj_val)
+        w = np.asarray(sol.x[:n], dtype=np.float64)
+        if value_scaled <= _CASH_TOL or float(np.abs(w).sum()) <= _CASH_GROSS:
+            return Solution(w=np.zeros(n), value=0.0, status=status)
         w = w / max(1.0, float(np.abs(w).sum()))  # strip solver overshoot of the L1 bound
         return Solution(w=w, value=value_scaled / scale, status=status)

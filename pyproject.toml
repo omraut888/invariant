@@ -8,7 +8,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "cvxpy>=1.9.3",
+    "clarabel>=0.11.1",
     "exchange-calendars>=4.13.2",
     "httpx>=0.28.1",
     "joblib>=1.6.0",
@@ -32,6 +32,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "cvxpy>=1.9.3",
     "hypothesis>=6.168.4",
     "ipykernel>=7.4.0",
     "mypy>=2.4.0",
@@ -72,8 +73,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 # cvxpy ships py.typed but star-exports its atoms, so mypy sees no `cp.norm` and an untyped
-# `Problem.solve`. Skipped (treated as Any); contained in stages/dro/robust.py and its tests.
-module = ["cvxpy", "cvxpy.*"]
+# `Problem.solve`. Skipped (treated as Any); used only in tests/unit/test_dro_robust.py as the
+# reference formulation. clarabel is a compiled extension without stubs; contained in
+# stages/dro/robust.py.
+module = ["cvxpy", "cvxpy.*", "clarabel", "clarabel.*"]
 follow_imports = "skip"
 ignore_missing_imports = true
 

@@ -130,3 +130,37 @@ def test_validation() -> None:
         robust_mean_std_risk(np.zeros(2), np.eye(2), np.ones(2), 1.0, -1.0)
     with pytest.raises(ValueError):
         MeanStdProblem(2, c=0.1).solve(np.zeros(3), np.eye(2), 0.0)
+
+
+def _cvxpy_reference(mu: np.ndarray, cov: np.ndarray, c: float, kappa: float) -> float:
+    """The same program written in cvxpy, in percent units (the formulation of ADR 0013)."""
+    n = len(mu)
+    w = cp.Variable(n)
+    chol = np.linalg.cholesky(cov * 1e4).T
+    prob = cp.Problem(
+        cp.Maximize(mu * 100 @ w - c * cp.norm(chol @ w, 2) - kappa * 100 * cp.norm(w, 2)),
+        [cp.norm(w, 1) <= 1],
+    )
+    prob.solve(solver=cp.CLARABEL)
+    assert prob.status == cp.OPTIMAL
+    return max(0.0, float(prob.value) / 100)
+
+
+@settings(max_examples=60, deadline=None)
+@given(st.integers(0, 2**32 - 1), st.integers(2, 6), st.floats(0.0, 0.2), st.floats(0.0, 2e-3))
+def test_direct_clarabel_matches_the_cvxpy_formulation(
+    seed: int, n: int, c: float, kappa: float
+) -> None:
+    rng = np.random.default_rng(seed)
+    a = rng.standard_normal((n, n))
+    cov = (a @ a.T + 0.1 * np.eye(n)) * 1e-4
+    mu = rng.standard_normal(n) * 1e-3
+    sol = MeanStdProblem(n, c).solve(mu, cov, kappa)
+    ref = _cvxpy_reference(mu, cov, c, kappa)
+    assert sol.value == pytest.approx(ref, rel=1e-6, abs=1e-10)
+    if sol.invested:
+        realised = float(
+            mu @ sol.w - c * np.sqrt(sol.w @ cov @ sol.w) - kappa * np.linalg.norm(sol.w)
+        )
+        assert realised == pytest.approx(ref, rel=1e-6, abs=1e-10)
+        assert np.abs(sol.w).sum() <= 1.0 + 1e-12
