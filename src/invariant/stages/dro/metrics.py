@@ -28,6 +28,14 @@ Bailey & Lopez de Prado (2014), J. Portfolio Management 40(5), eqs. (1)-(2) (tra
   trials' Sharpe ratios.
 - ``DSR = Phi((SR - SR0) sqrt(T - 1) / sqrt(1 - skew SR + (kurt - 1)/4 SR^2))``, with
   non-annualised SR, T observations, and kurtosis *not* in excess.
+
+Paired Sharpe-difference interval (diagnostic B, ADR 0014)
+-------------------------------------------------------------
+``sharpe_difference_interval`` resamples the *pair* of daily series with the same circular block
+bootstrap (block ``ceil(T^{1/3})``) and reports the percentile interval of the annualised
+difference ``SR_i - SR_n``. A zero-variance (all-cash) series has Sharpe 0. Percentile intervals
+from a block bootstrap of a smooth function of means are first-order valid (Kunsch 1989, Annals
+of Statistics 17(3)); the interval is reported only and never decides.
 """
 
 from __future__ import annotations
@@ -45,6 +53,7 @@ __all__ = [
     "deflated_sharpe_ratio",
     "exposure_shares",
     "sharpe",
+    "sharpe_difference_interval",
     "sharpe_difference_test",
     "turnover",
 ]
@@ -125,6 +134,37 @@ def sharpe_difference_test(
         else:
             exceed += abs(d_star - delta) / se_star >= abs(delta) / se
     return delta, (exceed + 1) / (n_boot + 1)
+
+
+def _sharpe0(r: _FloatArray) -> float:
+    s = sharpe(r)
+    return 0.0 if math.isnan(s) else s
+
+
+def sharpe_difference_interval(
+    ri: _FloatArray,
+    rn: _FloatArray,
+    rng: np.random.Generator,
+    *,
+    n_boot: int,
+    confidence: float,
+    block: int | None = None,
+) -> tuple[float, float, float]:
+    """``(SR_i - SR_n, low, high)``, annualised, with a paired circular-block percentile interval
+    (module docstring)."""
+    if len(ri) != len(rn):
+        raise ValueError("series must be paired")
+    t = len(ri)
+    b = block if block is not None else math.ceil(t ** (1.0 / 3.0))
+    n_blocks = math.ceil(t / b)
+    diffs = np.empty(n_boot)
+    for k in range(n_boot):
+        starts = rng.integers(0, t, size=n_blocks)
+        idx = (starts[:, None] + np.arange(b)[None, :]).ravel()[:t] % t
+        diffs[k] = _sharpe0(ri[idx]) - _sharpe0(rn[idx])
+    tail = (1.0 - confidence) / 2.0
+    low, high = np.quantile(diffs, [tail, 1.0 - tail])
+    return _sharpe0(ri) - _sharpe0(rn), float(low), float(high)
 
 
 def deflated_sharpe_from_moments(

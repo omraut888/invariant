@@ -1,0 +1,21 @@
+# Stage 3 Monte Carlo validation on the planted-signal benchmark (docs/adr/0014, "Validation").
+# Read by scripts/portfolio_stage_validation.py --config configs/portfolio_stage_validation.yaml.
+# The acceptance criteria, M and the thresholds were fixed and pushed before any run.
+
+root_seed: 20261027     # fresh: not used by any earlier study, pilot or validation
+n_seeds: 1273           # required_seeds(.05, .075, 2 gates, .90): ADR 0014
+confidence: 0.95
+n_boot: null            # Stage 1's causal.bootstrap.n_boot (999); descriptive only
+pipeline_n_obs: null    # multi_asset's own n_obs (6000)
+overrides: {}
+size:
+  # ADR 0013's null scenarios (drift and every true edge 0), at the stage's minimum length.
+  scenarios: [d3_null, d5_null_heavy]
+  n_obs: 5001           # 5000 complete panel rows = portfolio.min_obs
+  members: [s_real, s_decay]
+  upper_max: 0.075
+power:
+  # Stage 3 pass rate of s_real given it reached Stage 3. ADR 0013 measured .804 [.743, .854]
+  # for Ridge-CV on the pipeline's own signal sets (n = 194).
+  signal: s_real
+  lower_min: 0.70

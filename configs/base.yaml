@@ -72,3 +72,26 @@ decay:
   trim: 0.15              # break fractions in [0.15, 0.85]
   break_step: 25          # rows between candidate breaks
   min_obs: 5000           # design rows; size and power were measured only at T = 6000
+
+# Stage 3: portfolio construction (docs/adr/0013 for the method study, docs/adr/0014 for the
+# stage). Wasserstein DRO was implemented, verified and evaluated; ridge regularization of the
+# covariance (Ridge-CV) was selected and decides. The strategy is killed iff the one-sided
+# Ledoit-Wolf test of Ridge-CV's out-of-sample Sharpe against 1/N gives p >= lw_alpha. The
+# forecast timing comes from pit.targets.execution_lag. Every value except min_obs and
+# b_n_boot is the one ADR 0013 evaluated.
+portfolio:
+  c_annual: 0.5           # annualised Sharpe hurdle, fixed before ADR 0013's pilot
+  window: 1260
+  refit_every: 21
+  cv_every: 252
+  cv_valid: 252
+  ridge_grid: [0.0, 0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0]          # x tr(S)/N
+  eps_grid: [0.0, 0.0025, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2]       # x sqrt(tr(S)/N); DRO-CV, reported
+  fc_alpha: 0.05          # DRO-FC radius, reported
+  fc_draws: 4000
+  lw_alpha: 0.05
+  lw_n_boot: 999
+  b_n_boot: 999           # diagnostic B's paired block bootstrap
+  confidence: 0.95
+  cost_bp: 5.0            # reported net-of-cost Sharpe only
+  min_obs: 5000           # complete panel rows; the kill test's size is validated at 5000 (ADR 0014)

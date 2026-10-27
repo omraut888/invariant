@@ -181,7 +181,7 @@ def test_invalid_signal_ids(raw: str) -> None:
 
 def test_enum_values_pinned() -> None:
     # Values are persisted in the kill ledger; renaming one is a breaking change.
-    assert [s.value for s in StageName] == ["causal", "decay", "dro", "adversarial", "memo"]
+    assert [s.value for s in StageName] == ["causal", "decay", "portfolio", "adversarial", "memo"]
     assert [v.value for v in Verdict] == ["pass", "kill"]
     assert {r.value for r in KillReason} == {
         "general.insufficient_data",
@@ -191,6 +191,7 @@ def test_enum_values_pinned() -> None:
         "causal.no_significant_link",
         "causal.not_significant_after_correction",
         "decay.edge_declining",
+        "portfolio.no_edge_over_equal_weight",
     }
     assert [f.value for f in Frequency] == ["daily", "weekly", "monthly"]
 
@@ -211,4 +212,4 @@ def test_kill_reason_naming_convention(reason: KillReason) -> None:
 
 def test_enums_are_str() -> None:
     assert KillReason("general.insufficient_data") == "general.insufficient_data"
-    assert StageName("dro") is StageName.DRO
+    assert StageName("portfolio") is StageName.PORTFOLIO

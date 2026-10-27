@@ -1,11 +1,13 @@
 """Stage 3 look-ahead guard: every arm's weight at date t uses only data dated <= t.
 
-Perturbing features and returns after a cut date t* leaves every weight at dates <= t*
-unchanged, and every realised return at dates < t*. That covers refits, walk-forward CV and the
-forecast-confidence radius.
+Perturbing features and returns after a cut date t* leaves every weight decided at dates <= t*
+unchanged, and every realised return ``r[d + 1 + e]`` that lies at or before t*. That covers
+refits, walk-forward CV and the forecast-confidence radius, at execution lags e = 0, 1 and 2.
 """
 
 from __future__ import annotations
+
+from dataclasses import replace
 
 import numpy as np
 import pytest
@@ -30,23 +32,23 @@ CFG = WalkForwardConfig(
 
 
 @settings(max_examples=6, deadline=None)
-@given(st.integers(0, 2**32 - 1), st.integers(130, 230))
-def test_no_arm_uses_data_after_t(seed: int, cut: int) -> None:
+@given(st.integers(0, 2**32 - 1), st.integers(130, 230), st.integers(0, 2))
+def test_no_arm_uses_data_after_t(seed: int, cut: int, lag: int) -> None:
+    cfg = replace(CFG, lag=lag)
     rng = np.random.default_rng(seed)
     t, n = 260, 3
     x = rng.standard_normal((t, 2))
     r = 0.01 * rng.standard_normal((t, n)) + 0.002 * np.r_[np.zeros((1, 2)), x[:-1]] @ np.ones(
         (2, n)
     )
-    base = run_walk_forward(x, r, list(Arm), CFG, RngFactory(1))
+    base = run_walk_forward(x, r, list(Arm), cfg, RngFactory(1))
     x2, r2 = x.copy(), r.copy()
     x2[cut + 1 :] = rng.standard_normal(x2[cut + 1 :].shape) * 3
     r2[cut + 1 :] = rng.standard_normal(r2[cut + 1 :].shape) * 0.05
-    other = run_walk_forward(x2, r2, list(Arm), CFG, RngFactory(1))
+    other = run_walk_forward(x2, r2, list(Arm), cfg, RngFactory(1))
     for arm in Arm:
         dates = base[arm].dates
         known = dates <= cut
         np.testing.assert_array_equal(base[arm].weights[known], other[arm].weights[known])
-        np.testing.assert_array_equal(
-            base[arm].returns[dates < cut], other[arm].returns[dates < cut]
-        )
+        realised = dates + 1 + lag <= cut
+        np.testing.assert_array_equal(base[arm].returns[realised], other[arm].returns[realised])

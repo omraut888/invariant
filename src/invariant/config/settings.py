@@ -47,6 +47,7 @@ __all__ = [
     "HttpConfig",
     "PipelineConfig",
     "PitConfig",
+    "PortfolioConfig",
     "PublicationLags",
     "Settings",
     "TargetConfig",
@@ -294,6 +295,46 @@ class DecayConfig(_Frozen):
     min_obs: StrictInt = Field(ge=100)
 
 
+class PortfolioConfig(_Frozen):
+    """Stage 3, portfolio construction (``invariant.stages.portfolio.stage``; docs/adr/0013 for
+    the method study, 0014 for the stage).
+
+    The deciding arm is Ridge-CV, the arm ADR 0013's pre-registered study selected. Wasserstein
+    DRO (DRO-FC, DRO-CV) and Markowitz run beside it and are reported only. The strategy is
+    killed when the one-sided Ledoit-Wolf test of Ridge-CV's Sharpe against 1/N gives
+    ``p >= lw_alpha``. Every value except ``min_obs`` and ``b_n_boot`` is the one ADR 0013
+    evaluated. ``c_annual`` is the annualised Sharpe hurdle (c = c_annual / sqrt(252)).
+    ``min_obs`` is the minimum number of complete panel rows: the size of the kill test is
+    validated at 5000 rows (ADR 0014), and the real ETF panel has about 5,280.
+    """
+
+    c_annual: float = Field(ge=0.0)
+    window: StrictInt = Field(ge=2)
+    refit_every: StrictInt = Field(ge=1)
+    cv_every: StrictInt = Field(ge=1)
+    cv_valid: StrictInt = Field(ge=1)
+    ridge_grid: tuple[float, ...] = Field(min_length=1)
+    eps_grid: tuple[float, ...] = Field(min_length=1)
+    fc_alpha: float = Field(gt=0.0, lt=1.0)
+    fc_draws: StrictInt = Field(ge=100)
+    lw_alpha: float = Field(gt=0.0, lt=0.5)
+    lw_n_boot: StrictInt = Field(ge=99, le=100_000)
+    b_n_boot: StrictInt = Field(ge=99, le=100_000)
+    """Replicates of the paired block bootstrap behind diagnostic B's interval."""
+    confidence: float = Field(gt=0.0, lt=1.0)
+    cost_bp: float = Field(ge=0.0)
+    """Reported net-of-cost Sharpe, per unit of one-way turnover; never decides."""
+    min_obs: StrictInt = Field(ge=100)
+
+    @model_validator(mode="after")
+    def _check(self) -> Self:
+        if not self.cv_valid < self.window:
+            raise ValueError("cv_valid must be smaller than window")
+        if self.min_obs < self.window + 2:
+            raise ValueError("min_obs must leave at least one out-of-sample day")
+        return self
+
+
 class PipelineConfig(_Frozen):
     universe: UniverseConfig
     dates: DateRange
@@ -303,6 +344,7 @@ class PipelineConfig(_Frozen):
     pit: PitConfig
     causal: CausalConfig
     decay: DecayConfig
+    portfolio: PortfolioConfig
 
 
 def deep_merge(base: Mapping[str, object], override: Mapping[str, object]) -> dict[str, object]:

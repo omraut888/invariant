@@ -22,7 +22,7 @@ from invariant.ledger.kill_ledger import (
     check_stage_prefix,
 )
 
-CAUSAL, DECAY, DRO = StageName.CAUSAL, StageName.DECAY, StageName.DRO
+CAUSAL, DECAY, PORTFOLIO = StageName.CAUSAL, StageName.DECAY, StageName.PORTFOLIO
 FIXED = datetime(2026, 1, 2, 3, 4, 5, tzinfo=UTC)
 
 
@@ -113,7 +113,7 @@ def test_stage_order_duplicates_and_after_kill(tmp_path: Path) -> None:
         ledger.record("s_a", CAUSAL, Verdict.PASS, metrics={})  # duplicate
     _kill(ledger, "s_a", DECAY)
     with pytest.raises(LedgerError, match="nothing may follow a kill"):
-        ledger.record("s_a", DRO, Verdict.PASS, metrics={})
+        ledger.record("s_a", PORTFOLIO, Verdict.PASS, metrics={})
     assert len(ledger.entries()) == 2  # rejected decisions were not written
 
 
@@ -178,7 +178,7 @@ def test_read_only_ledger_rejects_writes(tmp_path: Path) -> None:
 def test_resumed_attempt_is_separate(tmp_path: Path) -> None:
     ctx, first = _ledger(tmp_path)
     _kill(first, "s_a")
-    write_fates(first, {"s_b": None}, stop_before={"s_b": DRO})  # crashed mid-run
+    write_fates(first, {"s_b": None}, stop_before={"s_b": PORTFOLIO})  # crashed mid-run
     ctx.mark_failed("boom")
     resumed = run_context(tmp_path)  # same inputs: attempt 2
     with pytest.raises(RunStateError, match="attempt 2"):
@@ -289,12 +289,18 @@ def test_what_killed_and_counts(tmp_path: Path) -> None:
     assert ledger.what_killed("unknown") is None
     counts = ledger.kill_counts_by_stage()
     assert list(counts) == list(STAGE_ORDER)
-    assert counts == {CAUSAL: 2, DECAY: 1, DRO: 0, StageName.ADVERSARIAL: 0, StageName.MEMO: 0}
+    assert counts == {
+        CAUSAL: 2,
+        DECAY: 1,
+        PORTFOLIO: 0,
+        StageName.ADVERSARIAL: 0,
+        StageName.MEMO: 0,
+    }
 
 
 def test_fates_over_stage_prefix(tmp_path: Path) -> None:
     _, ledger = _ledger(tmp_path)
-    write_fates(ledger, {"s_a": DECAY, "s_b": None}, stop_before={"s_b": DRO})
+    write_fates(ledger, {"s_a": DECAY, "s_b": None}, stop_before={"s_b": PORTFOLIO})
     full = ledger.fates()
     assert full["s_a"].status is FateStatus.KILLED and full["s_a"].stage is DECAY
     assert full["s_b"].status is FateStatus.INCOMPLETE and full["s_b"].stage is DECAY
@@ -303,7 +309,7 @@ def test_fates_over_stage_prefix(tmp_path: Path) -> None:
     assert causal_only["s_b"].status is FateStatus.PASSED
 
 
-@pytest.mark.parametrize("stages", [[], [DECAY], [CAUSAL, DRO]])
+@pytest.mark.parametrize("stages", [[], [DECAY], [CAUSAL, PORTFOLIO]])
 def test_stage_prefix_validation(stages: list[StageName]) -> None:
     with pytest.raises(ValueError, match="prefix"):
         check_stage_prefix(stages)

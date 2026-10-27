@@ -3,15 +3,17 @@ r"""Strictly walk-forward forecasts and portfolios for Stage 3's arms (docs/adr/
 Timing
 ------
 A feature dated t is known at the close of t, and ``returns[t]`` is the return from close
-t-1 to close t (ADR 0003). A forecast made at t targets ``returns[t+1]``. Every quantity used
-at date t comes only from rows <= t:
+t-1 to close t (ADR 0003). With execution lag e (``WalkForwardConfig.lag``, the PIT config's
+``targets.execution_lag``), a decision made at the close of t is entered at the close of t+e and
+targets ``returns[t+1+e]``. ADR 0013's study used e = 0, the benchmark's timing; real data uses
+e = 1. Every quantity used at date t comes only from rows <= t:
 
 - **Refit** every ``refit_every`` rows at a date tau, on the ``window`` most recent pairs
-  ``(x[s], r[s+1])`` with ``s + 1 <= tau``. For each asset this is OLS on ``[1, x]``, giving
-  the coefficients B, the 1/n residual covariance, and a Newey-West HAC covariance of the
-  stacked coefficients across assets.
+  ``(x[s], r[s+1+e])`` with ``s + 1 + e <= tau``. For each asset this is OLS on ``[1, x]``,
+  giving the coefficients B, the 1/n residual covariance, and a Newey-West HAC covariance of
+  the stacked coefficients across assets.
 - **Daily**: ``mu_t = B [1, x_t]``. Each arm solves its problem on ``mu_t`` and holds the
-  weights from close t to close t+1, earning ``w_t . r[t+1]``.
+  weights from close t+e to close t+e+1, earning ``w_t . r[t+1+e]``.
 - **CV** (Ridge-CV, DRO-CV) every ``cv_every`` rows, inside the current training window and
   walk-forward only. The model is fitted on the first ``window - cv_valid`` pairs, and each grid
   value is then run daily over the last ``cv_valid`` pairs. The score is the realised mean-std
@@ -89,10 +91,14 @@ class WalkForwardConfig:
     fc_draws: int = 4000
     ridge_grid: tuple[float, ...] = (0.0, 0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0)
     eps_grid: tuple[float, ...] = (0.0, 0.0025, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2)
+    lag: int = 0
+    """Execution lag e: a decision at t earns ``returns[t+1+e]`` (module docstring)."""
 
     def __post_init__(self) -> None:
         if self.c < 0:
             raise ValueError("c must be non-negative")
+        if self.lag < 0:
+            raise ValueError("lag must be non-negative")
         if not 0 < self.cv_valid < self.window:
             raise ValueError("cv_valid must be in (0, window)")
         if self.refit_every < 1 or self.cv_every < 1:
@@ -145,8 +151,8 @@ def fc_radius(v: _FloatArray, draws: _FloatArray, alpha: float) -> float:
 
 @dataclass
 class ArmPath:
-    """One arm's daily out-of-sample path. Row k is test date ``dates[k]``: ``weights[k]`` is
-    held over ``(dates[k], dates[k] + 1]`` and earns ``returns[k]``."""
+    """One arm's daily out-of-sample path. Row k is decision date ``dates[k]``: ``weights[k]``
+    is held over ``(dates[k] + e, dates[k] + e + 1]`` and earns ``returns[k]`` (e = the lag)."""
 
     arm: Arm
     dates: npt.NDArray[np.int64]
@@ -196,12 +202,13 @@ def _cv_choice(
 ) -> float:
     """Walk-forward CV inside the window ending at tau (module docstring)."""
     grid = cfg.ridge_grid if arm is Arm.RIDGE_CV else cfg.eps_grid
-    lo, mid = tau - cfg.window, tau - cfg.cv_valid
-    sub = fit_linear(x[lo:mid], r[lo + 1 : mid + 1])
+    e = cfg.lag
+    lo, mid, end = tau - cfg.window - e, tau - cfg.cv_valid - e, tau - e
+    sub = fit_linear(x[lo:mid], r[lo + 1 + e : mid + 1 + e])
     scores = []
     for g in grid:
         rets = np.array(
-            [_weights(arm, prob, sub, x[s], cfg.c, g, None) @ r[s + 1] for s in range(mid, tau)]
+            [_weights(arm, prob, sub, x[s], cfg.c, g, None) @ r[s + 1 + e] for s in range(mid, end)]
         )
         scores.append(float(-rets.mean() + cfg.c * rets.std()))
     return float(grid[int(np.argmin(scores))])  # first minimum: the smallest grid value
@@ -216,17 +223,18 @@ def run_walk_forward(
 ) -> dict[Arm, ArmPath]:
     """Every arm's out-of-sample path on features ``x`` (T, K) and returns ``r`` (T, N).
 
-    Test dates run from ``window`` to ``T - 2``. Deterministic given ``rng``, which supplies the
-    radius draws (stream ``fc_draws``).
+    Decision dates run from ``window + e`` to ``T - 2 - e``, with e = ``cfg.lag``.
+    Deterministic given ``rng``, which supplies the radius draws (stream ``fc_draws``).
     """
     n_t, n_assets = r.shape
+    e = cfg.lag
     if x.shape[0] != n_t:
         raise ValueError("x and r must have the same rows")
-    if n_t < cfg.window + 2:
+    if n_t < cfg.window + 2 + 2 * e:
         raise ValueError("not enough rows for one out-of-sample day")
     prob = MeanStdProblem(n_assets, cfg.c)
     draws = rng.generator("fc_draws").standard_normal((cfg.fc_draws, n_assets))
-    dates = np.arange(cfg.window, n_t - 1, dtype=np.int64)
+    dates = np.arange(cfg.window + e, n_t - 1 - e, dtype=np.int64)
     paths = {
         a: ArmPath(
             a,
@@ -241,9 +249,10 @@ def run_walk_forward(
     choice = {a: 0.0 for a in arms}
     fit: LinearFit | None = None
     for k, t in enumerate(dates):
-        offset = int(t) - cfg.window
+        offset = int(t) - cfg.window - e
         if offset % cfg.refit_every == 0:
-            fit = fit_linear(x[t - cfg.window : t], r[t - cfg.window + 1 : t + 1])
+            lo = t - cfg.window - e
+            fit = fit_linear(x[lo : t - e], r[lo + 1 + e : t + 1])
         if offset % cfg.cv_every == 0:
             for a in arms:
                 if a in (Arm.RIDGE_CV, Arm.DRO_CV):
@@ -260,7 +269,7 @@ def run_walk_forward(
                 p.radius[k] = radius
             w = _weights(a, prob, fit, x[t], cfg.c, choice[a], radius)
             paths[a].weights[k] = w
-            paths[a].returns[k] = float(w @ r[t + 1])
+            paths[a].returns[k] = float(w @ r[t + 1 + e])
     return paths
 
 

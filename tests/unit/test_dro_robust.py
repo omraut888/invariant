@@ -3,7 +3,7 @@ from __future__ import annotations
 import cvxpy as cp
 import numpy as np
 import pytest
-from hypothesis import given, settings
+from hypothesis import example, given, settings
 from hypothesis import strategies as st
 
 from invariant.stages.dro.robust import (
@@ -146,8 +146,14 @@ def _cvxpy_reference(mu: np.ndarray, cov: np.ndarray, c: float, kappa: float) ->
     return max(0.0, float(prob.value) / 100)
 
 
+# Both sides stop at Clarabel's default gap tolerance (1e-8 absolute) in units scaled by about
+# 1 / sqrt(mean diag cov) = 100 here, so each is within about 1e-10 of the optimum in caller units
+# and they may differ by about 2e-10; the objective recomputed from w carries the same gap. The
+# examples are the cases that showed a 1e-10 bound was tighter than the solvers promise.
 @settings(max_examples=60, deadline=None)
 @given(st.integers(0, 2**32 - 1), st.integers(2, 6), st.floats(0.0, 0.2), st.floats(0.0, 2e-3))
+@example(5, 5, 0.0078125, 0.0019947590421317118)
+@example(196414, 4, 0.0625, 0.0)
 def test_direct_clarabel_matches_the_cvxpy_formulation(
     seed: int, n: int, c: float, kappa: float
 ) -> None:
@@ -157,10 +163,10 @@ def test_direct_clarabel_matches_the_cvxpy_formulation(
     mu = rng.standard_normal(n) * 1e-3
     sol = MeanStdProblem(n, c).solve(mu, cov, kappa)
     ref = _cvxpy_reference(mu, cov, c, kappa)
-    assert sol.value == pytest.approx(ref, rel=1e-6, abs=1e-10)
+    assert sol.value == pytest.approx(ref, rel=1e-6, abs=5e-10)
     if sol.invested:
         realised = float(
             mu @ sol.w - c * np.sqrt(sol.w @ cov @ sol.w) - kappa * np.linalg.norm(sol.w)
         )
-        assert realised == pytest.approx(ref, rel=1e-6, abs=1e-10)
+        assert realised == pytest.approx(ref, rel=1e-6, abs=5e-10)
         assert np.abs(sol.w).sum() <= 1.0 + 1e-12

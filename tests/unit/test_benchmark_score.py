@@ -31,7 +31,7 @@ from invariant.ledger.benchmark_score import (
 )
 from invariant.ledger.kill_ledger import Fate, FateStatus, KillLedger
 
-CAUSAL, DECAY, DRO = StageName.CAUSAL, StageName.DECAY, StageName.DRO
+CAUSAL, DECAY, PORTFOLIO = StageName.CAUSAL, StageName.DECAY, StageName.PORTFOLIO
 # Expected (all five stages): s_real pass; s_conf, s_noise kill at causal; s_decay kill at decay.
 ORACLE: dict[str, StageName | None] = {
     "s_real": None,
@@ -81,7 +81,8 @@ def test_oracle_fates_score_perfectly() -> None:
 
 def test_every_confusion_cell_and_stage_match() -> None:
     score = score_fates(
-        _fates({"s_real": DRO, "s_conf": CAUSAL, "s_decay": CAUSAL, "s_noise": None}), _truth()
+        _fates({"s_real": PORTFOLIO, "s_conf": CAUSAL, "s_decay": CAUSAL, "s_noise": None}),
+        _truth(),
     )
     assert score.matrix == ConfusionMatrix(
         correct_kill=2, wrong_kill=1, correct_pass=0, missed_kill=1, kills_at_expected_stage=1
@@ -244,7 +245,7 @@ def test_aggregate_scores() -> None:
     truth = _truth()
     perfect = score_fates(_fates(dict(ORACLE)), truth)
     mixed = score_fates(
-        _fates({"s_real": DRO, "s_conf": CAUSAL, "s_decay": CAUSAL, "s_noise": None}), truth
+        _fates({"s_real": PORTFOLIO, "s_conf": CAUSAL, "s_decay": CAUSAL, "s_noise": None}), truth
     )
     agg = aggregate_scores([perfect, mixed, perfect])
     assert agg.n_runs == 3 and agg.n_incomplete_runs == 0

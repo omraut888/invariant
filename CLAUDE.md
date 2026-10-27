@@ -41,7 +41,7 @@ say so instead of implementing it as written.
 - src/invariant/core/          typed contracts, run hashing/reproducibility, logging
 - src/invariant/data/          sources (ETF, French factors, ALFRED), snapshots, point-in-time assembly
 - src/invariant/benchmark/     synthetic planted-signal market + ground truth
-- src/invariant/stages/        causal/ decay/ dro/ adversarial/ memo/
+- src/invariant/stages/        causal/ decay/ dro/ (evaluated DRO code) portfolio/ adversarial/ memo/
 - src/invariant/ledger/        kill ledger
 - src/invariant/orchestration/ pipeline DAG (later)
 - src/invariant/api/           FastAPI service (later)
@@ -66,6 +66,10 @@ say so instead of implementing it as written.
 - uv run pytest                   # everything
 - uv run ruff check . --fix && uv run ruff format .
 - uv run mypy
+- uv run pre-commit install        # once per clone: installs the pre-commit and pre-push hooks
+
+The pre-push hook runs ruff check, ruff format --check, mypy and the fast suite on the whole
+tree, so a failing check cannot be pushed. Never bypass it with `--no-verify`.
 
 ## How to work
 - For any non-trivial task: propose a plan and wait for approval before writing code.
@@ -100,4 +104,5 @@ say so instead of implementing it as written.
 - Stage 3 method study (ADR 0013) is done: all size gates pass; Ridge-CV selected by the
   pre-registered gross-Sharpe rule (DRO-FC is best net of 5 bp; a net-of-cost confirmation
   study is in the backlog).
-- Next: build Stage 3, portfolio construction on Ridge-CV, with kill rule A and diagnostic B.
+- Stage 3 stage (portfolio construction on Ridge-CV, kill rule A, diagnostic B; ADR 0014) is
+  built; its validation is pre-registered and pending.

@@ -53,7 +53,7 @@ class StageName(StrEnum):
 
     CAUSAL = "causal"
     DECAY = "decay"
-    DRO = "dro"
+    PORTFOLIO = "portfolio"
     ADVERSARIAL = "adversarial"
     MEMO = "memo"
 
@@ -91,6 +91,10 @@ class KillReason(StrEnum):
     # Stage 2 (docs/adr/0011, 0012). The one-sided sup-split test finds that the edge of the
     # Stage 1 link was stronger before some break than after it (p < alpha).
     DECAY_EDGE_DECLINING = "decay.edge_declining"
+    # Stage 3 (docs/adr/0013, 0014). The Ridge-CV portfolio of the signals that passed Stage 2
+    # does not beat 1/N out of sample: the one-sided Ledoit-Wolf test gives p >= alpha. Every
+    # member signal is killed with it.
+    PORTFOLIO_NO_EDGE_OVER_EQUAL_WEIGHT = "portfolio.no_edge_over_equal_weight"
 
     @property
     def stage(self) -> StageName | None:

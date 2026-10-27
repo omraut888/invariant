@@ -26,6 +26,7 @@ from invariant.config.settings import (
     HttpConfig,
     PipelineConfig,
     PitConfig,
+    PortfolioConfig,
     PublicationLags,
     Settings,
     TargetConfig,
@@ -82,6 +83,24 @@ CAUSAL = CausalConfig(
 
 DECAY = DecayConfig(alpha=0.05, n_boot=999, trim=0.15, break_step=25, min_obs=5000)
 
+PORTFOLIO = PortfolioConfig(
+    c_annual=0.5,
+    window=1260,
+    refit_every=21,
+    cv_every=252,
+    cv_valid=252,
+    ridge_grid=(0.0, 0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0),
+    eps_grid=(0.0, 0.0025, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2),
+    fc_alpha=0.05,
+    fc_draws=4000,
+    lw_alpha=0.05,
+    lw_n_boot=999,
+    b_n_boot=999,
+    confidence=0.95,
+    cost_bp=5.0,
+    min_obs=5000,
+)
+
 
 def _config(**overrides: object) -> PipelineConfig:
     base: dict[str, object] = {
@@ -93,6 +112,7 @@ def _config(**overrides: object) -> PipelineConfig:
         "pit": PIT,
         "causal": CAUSAL,
         "decay": DECAY,
+        "portfolio": PORTFOLIO,
     }
     base.update(overrides)
     return PipelineConfig.model_validate(base)
@@ -122,7 +142,7 @@ def test_same_inputs_same_run_id() -> None:
 def test_golden_run_id() -> None:
     # Pinned: if this changes without a change to the PipelineConfig schema, canonicalization
     # changed and HASH_SCHEMA_VERSION must be bumped. (Last re-pinned when `decay` was added.)
-    assert compute_run_id(_inputs()) == "6b24e63ac1f49496"
+    assert compute_run_id(_inputs()) == "485aae913204902c"
 
 
 @pytest.mark.parametrize(

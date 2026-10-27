@@ -60,6 +60,9 @@ params). Benchmark runs then take the real data path (snapshot, run id, PIT pane
 scorer can link a run to its dataset.
 
 ## Open question: per-signal verdicts in stages 3 and 4
+**Stage 3: answered in ADR 0014** (2026-10-27). The portfolio's verdict is recorded on every
+member's entry (stage `portfolio`, formerly `dro`). Stage 4 remains open.
+
 Causal discovery and decay validation judge each signal on its own, so a per-signal PASS/KILL is
 well-defined there. DRO builds **one portfolio** from the surviving signals, and the adversarial
 stage certifies **that portfolio**. Neither naturally produces a verdict per signal. Possible
