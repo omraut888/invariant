@@ -1,6 +1,6 @@
-# ADR 0013: Stage 3 Wasserstein DRO portfolio construction (pre-registered method study)
+# ADR 0013: Stage 3 portfolio construction: Wasserstein DRO evaluated, ridge selected (pre-registered method study)
 
-Status: **pre-registered (2026-10-24); pilot recorded, full run pending**. The theory section records what was
+Status: **accepted (2026-10-27): Ridge-CV selected; Wasserstein DRO evaluated, not selected**. Pre-registered 2026-10-24; pilot recorded; results under "Results". The theory section records what was
 transcribed and verified before any Stage 3 code. The study design, rules, c and the M formula
 below were fixed and pushed before the pilot ran. The pilot's outputs (M, the budget plan)
 are recorded afterwards, under "Pilot", and pushed before the full run. Results go in a separate
@@ -353,3 +353,115 @@ at or used.
   - feasible, so **M_rep = 200** (no reduction).
 - **Recorded in `configs/dro_study.yaml`:** `n_select_seeds: 200`, `n_report_seeds: 200`.
 - **Full run:** 2 × 1683 + 200 + 2 × 200 + 3 × 200 = **4566 tasks**, root seed 20261025.
+
+## Results (recorded 2026-10-27, after the full run)
+The full run executed from a worktree at 9686660 (clean), root seed 20261025, 4566 tasks on 8
+workers, 12.6 h wall time. No post-launch bug fixes to run code; the run did not resume or restart. One test-only fix
+after the run: `test_budget_plan_shrinks_reported_seeds_then_declares_infeasible` assumed
+`n_report_seeds: null` and failed once 9686660 recorded 200 (the fast suite was not rerun
+before that commit). `plan_budget` was correct, and the full run does not call it; the test
+now checks both the recorded and the unrecorded case.
+Report: `runs/dro_study/785d04df850d2136/report.json`.
+
+### Rule outcome: Ridge-CV, no deviation
+- **Size gates** (kill-test rejections against 1/N on the nulls, M = 1683, Wilson 95%; the
+  gate is upper bound ≤ .075). All 8 pass:
+
+  | arm | d3_null | d5_null_heavy |
+  |---|---|---|
+  | Markowitz | .043 [.035, .054] | .038 [.030, .048] |
+  | DRO-FC | .035 [.027, .045] | .039 [.030, .049] |
+  | Ridge-CV | .045 [.036, .056] | .040 [.031, .050] |
+  | DRO-CV | .043 [.034, .054] | .043 [.035, .054] |
+
+- **Selection** (d1_base, M = 200, mean gross annualised Sharpe; the best minus each arm, with
+  its paired bootstrap 95% CI):
+
+  | arm | Sharpe | best − arm |
+  |---|---|---|
+  | **Ridge-CV** | **1.560** | (best) |
+  | DRO-CV | 1.526 | .034 [.021, .047] |
+  | DRO-FC | 1.525 | .035 [.005, .066] |
+  | Markowitz | 1.484 | .076 [.064, .088] |
+
+  No CI contains 0, so no arm ties Ridge-CV and the tie-break is not used. **Ridge-CV is
+  selected.** It was applied as pre-registered, with no deviation.
+- **Kill rule A for the selected arm.** Ridge-CV beats 1/N at .05 in .935 [.892, .962] of d1
+  seeds, .960 [.923, .980] on d4 and .804 [.743, .854] on the pipeline's own signal sets.
+
+**What this means for the stage's name.** Stage 3 is **portfolio construction**. Wasserstein
+DRO (DRO-FC and DRO-CV) was implemented, verified against its theory and an independent cvxpy
+formulation, and evaluated in this study, and **ridge regularization of the covariance was
+selected**. Every memo must say exactly that, and must not describe the strategy's portfolio
+as distributionally robust.
+
+### Findings
+1. **DRO-FC wins net of costs.** Net of 5 bp per unit of one-way turnover, the d1 Sharpe
+   ratios are DRO-FC 1.303, Ridge-CV 1.226, DRO-CV 1.203 and Markowitz 1.120. DRO-FC sits in
+   cash on 64% of days, and its mean daily turnover is .185, against .460 for Ridge-CV.
+   Selection was pre-registered on **gross** Sharpe, so the rule picks Ridge-CV. **In
+   hindsight, the selection metric should have been net-of-cost Sharpe**: a portfolio rule is
+   chosen to be traded, and turnover is where the arms differ most. The study does not
+   establish that DRO-FC is better net of costs either: the net ranking was not the
+   pre-registered question, has no tie analysis here, and depends on the 5 bp level. See the
+   backlog.
+2. **At realistic signal strength every arm fails.** On d2_realistic (ICs .02), each arm
+   beats 1/N in at most .030 of seeds (Markowitz .030 [.014, .064], Ridge-CV .030
+   [.014, .064], DRO-CV .015 [.005, .043], DRO-FC .005 [.001, .028]). Net Sharpe is .055–.111
+   against 1/N's .443. At planted strengths near realistic ones, kill rule A kills the
+   strategy. That is a power limit of the signals, not a defect of the test.
+3. **DRO-FC's radius under-covers the true conditional mean.** The share of days with
+   ‖μ̂_t − μ_t‖₂ ≤ ε_t, against nominal .95:
+
+   | scenario | vs O2 (the true μ_t: all state nodes) | vs O1 (the arm's signals) |
+   |---|---|---|
+   | d1_base | .678 | .870 |
+   | d1 pipeline | .569 | .871 |
+   | d4_heavy | .674 | .865 |
+   | d2_realistic | .903 | .941 |
+   | d3_null / d5_null_heavy | .946 / .947 | .946 / .947 |
+
+   Coverage is close to nominal only where the mean barely moves. The radius is too small where
+   the signals matter, as departure 4 anticipated for the Newey–West rule-of-thumb bandwidth.
+4. **The selection depends on c.** At c = 0.25 (annual), DRO-FC has the best gross d1 Sharpe
+   (1.560; Ridge-CV 1.481). At c = 1.0, Ridge-CV does (1.603; Markowitz 1.593, DRO-FC 1.402). c
+   = 0.5 was fixed before the pilot; these are reported only.
+5. **Diagnostic B: both planted signals carry value.** Marginal Sharpe of each signal
+   (full minus leave-one-out, d1, paired 95% CI):
+
+   | arm | s_real | s_decay |
+   |---|---|---|
+   | Markowitz | .595 [.555, .638] | .279 [.250, .306] |
+   | DRO-FC | .644 [.599, .693] | .393 [.358, .427] |
+   | Ridge-CV | .630 [.586, .673] | .299 [.268, .328] |
+   | DRO-CV | .618 [.573, .663] | .328 [.294, .363] |
+
+6. **The pipeline mostly finds only s_real.** Stages 1–2 passed {s_real} alone on 137 of 200
+   d1 seeds and {s_real, s_decay} on 46. Other sets: {s_real, s_conf} 4, {s_real, s_noise} 2,
+   {s_real, s_decay, s_noise} 2, {s_real, s_conf, s_decay} 2, {s_decay} 1, nothing 6. So the
+   pipeline's arms run on 194 seeds, with lower Sharpe (Ridge-CV 1.324) and power (above), as
+   expected from s_decay's low Stage 1–2 power (ADRs 0010–0012).
+
+Also reported: the DSR exceeds .95 on ≥ .99 of d1 and all d4 seeds for every arm, on .15–.27
+of d2 seeds, and on < .01 of null seeds. DSR is undefined, and not counted, for seeds where
+DRO-FC is all cash (410 of 1683 on d3, 448 on d5). Median task times were 39–72 s.
+
+### Consequences
+- Stage 3 is built on **Ridge-CV** with kill rule A and diagnostic B (next ADR). The `dro`
+  module name is kept for the implemented and verified DRO code; the stage is named
+  "portfolio construction".
+- DRO-FC and DRO-CV remain in the codebase, tested, as evaluated alternatives, not used by the
+  stage.
+
+## Backlog (deferred 2026-10-27)
+- **Fresh-seed confirmation study with net-of-cost selection.** Pre-register net-of-cost
+  Sharpe as the selection metric, at a cost level justified before any run (from published
+  ETF spread and impact estimates for the universe the stage will trade, with a sensitivity
+  pair around it). The study must:
+  - use a fresh root seed, never 20261024 or 20261025;
+  - keep this study's size gates and its tie-break, with M derived the same way;
+  - state the pass probabilities.
+  If it selects a different arm, the stage changes only through that study's result, and this
+  ADR is not edited.
+- **A calibrated DRO-FC radius** (finding 3): a bandwidth or block-bootstrap radius whose
+  coverage of the true μ_t is gated, before DRO-FC is reconsidered.

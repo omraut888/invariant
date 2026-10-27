@@ -72,7 +72,11 @@ def _seconds(cfg: DroStudyConfig, t: float) -> dict[str, float]:
 
 
 def test_budget_plan_shrinks_reported_seeds_then_declares_infeasible() -> None:
-    cfg = load_dro_study_config()
+    recorded = load_dro_study_config()
+    assert recorded.n_report_seeds is not None
+    kept = plan_budget(_seconds(recorded, 1.0), recorded, n_select=300, workers=8)
+    assert kept.n_report_seeds == recorded.n_report_seeds  # a recorded value is honoured
+    cfg = recorded.model_copy(update={"n_report_seeds": None})
     roomy = plan_budget(_seconds(cfg, 1.0), cfg, n_select=300, workers=8)
     assert roomy.feasible and roomy.n_report_seeds == 300
     # core = 2*1683 + 300 = 3666 task-units; reported = 5 per seed

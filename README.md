@@ -1,9 +1,9 @@
 # INVARIANT
 
 An autonomous quant research pipeline. A candidate signal must survive five stages, any of which
-can kill it: causal discovery, decay validation, distributionally robust portfolio
-construction, adversarial regime certification, and a citation-backed research memo. Every
-stage is validated on a planted-signal benchmark before it touches real data. Every rejection
+can kill it: causal discovery, decay validation, portfolio construction (Wasserstein DRO
+evaluated, ridge regularization selected), adversarial regime certification, and a
+citation-backed research memo. Every stage is validated on a planted-signal benchmark before it touches real data. Every rejection
 is recorded with the numbers behind it.
 
 Full spec: [`docs/invariant-spec.html`](docs/invariant-spec.html). Working rules: [`CLAUDE.md`](CLAUDE.md).
@@ -27,8 +27,8 @@ uv run python scripts/phase0_smoke.py --n-obs 600 # end-to-end Phase 0 smoke run
 
 ## Results so far
 
-Both stages are accepted on the planted-signal benchmark (default preset, T = 6000, Wilson 95%
-CIs). Real data has not been run yet.
+Stages 1 and 2 are accepted on the planted-signal benchmark, and Stage 3's method is chosen
+(default preset, T = 6000, Wilson 95% CIs). Real data has not been run yet.
 
 **Stage 1, causal screen** ([ADR 0009](docs/adr/0009-stage1-ci-test-and-multiple-testing.md),
 [0010](docs/adr/0010-stage1-causal-stage.md)). PCMCI with an HC3 partial-correlation test and
@@ -60,6 +60,25 @@ Caveats:
 - Power is lowest for a decay that started recently (.22–.44 when it starts at 0.8 T).
 - s_decay still passes both stages in 28% of runs.
 - Stage 2 needs at least 5000 rows, the only length at which it was validated.
+
+**Stage 3, portfolio construction: method chosen**
+([ADR 0013](docs/adr/0013-stage3-dro-method-study.md)). A pre-registered study compared Markowitz, two Wasserstein DRO arms (a forecast-confidence
+radius, and a CV-chosen radius) and a CV-chosen ridge shrinkage of the covariance, all as
+mean–std portfolios with gross exposure ≤ 1. The kill test is a one-sided Ledoit–Wolf test
+of beating 1/N.
+- Its false-kill rate on two null markets is .035–.045 for every arm (M = 1683 each; all
+  upper bounds ≤ .056 against a .075 gate).
+- **Ridge-CV is selected** (best gross Sharpe, 1.560 vs 1.525 for the best DRO arm, the CI of
+  the difference excludes 0). Wasserstein DRO was implemented, verified and evaluated, and not
+  selected. Ridge-CV beats 1/N in 94% of runs at the default preset.
+
+Caveats:
+- **Net of 5 bp costs the DRO forecast-confidence arm is best** (1.303 vs 1.226): it trades
+  far less. Selection was pre-registered on gross Sharpe, which in hindsight was the wrong
+  metric; a fresh-seed net-of-cost confirmation study is in the backlog.
+- At a realistic IC (.02) no arm beats 1/N (≤ 3% of runs).
+- The DRO confidence radius covers the true conditional mean on only 57–68% of days
+  (nominal 95%) where the signals matter.
 
 **Structural limit: no stage fixes a hidden confounder.** When the common cause Z is
 unobserved, Stage 1 passes the confounded s_conf in 73% of runs. Stage 2 kills only 4.5% of
@@ -108,6 +127,6 @@ Its output says nothing about any method; it only proves the plumbing works.
 - Fama-French factors are revised with every release; they are used only with a 42-session lag
   and a revision caveat.
 - Macro features are levels only for now; within-vintage changes come next.
-- Per-signal verdicts for the DRO and adversarial stages are an open design question (ADR 0007).
+- Per-signal verdicts for the portfolio and adversarial stages are an open design question (ADR 0007).
 
-**Next: Stage 3.** Wasserstein distributionally robust portfolio construction.
+**Next: build Stage 3** (portfolio construction on Ridge-CV, kill rule A, diagnostic B).

@@ -4,7 +4,8 @@
 An autonomous quant research pipeline. Five stages, each capable of killing a candidate signal:
 1. Causal discovery: is the signal structurally upstream of returns, or confounded?
 2. Decay validation: transfer-entropy half-life; is the edge being arbitraged away?
-3. DRO portfolio construction: Wasserstein distributionally robust optimization
+3. Portfolio construction: Wasserstein DRO was implemented, verified and evaluated (ADR 0013);
+   ridge regularization (Ridge-CV) was selected. The memo must say this, never "DRO portfolio".
 4. Adversarial regime certification: worst plausible market path, with a realism constraint
 5. Research memo: citation-backed investment memo arguing for or against the strategy
 
@@ -96,4 +97,7 @@ say so instead of implementing it as written.
 - Stage 1 (causal, `hc3|hybrid`; ADRs 0009–0010) is accepted on the benchmark.
 - Stage 2 (decay: a one-sided sup-split decline test, no half-life reported; ADRs 0011–0012)
   is accepted on the benchmark.
-- Next: Stage 3, Wasserstein DRO portfolio construction.
+- Stage 3 method study (ADR 0013) is done: all size gates pass; Ridge-CV selected by the
+  pre-registered gross-Sharpe rule (DRO-FC is best net of 5 bp; a net-of-cost confirmation
+  study is in the backlog).
+- Next: build Stage 3, portfolio construction on Ridge-CV, with kill rule A and diagnostic B.
