@@ -105,4 +105,4 @@ tree, so a failing check cannot be pushed. Never bypass it with `--no-verify`.
   pre-registered gross-Sharpe rule (DRO-FC is best net of 5 bp; a net-of-cost confirmation
   study is in the backlog).
 - Stage 3 stage (portfolio construction on Ridge-CV, kill rule A, diagnostic B; ADR 0014) is
-  built; its validation is pre-registered and pending.
+  accepted on the benchmark. Stage 4 (adversarial regime certification) is next.

@@ -1,7 +1,7 @@
 # ADR 0014: Stage 3, the portfolio construction stage (Ridge-CV, kill rule A)
 
-Status: **pre-registered (2026-10-27); validation pending**. The validation below was fixed and
-pushed before its run. Results will go in a separate section and are never edited into the
+Status: **accepted (2026-10-28)**. Pre-registered 2026-10-27; the validation below was fixed and
+pushed before its run. Results are in a separate section at the end and are not edited into the
 pre-registration.
 
 ## Context
@@ -209,3 +209,104 @@ changes after the run.
 - **Zero weight = kill** (ADR 0007's other suggestion): Ridge-CV's weights are on assets, not
   signals, so it does not apply.
 - **min_obs 6000**: would never run on the real panel (above).
+
+## Results (2026-10-28)
+Run `runs/portfolio_stage_validation/21d7006da9f51e29`, commit cb60ab9 (clean), worktree
+`../invariant-portfolio-run`, 8 workers, root seed 20261027, M = 1273, 3819 tasks. No bug was
+found after launch; the run did not restart or resume. Wilson 95% intervals throughout.
+
+**Acceptance: all criteria pass. Stage 3 is accepted on the benchmark.**
+
+| criterion | scope | rate | bound | threshold | result |
+|---|---|---|---|---|---|
+| V1 size | d3_null | .049 [.039, .063] (63/1273) | upper .063 | ≤ .075 | pass |
+| V1 size | d5_null_heavy | .043 [.033, .056] (55/1273) | upper .056 | ≤ .075 | pass |
+| V2 power | s_real, given reached | .828 [.806, .848] (996/1203) | lower .806 | ≥ .70 | pass |
+| V3 complete | all | 3819 of 3819 tasks; 0 incomplete chains | | | pass |
+
+Every size run built the portfolio (1273/1273 per scenario).
+
+**Against the predictions.** d3 .049 against .045 [.036, .056], d5 .043 against .040
+[.031, .050], V2 .828 against .804 [.743, .854]: all inside ADR 0013's intervals. s_real reached
+Stage 3 in .945 [.931, .956] of runs, against 193/200 (.965) in ADR 0013. In 49 runs (.038) no
+signal reached Stage 3, so those runs have no Stage 3 verdict (built 1224 of 1273).
+
+**Reported metrics** (means over runs; Sharpe annualised; net = 5 bp per unit of turnover;
+invested and cash are the mean daily shares; turnover is mean daily one-way):
+
+| task | arm | SR | net SR | invested | cash | turnover | beats 1/N |
+|---|---|---|---|---|---|---|---|
+| d3_null | 1/N | −.008 | −.008 | 1.00 | .00 | .000 | — |
+| | Markowitz | −.003 | −.375 | .96 | .01 | .466 | .042 [.033, .055] |
+| | DRO-FC | −.022 | −.063 | .01 | .99 | .006 | .038 [.029, .051] |
+| | **Ridge-CV** | −.008 | −.308 | .53 | .41 | .295 | .049 [.039, .063] |
+| | DRO-CV | −.011 | −.251 | .35 | .63 | .186 | .046 [.036, .059] |
+| d5_null_heavy | 1/N | −.009 | −.009 | 1.00 | .00 | .000 | — |
+| | Markowitz | −.019 | −.392 | .96 | .02 | .466 | .043 [.033, .056] |
+| | DRO-FC | −.029 | −.069 | .01 | .99 | .006 | .034 [.025, .045] |
+| | **Ridge-CV** | −.023 | −.323 | .52 | .42 | .293 | .043 [.033, .056] |
+| | DRO-CV | −.027 | −.267 | .35 | .64 | .183 | .042 [.033, .055] |
+| pipeline d1 | 1/N | .436 | .436 | 1.00 | .00 | .000 | — |
+| | Markowitz | 1.264 | .950 | .98 | .01 | .459 | .764 [.739, .787] |
+| | DRO-FC | 1.196 | 1.013 | .30 | .69 | .140 | .712 [.686, .736] |
+| | **Ridge-CV** | 1.321 | 1.035 | .78 | .18 | .375 | .823 [.800, .843] |
+| | DRO-CV | 1.275 | 1.000 | .68 | .30 | .330 | .762 [.738, .785] |
+
+Per signal over the pipeline (n = 1273):
+
+| signal | reaches Stage 3 | Stage 3 pass, given reached | passes all three | B mean | B interval excludes 0 |
+|---|---|---|---|---|---|
+| s_real | .945 [.931, .956] | .828 [.806, .848] (n = 1203) | .782 [.759, .804] | .876 | .882 [.863, .899] |
+| s_decay | .229 [.207, .253] | .925 [.889, .950] (n = 292) | .212 [.191, .235] | .265 | .298 [.248, .353] |
+| s_conf | .027 [.019, .037] | .853 [.699, .936] (n = 34) | .023 [.016, .033] | .181 | .235 [.124, .400] |
+| s_noise | .019 [.013, .028] | .792 [.595, .908] (n = 24) | .015 [.010, .023] | .017 | .042 [.007, .202] |
+
+Member sets: {s_real} 889, {s_real, s_decay} 261, none 49, {s_real, s_conf} 23,
+{s_real, s_noise} 17, {s_decay} 17, {s_real, s_conf, s_decay} 8, {s_real, s_decay, s_noise} 4,
+and five sets with one run each. On the size tasks, B's interval excludes 0 for s_real in .059
+[.047, .073] (d3) and .057 [.045, .071] (d5) of null runs, and for s_decay in .057 and .045.
+
+Pooled over (causal, decay, portfolio), with the optimistic intervals of `score_run`: kill
+precision .927 [.918, .935], kill recall .917 [.908, .925]. Correct final verdict per signal:
+s_real .782, s_decay .788, s_conf .977, s_noise .985.
+
+Runtime: 13.7 h wall clock (2026-10-27T18:47Z to 2026-10-28T08:27Z), against the 6.6 h
+projected. Median task time was 48 s (d3), 56 s (d5) and 126 s (pipeline), against 21 s and 25 s
+idle. The 2× load allowance was too small for the pipeline task (about 5×). Nothing depended on
+the projection, because every task was gated and no fallback was registered.
+
+**Findings**
+1. **The production path reproduces ADR 0013.** Size on both nulls at 5000 rows and power on
+   the pipeline fall inside the intervals ADR 0013 predicted. d3's false-pass rate (.049) is
+   close to nominal α; its upper bound (.063) is under the gate by .012.
+2. **The joint verdict lets passengers through.** Stage 3 passes or kills all members
+   together, so a Stage 1 false positive that rides along with s_real passes too. s_noise
+   passes all three stages in 1.5% of runs and s_conf in 2.3%, almost always as a co-member
+   of s_real (s_noise was the only member once). Kill rule A alone cannot catch this.
+   Diagnostic B does separate them: its interval excludes 0 for s_noise in .042 of the runs
+   where it reached Stage 3, against .882 for s_real. On the nulls, B excludes 0 in .045–.059
+   of runs, which is close to its nominal .05 (these runs have two correlated members, so it
+   is not a calibration certificate). This is evidence for a per-signal rule built on B, which
+   the pre-registration rejected for now (Alternatives). It goes to the backlog and needs its
+   own study.
+3. **s_decay passes Stage 3 when it reaches it** (.925 given reached). That is expected:
+   Stage 3 tests whether the portfolio beats 1/N, not whether the edge is declining, and
+   s_decay's early edge is real. Catching s_decay is Stage 2's job (ADR 0012).
+4. **A false pass would lose money net of costs.** On the nulls, Ridge-CV's net Sharpe is
+   −.31 to −.32 because it turns over .29 a day. The kill test is on gross Sharpe, so a
+   strategy can pass Stage 3 and still have negative expected net returns. This is the same
+   gap as ADR 0013 finding 1. The net-of-cost confirmation study in the backlog addresses it.
+5. **On the pipeline, mean net Sharpe ranks Ridge-CV first** (1.035, against 1.013 for DRO-FC,
+   1.000 for DRO-CV and .950 for Markowitz). In ADR 0013's d1 scenario, DRO-FC was first net
+   of costs (1.303 against 1.226). These are not comparable: the member sets here come from
+   Stages 1–2, and no paired interval was computed for these differences. This is not a
+   selection and does not settle the backlog study.
+6. **Stage 3 is accepted on the benchmark** as Ridge-CV portfolio construction with kill rule A
+   and diagnostic B (reported only). Wasserstein DRO was implemented, verified and evaluated
+   (ADR 0013), and ridge regularization was selected. The memo must say so.
+
+**Backlog added**
+- A per-signal Stage 3 rule built on B: calibrate its interval with correlated members, then
+  pre-register and run it on fresh seeds.
+- Compute projections should come from a smoke run under the full worker load, not from idle
+  timings times an allowance.

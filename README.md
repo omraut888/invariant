@@ -27,7 +27,7 @@ uv run python scripts/phase0_smoke.py --n-obs 600 # end-to-end Phase 0 smoke run
 
 ## Results so far
 
-Stages 1 and 2 are accepted on the planted-signal benchmark, and Stage 3's method is chosen
+Stages 1, 2 and 3 are accepted on the planted-signal benchmark
 (default preset, T = 6000, Wilson 95% CIs). Real data has not been run yet.
 
 **Stage 1, causal screen** ([ADR 0009](docs/adr/0009-stage1-ci-test-and-multiple-testing.md),
@@ -80,6 +80,24 @@ Caveats:
 - The DRO confidence radius covers the true conditional mean on only 57–68% of days
   (nominal 95%) where the signals matter.
 
+**Stage 3, portfolio construction: accepted**
+([ADR 0014](docs/adr/0014-stage3-portfolio-stage.md)). The production stage runs Ridge-CV
+with its timing taken from the PIT config's execution lag. Kill rule A is joint over the
+signals that reach the stage, and diagnostic B (leave-one-out marginal Sharpe) is reported
+only. On fresh seeds (M = 1273):
+- The false-pass rate at 5000 rows is .049 [.039, .063] and .043 [.033, .056] on the two
+  nulls (gate: upper bound ≤ .075).
+- s_real passes in .828 [.806, .848] of the runs where it reaches Stage 3 (gate: lower bound
+  ≥ .70).
+
+Caveats:
+- The joint verdict lets Stage 1 false positives ride along with s_real: s_noise passes all
+  three stages in 1.5% of runs and s_conf in 2.3%. B separates them (its interval excludes 0
+  for s_noise in 4% of those runs, against 88% for s_real). A per-signal rule on B is in the
+  backlog.
+- The test is on gross Sharpe. On the nulls, Ridge-CV loses about .31 of Sharpe to 5 bp
+  costs, so a false pass would lose money.
+
 **Structural limit: no stage fixes a hidden confounder.** When the common cause Z is
 unobserved, Stage 1 passes the confounded s_conf in 73% of runs. Stage 2 kills only 4.5% of
 those, because a spurious edge need not decay. So s_conf passes both stages in 70% of runs. No
@@ -129,4 +147,4 @@ Its output says nothing about any method; it only proves the plumbing works.
 - Macro features are levels only for now; within-vintage changes come next.
 - Per-signal verdicts for the portfolio and adversarial stages are an open design question (ADR 0007).
 
-**Next: build Stage 3** (portfolio construction on Ridge-CV, kill rule A, diagnostic B).
+**Next: Stage 4** (adversarial regime certification).
