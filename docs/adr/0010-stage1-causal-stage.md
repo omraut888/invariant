@@ -175,7 +175,7 @@ The rule's limits, stated before the run:
 If any criterion fails, Stage 1 is not done and the decision returns to review. No threshold
 is changed after the run.
 
-## Validation results (M = 500, commit `ba43129`, clean tree; report `runs/causal_stage_validation/76b2880f3c8dd866/report.json`)
+## Validation results (M = 500, commit `ba43129`, clean tree; report `runs/causal_stage_validation/76b2880f3c8dd866/report.json`; archived at [`docs/results/0010-causal-stage-validation/report.json`](../results/0010-causal-stage-validation/report.json))
 tigramite 5.2.10.1. Every replication completed and every ledger chain verified (A4). Median
 runtime is 1.8 to 2.4 s per replication, including the snapshot, the panel and the ledger.
 

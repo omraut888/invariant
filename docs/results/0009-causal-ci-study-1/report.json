@@ -1,0 +1,5171 @@
+{
+  "config": {
+    "root_seed": 20261014,
+    "n_seeds": null,
+    "n_obs": 6000,
+    "tau_max": 5,
+    "pc_alpha": 0.2,
+    "alpha": 0.05,
+    "size_cutoff": 0.075,
+    "all_pass_prob": 0.9,
+    "confidence": 0.95,
+    "tests": [
+      {
+        "label": "parcorr",
+        "test": "parcorr",
+        "wls_window": 10
+      },
+      {
+        "label": "wls10",
+        "test": "parcorr_wls",
+        "wls_window": 10
+      },
+      {
+        "label": "wls50",
+        "test": "parcorr_wls",
+        "wls_window": 50
+      },
+      {
+        "label": "robust",
+        "test": "robust_parcorr",
+        "wls_window": 10
+      }
+    ],
+    "selection_scenario": "e3_default",
+    "selection_families": [
+      "s_real->R",
+      "s_decay->R"
+    ]
+  },
+  "n_seeds": 1654,
+  "n_gating": 7,
+  "per_family_pass_prob_at_alpha": 0.988648607027432,
+  "all_pass_prob_lower_bound": 0.9205402491920237,
+  "max_passing_rejections": 103,
+  "tigramite_version": "5.2.10.1",
+  "git_sha": "54a4ffe4d74055deeffd1229e49554a386230813",
+  "git_dirty": true,
+  "families": [
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_real->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 93,
+        "trials": 1654,
+        "estimate": 0.0562273276904474,
+        "ci_low": 0.046119251528591504,
+        "ci_high": 0.06839197498865211,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_real->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 94,
+        "trials": 1654,
+        "estimate": 0.056831922611850064,
+        "ci_low": 0.046666925416253544,
+        "ci_high": 0.06905068907576223,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_real->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 98,
+        "trials": 1654,
+        "estimate": 0.0592503022974607,
+        "ci_low": 0.04886106246124376,
+        "ci_high": 0.07168210392986059,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_real->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 90,
+        "trials": 1654,
+        "estimate": 0.05441354292623942,
+        "ci_low": 0.04447837825513009,
+        "ci_high": 0.06641368433779707,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_real->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 76,
+        "trials": 1654,
+        "estimate": 0.045949214026602174,
+        "ci_low": 0.03686792292047082,
+        "ci_high": 0.05713470802564628,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.1434058145411654
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_real->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 74,
+        "trials": 1654,
+        "estimate": 0.044740024183796856,
+        "ci_low": 0.035787741109573154,
+        "ci_high": 0.055802113886999655,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.09660823806425123
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_real->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 80,
+        "trials": 1654,
+        "estimate": 0.04836759371221282,
+        "ci_low": 0.039033865307617995,
+        "ci_high": 0.0597943175375877,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.18703013241606214
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_real->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 77,
+        "trials": 1654,
+        "estimate": 0.046553808948004836,
+        "ci_low": 0.0374087239525443,
+        "ci_high": 0.05780029496834495,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.16058846868533194
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_real",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 85,
+        "trials": 1654,
+        "estimate": 0.051390568319226115,
+        "ci_low": 0.041751092327317094,
+        "ci_high": 0.06310903039174934,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_real",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 87,
+        "trials": 1654,
+        "estimate": 0.05259975816203144,
+        "ci_low": 0.04284084544853314,
+        "ci_high": 0.06443205322007758,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_real",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 81,
+        "trials": 1654,
+        "estimate": 0.04897218863361548,
+        "ci_low": 0.03957646497207892,
+        "ci_high": 0.060458105847898916,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_real",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 81,
+        "trials": 1654,
+        "estimate": 0.04897218863361548,
+        "ci_low": 0.03957646497207892,
+        "ci_high": 0.060458105847898916,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_conf->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 83,
+        "trials": 1654,
+        "estimate": 0.0501813784764208,
+        "ci_low": 0.04066294729022774,
+        "ci_high": 0.06178439947929439,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_conf->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 82,
+        "trials": 1654,
+        "estimate": 0.049576783555018135,
+        "ci_low": 0.04011949474996246,
+        "ci_high": 0.06112146404478752,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_conf->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 80,
+        "trials": 1654,
+        "estimate": 0.04836759371221282,
+        "ci_low": 0.039033865307617995,
+        "ci_high": 0.0597943175375877,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_conf->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 80,
+        "trials": 1654,
+        "estimate": 0.04836759371221282,
+        "ci_low": 0.039033865307617995,
+        "ci_high": 0.0597943175375877,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 85,
+        "trials": 1654,
+        "estimate": 0.051390568319226115,
+        "ci_low": 0.041751092327317094,
+        "ci_high": 0.06310903039174934,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.19080818469157546
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 87,
+        "trials": 1654,
+        "estimate": 0.05259975816203144,
+        "ci_low": 0.04284084544853314,
+        "ci_high": 0.06443205322007758,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.755572768112488
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 86,
+        "trials": 1654,
+        "estimate": 0.05199516324062878,
+        "ci_low": 0.042295771169527395,
+        "ci_high": 0.06377073952431117,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.17471641895734225
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 84,
+        "trials": 1654,
+        "estimate": 0.05078597339782346,
+        "ci_low": 0.04120681545832066,
+        "ci_high": 0.06244691928597363,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.46519457208211845
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_conf",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 83,
+        "trials": 1654,
+        "estimate": 0.0501813784764208,
+        "ci_low": 0.04066294729022774,
+        "ci_high": 0.06178439947929439,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_conf",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 90,
+        "trials": 1654,
+        "estimate": 0.05441354292623942,
+        "ci_low": 0.04447837825513009,
+        "ci_high": 0.06641368433779707,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_conf",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 74,
+        "trials": 1654,
+        "estimate": 0.044740024183796856,
+        "ci_low": 0.035787741109573154,
+        "ci_high": 0.055802113886999655,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_conf",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 90,
+        "trials": 1654,
+        "estimate": 0.05441354292623942,
+        "ci_low": 0.04447837825513009,
+        "ci_high": 0.06641368433779707,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_decay->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 73,
+        "trials": 1654,
+        "estimate": 0.044135429262394194,
+        "ci_low": 0.03524837835731536,
+        "ci_high": 0.05513508866448529,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_decay->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 75,
+        "trials": 1654,
+        "estimate": 0.04534461910519952,
+        "ci_low": 0.0363275923507849,
+        "ci_high": 0.056468650620560064,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_decay->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 83,
+        "trials": 1654,
+        "estimate": 0.0501813784764208,
+        "ci_low": 0.04066294729022774,
+        "ci_high": 0.06178439947929439,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_decay->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 68,
+        "trials": 1654,
+        "estimate": 0.041112454655380895,
+        "ci_low": 0.03255923498406582,
+        "ci_high": 0.0517922921638741,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_decay->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 70,
+        "trials": 1654,
+        "estimate": 0.04232164449818621,
+        "ci_low": 0.03363331735350372,
+        "ci_high": 0.053130985743980494,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.44229589985802664
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_decay->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 76,
+        "trials": 1654,
+        "estimate": 0.045949214026602174,
+        "ci_low": 0.03686792292047082,
+        "ci_high": 0.05713470802564628,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.15478968442411423
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_decay->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 77,
+        "trials": 1654,
+        "estimate": 0.046553808948004836,
+        "ci_low": 0.0374087239525443,
+        "ci_high": 0.05780029496834495,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.5124646636460021
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_decay->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 80,
+        "trials": 1654,
+        "estimate": 0.04836759371221282,
+        "ci_low": 0.039033865307617995,
+        "ci_high": 0.0597943175375877,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.2037537548051297
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_decay",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 73,
+        "trials": 1654,
+        "estimate": 0.044135429262394194,
+        "ci_low": 0.03524837835731536,
+        "ci_high": 0.05513508866448529,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_decay",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 74,
+        "trials": 1654,
+        "estimate": 0.044740024183796856,
+        "ci_low": 0.035787741109573154,
+        "ci_high": 0.055802113886999655,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_decay",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 74,
+        "trials": 1654,
+        "estimate": 0.044740024183796856,
+        "ci_low": 0.035787741109573154,
+        "ci_high": 0.055802113886999655,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_decay",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 69,
+        "trials": 1654,
+        "estimate": 0.04171704957678356,
+        "ci_low": 0.03309600655568003,
+        "ci_high": 0.05246190856703205,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_noise->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 82,
+        "trials": 1654,
+        "estimate": 0.049576783555018135,
+        "ci_low": 0.04011949474996246,
+        "ci_high": 0.06112146404478752,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_noise->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 80,
+        "trials": 1654,
+        "estimate": 0.04836759371221282,
+        "ci_low": 0.039033865307617995,
+        "ci_high": 0.0597943175375877,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_noise->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 81,
+        "trials": 1654,
+        "estimate": 0.04897218863361548,
+        "ci_low": 0.03957646497207892,
+        "ci_high": 0.060458105847898916,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_noise->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 73,
+        "trials": 1654,
+        "estimate": 0.044135429262394194,
+        "ci_low": 0.03524837835731536,
+        "ci_high": 0.05513508866448529,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 82,
+        "trials": 1654,
+        "estimate": 0.049576783555018135,
+        "ci_low": 0.04011949474996246,
+        "ci_high": 0.06112146404478752,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.9606703957526513
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 71,
+        "trials": 1654,
+        "estimate": 0.042926239419588876,
+        "ci_low": 0.03417115651796548,
+        "ci_high": 0.053799534554290894,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.4836113159366301
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 83,
+        "trials": 1654,
+        "estimate": 0.0501813784764208,
+        "ci_low": 0.04066294729022774,
+        "ci_high": 0.06178439947929439,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.7284618671344132
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 86,
+        "trials": 1654,
+        "estimate": 0.05199516324062878,
+        "ci_low": 0.042295771169527395,
+        "ci_high": 0.06377073952431117,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.8214878389426421
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_noise",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 85,
+        "trials": 1654,
+        "estimate": 0.051390568319226115,
+        "ci_low": 0.041751092327317094,
+        "ci_high": 0.06310903039174934,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_noise",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 85,
+        "trials": 1654,
+        "estimate": 0.051390568319226115,
+        "ci_low": 0.041751092327317094,
+        "ci_high": 0.06310903039174934,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_noise",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 92,
+        "trials": 1654,
+        "estimate": 0.05562273276904474,
+        "ci_low": 0.04557193208866877,
+        "ci_high": 0.0677329064538027,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->s_noise",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 85,
+        "trials": 1654,
+        "estimate": 0.051390568319226115,
+        "ci_low": 0.041751092327317094,
+        "ci_high": 0.06310903039174934,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "z->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 107,
+        "trials": 1654,
+        "estimate": 0.06469165659008465,
+        "ci_low": 0.05381672337736116,
+        "ci_high": 0.07758393478669254,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "z->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 75,
+        "trials": 1654,
+        "estimate": 0.04534461910519952,
+        "ci_low": 0.0363275923507849,
+        "ci_high": 0.056468650620560064,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "z->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 107,
+        "trials": 1654,
+        "estimate": 0.06469165659008465,
+        "ci_low": 0.05381672337736116,
+        "ci_high": 0.07758393478669254,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "z->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 107,
+        "trials": 1654,
+        "estimate": 0.06469165659008465,
+        "ci_low": 0.05381672337736116,
+        "ci_high": 0.07758393478669254,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "z->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 92,
+        "trials": 1654,
+        "estimate": 0.05562273276904474,
+        "ci_low": 0.04557193208866877,
+        "ci_high": 0.0677329064538027,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.7640174548331293
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "z->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 90,
+        "trials": 1654,
+        "estimate": 0.05441354292623942,
+        "ci_low": 0.04447837825513009,
+        "ci_high": 0.06641368433779707,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.8144355619559499
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "z->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 89,
+        "trials": 1654,
+        "estimate": 0.05380894800483676,
+        "ci_low": 0.04393215508264613,
+        "ci_high": 0.0657535195355089,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.6171139361705338
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "z->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 85,
+        "trials": 1654,
+        "estimate": 0.051390568319226115,
+        "ci_low": 0.041751092327317094,
+        "ci_high": 0.06310903039174934,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.4876111494341909
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->z",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 70,
+        "trials": 1654,
+        "estimate": 0.04232164449818621,
+        "ci_low": 0.03363331735350372,
+        "ci_high": 0.053130985743980494,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->z",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 71,
+        "trials": 1654,
+        "estimate": 0.042926239419588876,
+        "ci_low": 0.03417115651796548,
+        "ci_high": 0.053799534554290894,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->z",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 74,
+        "trials": 1654,
+        "estimate": 0.044740024183796856,
+        "ci_low": 0.035787741109573154,
+        "ci_high": 0.055802113886999655,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->z",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 82,
+        "trials": 1654,
+        "estimate": 0.049576783555018135,
+        "ci_low": 0.04011949474996246,
+        "ci_high": 0.06112146404478752,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 92,
+        "trials": 1654,
+        "estimate": 0.05562273276904474,
+        "ci_low": 0.04557193208866877,
+        "ci_high": 0.0677329064538027,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 65,
+        "trials": 1654,
+        "estimate": 0.039298669891172915,
+        "ci_low": 0.030952270228805076,
+        "ci_high": 0.049780092994818406,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 92,
+        "trials": 1654,
+        "estimate": 0.05562273276904474,
+        "ci_low": 0.04557193208866877,
+        "ci_high": 0.0677329064538027,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 93,
+        "trials": 1654,
+        "estimate": 0.0562273276904474,
+        "ci_low": 0.046119251528591504,
+        "ci_high": 0.06839197498865211,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 88,
+        "trials": 1654,
+        "estimate": 0.053204353083434096,
+        "ci_low": 0.043386308811629165,
+        "ci_high": 0.0650929778317537,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.8606980600470224
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 84,
+        "trials": 1654,
+        "estimate": 0.05078597339782346,
+        "ci_low": 0.04120681545832066,
+        "ci_high": 0.06244691928597363,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.43884056275909733
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 83,
+        "trials": 1654,
+        "estimate": 0.0501813784764208,
+        "ci_low": 0.04066294729022774,
+        "ci_high": 0.06178439947929439,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.37127126819330425
+    },
+    {
+      "scenario": "e1_iid_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 89,
+        "trials": 1654,
+        "estimate": 0.05380894800483676,
+        "ci_low": 0.04393215508264613,
+        "ci_high": 0.0657535195355089,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.9591608826809015
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_real->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 89,
+        "trials": 1654,
+        "estimate": 0.05380894800483676,
+        "ci_low": 0.04393215508264613,
+        "ci_high": 0.0657535195355089,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_real->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 94,
+        "trials": 1654,
+        "estimate": 0.056831922611850064,
+        "ci_low": 0.046666925416253544,
+        "ci_high": 0.06905068907576223,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_real->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 98,
+        "trials": 1654,
+        "estimate": 0.0592503022974607,
+        "ci_low": 0.04886106246124376,
+        "ci_high": 0.07168210392986059,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_real->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 90,
+        "trials": 1654,
+        "estimate": 0.05441354292623942,
+        "ci_low": 0.04447837825513009,
+        "ci_high": 0.06641368433779707,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_real->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 76,
+        "trials": 1654,
+        "estimate": 0.045949214026602174,
+        "ci_low": 0.03686792292047082,
+        "ci_high": 0.05713470802564628,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.034716495528080316
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_real->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 74,
+        "trials": 1654,
+        "estimate": 0.044740024183796856,
+        "ci_low": 0.035787741109573154,
+        "ci_high": 0.055802113886999655,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.18576667692620585
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_real->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 77,
+        "trials": 1654,
+        "estimate": 0.046553808948004836,
+        "ci_low": 0.0374087239525443,
+        "ci_high": 0.05780029496834495,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.38107698808938817
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_real->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 72,
+        "trials": 1654,
+        "estimate": 0.04353083434099154,
+        "ci_low": 0.03470951356281091,
+        "ci_high": 0.0544675654842176,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.03249588709722073
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_real",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 73,
+        "trials": 1654,
+        "estimate": 0.044135429262394194,
+        "ci_low": 0.03524837835731536,
+        "ci_high": 0.05513508866448529,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_real",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 84,
+        "trials": 1654,
+        "estimate": 0.05078597339782346,
+        "ci_low": 0.04120681545832066,
+        "ci_high": 0.06244691928597363,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_real",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 79,
+        "trials": 1654,
+        "estimate": 0.047762998790810154,
+        "ci_low": 0.03849170333345685,
+        "ci_high": 0.059130091536976695,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_real",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 86,
+        "trials": 1654,
+        "estimate": 0.05199516324062878,
+        "ci_low": 0.042295771169527395,
+        "ci_high": 0.06377073952431117,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_conf->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 87,
+        "trials": 1654,
+        "estimate": 0.05259975816203144,
+        "ci_low": 0.04284084544853314,
+        "ci_high": 0.06443205322007758,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_conf->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 79,
+        "trials": 1654,
+        "estimate": 0.047762998790810154,
+        "ci_low": 0.03849170333345685,
+        "ci_high": 0.059130091536976695,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_conf->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 77,
+        "trials": 1654,
+        "estimate": 0.046553808948004836,
+        "ci_low": 0.0374087239525443,
+        "ci_high": 0.05780029496834495,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_conf->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 78,
+        "trials": 1654,
+        "estimate": 0.0471584038694075,
+        "ci_low": 0.037949986862185085,
+        "ci_high": 0.058465420033476316,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 82,
+        "trials": 1654,
+        "estimate": 0.049576783555018135,
+        "ci_low": 0.04011949474996246,
+        "ci_high": 0.06112146404478752,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.10962197564139287
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 89,
+        "trials": 1654,
+        "estimate": 0.05380894800483676,
+        "ci_low": 0.04393215508264613,
+        "ci_high": 0.0657535195355089,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.8649518400911043
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 93,
+        "trials": 1654,
+        "estimate": 0.0562273276904474,
+        "ci_low": 0.046119251528591504,
+        "ci_high": 0.06839197498865211,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.14333890943941074
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 85,
+        "trials": 1654,
+        "estimate": 0.051390568319226115,
+        "ci_low": 0.041751092327317094,
+        "ci_high": 0.06310903039174934,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.43080144959724964
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_conf",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 86,
+        "trials": 1654,
+        "estimate": 0.05199516324062878,
+        "ci_low": 0.042295771169527395,
+        "ci_high": 0.06377073952431117,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_conf",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 89,
+        "trials": 1654,
+        "estimate": 0.05380894800483676,
+        "ci_low": 0.04393215508264613,
+        "ci_high": 0.0657535195355089,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_conf",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 76,
+        "trials": 1654,
+        "estimate": 0.045949214026602174,
+        "ci_low": 0.03686792292047082,
+        "ci_high": 0.05713470802564628,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_conf",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 86,
+        "trials": 1654,
+        "estimate": 0.05199516324062878,
+        "ci_low": 0.042295771169527395,
+        "ci_high": 0.06377073952431117,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_decay->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 70,
+        "trials": 1654,
+        "estimate": 0.04232164449818621,
+        "ci_low": 0.03363331735350372,
+        "ci_high": 0.053130985743980494,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_decay->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 75,
+        "trials": 1654,
+        "estimate": 0.04534461910519952,
+        "ci_low": 0.0363275923507849,
+        "ci_high": 0.056468650620560064,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_decay->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 71,
+        "trials": 1654,
+        "estimate": 0.042926239419588876,
+        "ci_low": 0.03417115651796548,
+        "ci_high": 0.053799534554290894,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_decay->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 71,
+        "trials": 1654,
+        "estimate": 0.042926239419588876,
+        "ci_low": 0.03417115651796548,
+        "ci_high": 0.053799534554290894,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_decay->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 62,
+        "trials": 1654,
+        "estimate": 0.037484885126964934,
+        "ci_low": 0.029350589531029835,
+        "ci_high": 0.04776260976827721,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.20008343589594924
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_decay->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 74,
+        "trials": 1654,
+        "estimate": 0.044740024183796856,
+        "ci_low": 0.035787741109573154,
+        "ci_high": 0.055802113886999655,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.11623656130166338
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_decay->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 75,
+        "trials": 1654,
+        "estimate": 0.04534461910519952,
+        "ci_low": 0.0363275923507849,
+        "ci_high": 0.056468650620560064,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.6677352450667943
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_decay->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 66,
+        "trials": 1654,
+        "estimate": 0.03990326481257558,
+        "ci_low": 0.031487354939294464,
+        "ci_high": 0.050451396259101174,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.14969256972011102
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_decay",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 72,
+        "trials": 1654,
+        "estimate": 0.04353083434099154,
+        "ci_low": 0.03470951356281091,
+        "ci_high": 0.0544675654842176,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_decay",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 78,
+        "trials": 1654,
+        "estimate": 0.0471584038694075,
+        "ci_low": 0.037949986862185085,
+        "ci_high": 0.058465420033476316,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_decay",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 69,
+        "trials": 1654,
+        "estimate": 0.04171704957678356,
+        "ci_low": 0.03309600655568003,
+        "ci_high": 0.05246190856703205,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_decay",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 64,
+        "trials": 1654,
+        "estimate": 0.03869407496977025,
+        "ci_low": 0.03041777231447052,
+        "ci_high": 0.049108202934380805,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_noise->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 76,
+        "trials": 1654,
+        "estimate": 0.045949214026602174,
+        "ci_low": 0.03686792292047082,
+        "ci_high": 0.05713470802564628,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_noise->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 75,
+        "trials": 1654,
+        "estimate": 0.04534461910519952,
+        "ci_low": 0.0363275923507849,
+        "ci_high": 0.056468650620560064,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_noise->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 74,
+        "trials": 1654,
+        "estimate": 0.044740024183796856,
+        "ci_low": 0.035787741109573154,
+        "ci_high": 0.055802113886999655,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_noise->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 66,
+        "trials": 1654,
+        "estimate": 0.03990326481257558,
+        "ci_low": 0.031487354939294464,
+        "ci_high": 0.050451396259101174,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 71,
+        "trials": 1654,
+        "estimate": 0.042926239419588876,
+        "ci_low": 0.03417115651796548,
+        "ci_high": 0.053799534554290894,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.7387219654344157
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 75,
+        "trials": 1654,
+        "estimate": 0.04534461910519952,
+        "ci_low": 0.0363275923507849,
+        "ci_high": 0.056468650620560064,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.4756275973672107
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 81,
+        "trials": 1654,
+        "estimate": 0.04897218863361548,
+        "ci_low": 0.03957646497207892,
+        "ci_high": 0.060458105847898916,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.8440940864820298
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 83,
+        "trials": 1654,
+        "estimate": 0.0501813784764208,
+        "ci_low": 0.04066294729022774,
+        "ci_high": 0.06178439947929439,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.7969323211563585
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_noise",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 73,
+        "trials": 1654,
+        "estimate": 0.044135429262394194,
+        "ci_low": 0.03524837835731536,
+        "ci_high": 0.05513508866448529,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_noise",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 91,
+        "trials": 1654,
+        "estimate": 0.05501813784764208,
+        "ci_low": 0.045024972485858,
+        "ci_high": 0.06707347808184132,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_noise",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 83,
+        "trials": 1654,
+        "estimate": 0.0501813784764208,
+        "ci_low": 0.04066294729022774,
+        "ci_high": 0.06178439947929439,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_noise",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 79,
+        "trials": 1654,
+        "estimate": 0.047762998790810154,
+        "ci_low": 0.03849170333345685,
+        "ci_high": 0.059130091536976695,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "z->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 109,
+        "trials": 1654,
+        "estimate": 0.06590084643288996,
+        "ci_low": 0.05492129236121203,
+        "ci_high": 0.07889214175238594,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "z->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 76,
+        "trials": 1654,
+        "estimate": 0.045949214026602174,
+        "ci_low": 0.03686792292047082,
+        "ci_high": 0.05713470802564628,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "z->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 102,
+        "trials": 1654,
+        "estimate": 0.06166868198307134,
+        "ci_low": 0.051060473957872624,
+        "ci_high": 0.07430824433232032,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "z->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 102,
+        "trials": 1654,
+        "estimate": 0.06166868198307134,
+        "ci_low": 0.051060473957872624,
+        "ci_high": 0.07430824433232032,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "z->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 96,
+        "trials": 1654,
+        "estimate": 0.05804111245465538,
+        "ci_low": 0.047763315673574794,
+        "ci_high": 0.07036707476798526,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.6007915989950381
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "z->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 84,
+        "trials": 1654,
+        "estimate": 0.05078597339782346,
+        "ci_low": 0.04120681545832066,
+        "ci_high": 0.06244691928597363,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.8442121551650981
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "z->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 88,
+        "trials": 1654,
+        "estimate": 0.053204353083434096,
+        "ci_low": 0.043386308811629165,
+        "ci_high": 0.0650929778317537,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.08218499806231916
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "z->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 91,
+        "trials": 1654,
+        "estimate": 0.05501813784764208,
+        "ci_low": 0.045024972485858,
+        "ci_high": 0.06707347808184132,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.2712200140384383
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->z",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 65,
+        "trials": 1654,
+        "estimate": 0.039298669891172915,
+        "ci_low": 0.030952270228805076,
+        "ci_high": 0.049780092994818406,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->z",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 72,
+        "trials": 1654,
+        "estimate": 0.04353083434099154,
+        "ci_low": 0.03470951356281091,
+        "ci_high": 0.0544675654842176,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->z",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 68,
+        "trials": 1654,
+        "estimate": 0.041112454655380895,
+        "ci_low": 0.03255923498406582,
+        "ci_high": 0.0517922921638741,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->z",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 74,
+        "trials": 1654,
+        "estimate": 0.044740024183796856,
+        "ci_low": 0.035787741109573154,
+        "ci_high": 0.055802113886999655,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 404,
+        "trials": 1654,
+        "estimate": 0.24425634824667472,
+        "ci_low": 0.224158729399582,
+        "ci_high": 0.26553915727179955,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 77,
+        "trials": 1654,
+        "estimate": 0.046553808948004836,
+        "ci_low": 0.0374087239525443,
+        "ci_high": 0.05780029496834495,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 164,
+        "trials": 1654,
+        "estimate": 0.09915356711003627,
+        "ci_low": 0.08566590146899832,
+        "ci_high": 0.11449887125706777,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 195,
+        "trials": 1654,
+        "estimate": 0.11789600967351874,
+        "ci_low": 0.10323279984875665,
+        "ci_high": 0.13433000009524604,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 253,
+        "trials": 1654,
+        "estimate": 0.15296251511487305,
+        "ci_low": 0.13642111947394425,
+        "ci_high": 0.171112183006843,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 6.57984088148779e-34
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 94,
+        "trials": 1654,
+        "estimate": 0.056831922611850064,
+        "ci_low": 0.046666925416253544,
+        "ci_high": 0.06905068907576223,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.37351511776133384
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 135,
+        "trials": 1654,
+        "estimate": 0.08162031438935913,
+        "ci_low": 0.06937501943978783,
+        "ci_high": 0.09580450201788598,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 3.627470193584784e-07
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 132,
+        "trials": 1654,
+        "estimate": 0.07980652962515115,
+        "ci_low": 0.067699154464151,
+        "ci_high": 0.0938612030692064,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 7.787323952794364e-06
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_conf->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 91,
+        "trials": 1654,
+        "estimate": 0.05501813784764208,
+        "ci_low": 0.045024972485858,
+        "ci_high": 0.06707347808184132,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_conf->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 80,
+        "trials": 1654,
+        "estimate": 0.04836759371221282,
+        "ci_low": 0.039033865307617995,
+        "ci_high": 0.0597943175375877,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_conf->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 79,
+        "trials": 1654,
+        "estimate": 0.047762998790810154,
+        "ci_low": 0.03849170333345685,
+        "ci_high": 0.059130091536976695,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_conf->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 80,
+        "trials": 1654,
+        "estimate": 0.04836759371221282,
+        "ci_low": 0.039033865307617995,
+        "ci_high": 0.0597943175375877,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 79,
+        "trials": 1654,
+        "estimate": 0.047762998790810154,
+        "ci_low": 0.03849170333345685,
+        "ci_high": 0.059130091536976695,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.2115046244761668
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 90,
+        "trials": 1654,
+        "estimate": 0.05441354292623942,
+        "ci_low": 0.04447837825513009,
+        "ci_high": 0.06641368433779707,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.4218399274789476
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 86,
+        "trials": 1654,
+        "estimate": 0.05199516324062878,
+        "ci_low": 0.042295771169527395,
+        "ci_high": 0.06377073952431117,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.10829376086905695
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 87,
+        "trials": 1654,
+        "estimate": 0.05259975816203144,
+        "ci_low": 0.04284084544853314,
+        "ci_high": 0.06443205322007758,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.662574582473964
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_noise->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 73,
+        "trials": 1654,
+        "estimate": 0.044135429262394194,
+        "ci_low": 0.03524837835731536,
+        "ci_high": 0.05513508866448529,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_noise->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 73,
+        "trials": 1654,
+        "estimate": 0.044135429262394194,
+        "ci_low": 0.03524837835731536,
+        "ci_high": 0.05513508866448529,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_noise->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 77,
+        "trials": 1654,
+        "estimate": 0.046553808948004836,
+        "ci_low": 0.0374087239525443,
+        "ci_high": 0.05780029496834495,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_noise->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 66,
+        "trials": 1654,
+        "estimate": 0.03990326481257558,
+        "ci_low": 0.031487354939294464,
+        "ci_high": 0.050451396259101174,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 77,
+        "trials": 1654,
+        "estimate": 0.046553808948004836,
+        "ci_low": 0.0374087239525443,
+        "ci_high": 0.05780029496834495,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.9308029073964287
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 81,
+        "trials": 1654,
+        "estimate": 0.04897218863361548,
+        "ci_low": 0.03957646497207892,
+        "ci_high": 0.060458105847898916,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.7124762255905766
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 77,
+        "trials": 1654,
+        "estimate": 0.046553808948004836,
+        "ci_low": 0.0374087239525443,
+        "ci_high": 0.05780029496834495,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.9479610124422192
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 79,
+        "trials": 1654,
+        "estimate": 0.047762998790810154,
+        "ci_low": 0.03849170333345685,
+        "ci_high": 0.059130091536976695,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.8658134195961369
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R@2..",
+      "role": "null",
+      "lags": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 169,
+        "trials": 1654,
+        "estimate": 0.10217654171704958,
+        "ci_low": 0.0884895749437618,
+        "ci_high": 0.11770713765616506,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R@2..",
+      "role": "null",
+      "lags": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 152,
+        "trials": 1654,
+        "estimate": 0.09189842805320435,
+        "ci_low": 0.07890608322625915,
+        "ci_high": 0.10678203380254116,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R@2..",
+      "role": "null",
+      "lags": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 164,
+        "trials": 1654,
+        "estimate": 0.09915356711003627,
+        "ci_low": 0.08566590146899832,
+        "ci_high": 0.11449887125706777,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R@2..",
+      "role": "null",
+      "lags": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 164,
+        "trials": 1654,
+        "estimate": 0.09915356711003627,
+        "ci_low": 0.08566590146899832,
+        "ci_high": 0.11449887125706777,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 399,
+        "trials": 1654,
+        "estimate": 0.24123337363966144,
+        "ci_low": 0.22122983458689313,
+        "ci_high": 0.2624361122106277,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 92,
+        "trials": 1654,
+        "estimate": 0.05562273276904474,
+        "ci_low": 0.04557193208866877,
+        "ci_high": 0.0677329064538027,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 178,
+        "trials": 1654,
+        "estimate": 0.10761789600967352,
+        "ci_low": 0.09358198127255928,
+        "ci_high": 0.1234722231003169,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 207,
+        "trials": 1654,
+        "estimate": 0.12515114873035066,
+        "ci_low": 0.11006808930714852,
+        "ci_high": 0.14197136633411994,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 266,
+        "trials": 1654,
+        "estimate": 0.1608222490931076,
+        "ci_low": 0.1439068747250248,
+        "ci_high": 0.17930947142780032,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 6.703831783878115e-36
+    },
+    {
+      "scenario": "e3_default",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 103,
+        "trials": 1654,
+        "estimate": 0.062273276904474005,
+        "ci_low": 0.05161111692423372,
+        "ci_high": 0.07496398934073137,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.0816271693094327
+    },
+    {
+      "scenario": "e3_default",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 142,
+        "trials": 1654,
+        "estimate": 0.08585247883917775,
+        "ci_low": 0.07329270003374913,
+        "ci_high": 0.10033153724732974,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 1.0346550192100412e-07
+    },
+    {
+      "scenario": "e3_default",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 156,
+        "trials": 1654,
+        "estimate": 0.094316807738815,
+        "ci_low": 0.08115659250002483,
+        "ci_high": 0.1093570764278641,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 3.2416647824799883e-09
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 572,
+        "trials": 1654,
+        "estimate": 0.34582829504232165,
+        "ci_low": 0.32328710932811144,
+        "ci_high": 0.36908395710499087,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 663,
+        "trials": 1654,
+        "estimate": 0.40084643288996374,
+        "ci_low": 0.37748470126681877,
+        "ci_high": 0.4246676708705489,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 683,
+        "trials": 1654,
+        "estimate": 0.41293833131801694,
+        "ci_low": 0.38943851374473937,
+        "ci_high": 0.4368416178880713,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 667,
+        "trials": 1654,
+        "estimate": 0.40326481257557434,
+        "ci_low": 0.3798742775933852,
+        "ci_high": 0.427103646443071,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 856,
+        "trials": 1654,
+        "estimate": 0.5175332527206772,
+        "ci_low": 0.4934390283680064,
+        "ci_high": 0.541546222900386,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 965,
+        "trials": 1654,
+        "estimate": 0.5834340991535671,
+        "ci_low": 0.5595090747913077,
+        "ci_high": 0.6069724657272487,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 949,
+        "trials": 1654,
+        "estimate": 0.5737605804111245,
+        "ci_low": 0.5497840218514146,
+        "ci_high": 0.5973953110707874,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 965,
+        "trials": 1654,
+        "estimate": 0.5834340991535671,
+        "ci_low": 0.5595090747913077,
+        "ci_high": 0.6069724657272487,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_decay->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 592,
+        "trials": 1654,
+        "estimate": 0.35792019347037485,
+        "ci_low": 0.33517086969709786,
+        "ci_high": 0.38132795623144733,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_decay->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 657,
+        "trials": 1654,
+        "estimate": 0.39721886336154777,
+        "ci_low": 0.37390145581566986,
+        "ci_high": 0.42101258847306494,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_decay->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 655,
+        "trials": 1654,
+        "estimate": 0.39600967351874244,
+        "ci_low": 0.3727073399833008,
+        "ci_high": 0.41979392835588974,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_decay->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 685,
+        "trials": 1654,
+        "estimate": 0.41414752116082226,
+        "ci_low": 0.39063470711127435,
+        "ci_high": 0.43805820047108057,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_decay->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 753,
+        "trials": 1654,
+        "estimate": 0.45525997581620314,
+        "ci_low": 0.43139160279404504,
+        "ci_high": 0.479335687072816,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_decay->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 870,
+        "trials": 1654,
+        "estimate": 0.5259975816203144,
+        "ci_low": 0.5019014569057749,
+        "ci_high": 0.5499732260094274,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_decay->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 847,
+        "trials": 1654,
+        "estimate": 0.5120918984280532,
+        "ci_low": 0.48800253726920917,
+        "ci_high": 0.5361252222262338,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_decay->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 850,
+        "trials": 1654,
+        "estimate": 0.5139056831922612,
+        "ci_low": 0.48981438457968995,
+        "ci_high": 0.5379325388400694,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "z->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 209,
+        "trials": 1654,
+        "estimate": 0.12636033857315598,
+        "ci_low": 0.11120902873613335,
+        "ci_high": 0.1432432028546794,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "z->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 189,
+        "trials": 1654,
+        "estimate": 0.11426844014510278,
+        "ci_low": 0.0998220991747939,
+        "ci_high": 0.13050237292057587,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "z->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 200,
+        "trials": 1654,
+        "estimate": 0.12091898428053205,
+        "ci_low": 0.10607864028585073,
+        "ci_high": 0.1375160995320127,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "z->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 211,
+        "trials": 1654,
+        "estimate": 0.1275695284159613,
+        "ci_low": 0.11235044469231359,
+        "ci_high": 0.14451456284804348,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_conf->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 91,
+        "trials": 1654,
+        "estimate": 0.05501813784764208,
+        "ci_low": 0.045024972485858,
+        "ci_high": 0.06707347808184132,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_conf->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 80,
+        "trials": 1654,
+        "estimate": 0.04836759371221282,
+        "ci_low": 0.039033865307617995,
+        "ci_high": 0.0597943175375877,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_conf->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 76,
+        "trials": 1654,
+        "estimate": 0.045949214026602174,
+        "ci_low": 0.03686792292047082,
+        "ci_high": 0.05713470802564628,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_conf->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 80,
+        "trials": 1654,
+        "estimate": 0.04836759371221282,
+        "ci_low": 0.039033865307617995,
+        "ci_high": 0.0597943175375877,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 84,
+        "trials": 1654,
+        "estimate": 0.05078597339782346,
+        "ci_low": 0.04120681545832066,
+        "ci_high": 0.06244691928597363,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.32201982936790907
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 88,
+        "trials": 1654,
+        "estimate": 0.053204353083434096,
+        "ci_low": 0.043386308811629165,
+        "ci_high": 0.0650929778317537,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.620345426093404
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 92,
+        "trials": 1654,
+        "estimate": 0.05562273276904474,
+        "ci_low": 0.04557193208866877,
+        "ci_high": 0.0677329064538027,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.07651307005295038
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 85,
+        "trials": 1654,
+        "estimate": 0.051390568319226115,
+        "ci_low": 0.041751092327317094,
+        "ci_high": 0.06310903039174934,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.27599171997062844
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_noise->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 74,
+        "trials": 1654,
+        "estimate": 0.044740024183796856,
+        "ci_low": 0.035787741109573154,
+        "ci_high": 0.055802113886999655,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_noise->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 75,
+        "trials": 1654,
+        "estimate": 0.04534461910519952,
+        "ci_low": 0.0363275923507849,
+        "ci_high": 0.056468650620560064,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_noise->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 75,
+        "trials": 1654,
+        "estimate": 0.04534461910519952,
+        "ci_low": 0.0363275923507849,
+        "ci_high": 0.056468650620560064,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_noise->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 65,
+        "trials": 1654,
+        "estimate": 0.039298669891172915,
+        "ci_low": 0.030952270228805076,
+        "ci_high": 0.049780092994818406,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 74,
+        "trials": 1654,
+        "estimate": 0.044740024183796856,
+        "ci_low": 0.035787741109573154,
+        "ci_high": 0.055802113886999655,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.7459361954415117
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 72,
+        "trials": 1654,
+        "estimate": 0.04353083434099154,
+        "ci_low": 0.03470951356281091,
+        "ci_high": 0.0544675654842176,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.6879747092624362
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 80,
+        "trials": 1654,
+        "estimate": 0.04836759371221282,
+        "ci_low": 0.039033865307617995,
+        "ci_high": 0.0597943175375877,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.4619927284952312
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 80,
+        "trials": 1654,
+        "estimate": 0.04836759371221282,
+        "ci_low": 0.039033865307617995,
+        "ci_high": 0.0597943175375877,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.9233135937856854
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R@2..",
+      "role": "null",
+      "lags": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 126,
+        "trials": 1654,
+        "estimate": 0.0761789600967352,
+        "ci_low": 0.06435339274267939,
+        "ci_high": 0.08996863694204511,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R@2..",
+      "role": "null",
+      "lags": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 142,
+        "trials": 1654,
+        "estimate": 0.08585247883917775,
+        "ci_low": 0.07329270003374913,
+        "ci_high": 0.10033153724732974,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R@2..",
+      "role": "null",
+      "lags": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 137,
+        "trials": 1654,
+        "estimate": 0.08282950423216445,
+        "ci_low": 0.0704933270477023,
+        "ci_high": 0.09709897035951583,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R@2..",
+      "role": "null",
+      "lags": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 137,
+        "trials": 1654,
+        "estimate": 0.08282950423216445,
+        "ci_low": 0.0704933270477023,
+        "ci_high": 0.09709897035951583,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 402,
+        "trials": 1654,
+        "estimate": 0.2430471584038694,
+        "ci_low": 0.22298700469279428,
+        "ci_high": 0.2642981060290429,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 80,
+        "trials": 1654,
+        "estimate": 0.04836759371221282,
+        "ci_low": 0.039033865307617995,
+        "ci_high": 0.0597943175375877,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 171,
+        "trials": 1654,
+        "estimate": 0.1033857315598549,
+        "ci_low": 0.08962015219225006,
+        "ci_high": 0.11898933635722106,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 194,
+        "trials": 1654,
+        "estimate": 0.11729141475211609,
+        "ci_low": 0.10266401904012734,
+        "ci_high": 0.1336923929291032,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 261,
+        "trials": 1654,
+        "estimate": 0.15779927448609432,
+        "ci_low": 0.1410259231907357,
+        "ci_high": 0.17615848308822873,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 2.4498732113608565e-33
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 94,
+        "trials": 1654,
+        "estimate": 0.056831922611850064,
+        "ci_low": 0.046666925416253544,
+        "ci_high": 0.06905068907576223,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.35896065715045145
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 129,
+        "trials": 1654,
+        "estimate": 0.07799274486094317,
+        "ci_low": 0.06602525804338401,
+        "ci_high": 0.09191593556565693,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 1.7944766216522613e-06
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 143,
+        "trials": 1654,
+        "estimate": 0.08645707376058041,
+        "ci_low": 0.07385317664766311,
+        "ci_high": 0.10097744860818789,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 3.203143289938152e-07
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 135,
+        "trials": 1654,
+        "estimate": 0.08162031438935913,
+        "ci_low": 0.06937501943978783,
+        "ci_high": 0.09580450201788598,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 160,
+        "trials": 1654,
+        "estimate": 0.09673518742442563,
+        "ci_low": 0.08340989615863378,
+        "ci_high": 0.11192932466834374,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 164,
+        "trials": 1654,
+        "estimate": 0.09915356711003627,
+        "ci_low": 0.08566590146899832,
+        "ci_high": 0.11449887125706777,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 168,
+        "trials": 1654,
+        "estimate": 0.10157194679564692,
+        "ci_low": 0.08792452122680039,
+        "ci_high": 0.11706580339835432,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 157,
+        "trials": 1654,
+        "estimate": 0.09492140266021766,
+        "ci_low": 0.08171966016251764,
+        "ci_high": 0.11000039674014345,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 181,
+        "trials": 1654,
+        "estimate": 0.1094316807738815,
+        "ci_low": 0.0952821300200148,
+        "ci_high": 0.1253912382771778,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 177,
+        "trials": 1654,
+        "estimate": 0.10701330108827085,
+        "ci_low": 0.09301555689190724,
+        "ci_high": 0.12283225950619678,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 175,
+        "trials": 1654,
+        "estimate": 0.10580411124546554,
+        "ci_low": 0.09188315243792085,
+        "ci_high": 0.12155188801063889,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_decay->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 97,
+        "trials": 1654,
+        "estimate": 0.058645707376058044,
+        "ci_low": 0.048312021945754034,
+        "ci_high": 0.07102475647057817,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_decay->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 134,
+        "trials": 1654,
+        "estimate": 0.08101571946795647,
+        "ci_low": 0.06881618277228008,
+        "ci_high": 0.09515695071062158,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_decay->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 116,
+        "trials": 1654,
+        "estimate": 0.07013301088270858,
+        "ci_low": 0.05879605871156712,
+        "ci_high": 0.08346209122543588,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_decay->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 117,
+        "trials": 1654,
+        "estimate": 0.07073760580411124,
+        "ci_low": 0.05935066628522999,
+        "ci_high": 0.08411387162654517,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_decay->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 115,
+        "trials": 1654,
+        "estimate": 0.06952841596130592,
+        "ci_low": 0.058241712094958376,
+        "ci_high": 0.0828100498672725,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_decay->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 133,
+        "trials": 1654,
+        "estimate": 0.0804111245465538,
+        "ci_low": 0.068257560383612,
+        "ci_high": 0.09450918512451753,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_decay->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 132,
+        "trials": 1654,
+        "estimate": 0.07980652962515115,
+        "ci_low": 0.067699154464151,
+        "ci_high": 0.0938612030692064,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_decay->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 130,
+        "trials": 1654,
+        "estimate": 0.07859733978234583,
+        "ci_low": 0.06658300099946336,
+        "ci_high": 0.09256458058434973,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "z->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 122,
+        "trials": 1654,
+        "estimate": 0.07376058041112454,
+        "ci_low": 0.0621275135909224,
+        "ci_high": 0.0873689641947135,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "z->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 101,
+        "trials": 1654,
+        "estimate": 0.06106408706166868,
+        "ci_low": 0.05051014268360429,
+        "ci_high": 0.0736521876318165,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "z->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 123,
+        "trials": 1654,
+        "estimate": 0.0743651753325272,
+        "ci_low": 0.06268362480514907,
+        "ci_high": 0.088019240955259,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "z->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 111,
+        "trials": 1654,
+        "estimate": 0.06711003627569528,
+        "ci_low": 0.05602699873370149,
+        "ci_high": 0.0801992113294408,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "s_vol->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 327,
+        "trials": 1654,
+        "estimate": 0.1977025392986699,
+        "ci_low": 0.17921896418920047,
+        "ci_high": 0.2175870484247257,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "s_vol->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 56,
+        "trials": 1654,
+        "estimate": 0.03385731559854897,
+        "ci_low": 0.026164592402347572,
+        "ci_high": 0.043710279048326584,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "s_vol->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 209,
+        "trials": 1654,
+        "estimate": 0.12636033857315598,
+        "ci_low": 0.11120902873613335,
+        "ci_high": 0.1432432028546794,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "s_vol->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 123,
+        "trials": 1654,
+        "estimate": 0.0743651753325272,
+        "ci_low": 0.06268362480514907,
+        "ci_high": 0.088019240955259,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "s_vol->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 232,
+        "trials": 1654,
+        "estimate": 0.14026602176541716,
+        "ci_low": 0.12436271075410979,
+        "ci_high": 0.15783644425646234,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 1.5019941045578683e-27
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "s_vol->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 82,
+        "trials": 1654,
+        "estimate": 0.049576783555018135,
+        "ci_low": 0.04011949474996246,
+        "ci_high": 0.06112146404478752,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.16385024917571334
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "s_vol->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 171,
+        "trials": 1654,
+        "estimate": 0.1033857315598549,
+        "ci_low": 0.08962015219225006,
+        "ci_high": 0.11898933635722106,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 2.750094145055958e-13
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "s_vol->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 107,
+        "trials": 1654,
+        "estimate": 0.06469165659008465,
+        "ci_low": 0.05381672337736116,
+        "ci_high": 0.07758393478669254,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.000500092444202538
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 409,
+        "trials": 1654,
+        "estimate": 0.24727932285368803,
+        "ci_low": 0.22708900595683704,
+        "ci_high": 0.2686408205884052,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 78,
+        "trials": 1654,
+        "estimate": 0.0471584038694075,
+        "ci_low": 0.037949986862185085,
+        "ci_high": 0.058465420033476316,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 163,
+        "trials": 1654,
+        "estimate": 0.09854897218863362,
+        "ci_low": 0.08510165172060434,
+        "ci_high": 0.11385673303068962,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 197,
+        "trials": 1654,
+        "estimate": 0.11910519951632406,
+        "ci_low": 0.10437075128578042,
+        "ci_high": 0.13560482460776654,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "parcorr",
+      "rate": {
+        "successes": 253,
+        "trials": 1654,
+        "estimate": 0.15296251511487305,
+        "ci_low": 0.13642111947394425,
+        "ci_high": 0.171112183006843,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 1.180508124368304e-32
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls10",
+      "rate": {
+        "successes": 96,
+        "trials": 1654,
+        "estimate": 0.05804111245465538,
+        "ci_low": 0.047763315673574794,
+        "ci_high": 0.07036707476798526,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.4513261855568589
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "wls50",
+      "rate": {
+        "successes": 132,
+        "trials": 1654,
+        "estimate": 0.07980652962515115,
+        "ci_low": 0.067699154464151,
+        "ci_high": 0.0938612030692064,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 1.3117952199770883e-06
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "robust",
+      "rate": {
+        "successes": 136,
+        "trials": 1654,
+        "estimate": 0.08222490931076179,
+        "ci_low": 0.06993406823553933,
+        "ci_high": 0.09645184119690664,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 2.8325668954748806e-06
+    }
+  ],
+  "admissible": {
+    "parcorr": false,
+    "wls10": true,
+    "wls50": false,
+    "robust": false
+  },
+  "failed_gates": {
+    "parcorr": [
+      "e2_garch_null/z->R",
+      "e4_vol_null/s_vol->R"
+    ],
+    "wls10": [],
+    "wls50": [
+      "e4_vol_null/s_vol->R"
+    ],
+    "robust": [
+      "e4_vol_null/s_vol->R"
+    ]
+  },
+  "power": [
+    {
+      "test": "parcorr",
+      "power": 0.3518742442563482,
+      "diff_from_best": 0.0471584038694075,
+      "diff_ci_low": 0.030698708132907575,
+      "diff_ci_high": 0.06361809960590742
+    },
+    {
+      "test": "wls10",
+      "power": 0.39903264812575573,
+      "diff_from_best": 0.0,
+      "diff_ci_low": 0.0,
+      "diff_ci_high": 0.0
+    },
+    {
+      "test": "wls50",
+      "power": 0.40447400241837966,
+      "diff_from_best": -0.005441354292623942,
+      "diff_ci_low": -0.019563906287199045,
+      "diff_ci_high": 0.008681197701951159
+    },
+    {
+      "test": "robust",
+      "power": 0.40870616686819833,
+      "diff_from_best": -0.009673518742442563,
+      "diff_ci_low": -0.02484614654898928,
+      "diff_ci_high": 0.0054991090641041546
+    }
+  ],
+  "median_seconds": {
+    "parcorr": 1.1878868749990943,
+    "wls10": 1.5110998965010367,
+    "wls50": 1.6095394584999667,
+    "robust": 3.898800625000149
+  },
+  "selected": "wls10",
+  "selection_reason": "admissible: ['wls10']; highest power: wls10; statistically tied with it: ['wls10']; cheapest of those: wls10"
+}

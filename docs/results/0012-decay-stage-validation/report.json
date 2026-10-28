@@ -1,0 +1,809 @@
+{
+  "config": {
+    "root_seed": 20261023,
+    "n_seeds": 1000,
+    "n_obs": null,
+    "presets": [
+      "base",
+      "realistic",
+      "hidden_confounder"
+    ],
+    "confidence": 0.95,
+    "n_boot": null,
+    "min_obs": null,
+    "acceptance": {
+      "preset": "base",
+      "null_signals": [
+        "s_real"
+      ],
+      "null_kill_upper_max": 0.075,
+      "decay_signals": [
+        "s_decay"
+      ],
+      "decay_kill_lower_min": 0.52
+    }
+  },
+  "n_seeds": 1000,
+  "git_sha": "90ce789f7d7233d3e7b562e0ba71779eae68812e",
+  "git_dirty": false,
+  "alpha": 0.05,
+  "presets": [
+    {
+      "preset": "base",
+      "n_runs": 1000,
+      "n_incomplete": 0,
+      "aggregate": {
+        "n_runs": 1000,
+        "n_incomplete_runs": 0,
+        "stages": [
+          "causal",
+          "decay"
+        ],
+        "per_signal_correct": {
+          "s_conf": {
+            "successes": 979,
+            "trials": 1000,
+            "estimate": 0.979,
+            "ci_low": 0.9681097049387625,
+            "ci_high": 0.9862242604320758,
+            "confidence": 0.95
+          },
+          "s_decay": {
+            "successes": 720,
+            "trials": 1000,
+            "estimate": 0.72,
+            "ci_low": 0.6913699270789491,
+            "ci_high": 0.7469462991874067,
+            "confidence": 0.95
+          },
+          "s_noise": {
+            "successes": 970,
+            "trials": 1000,
+            "estimate": 0.97,
+            "ci_low": 0.9574965858524128,
+            "ci_high": 0.9789062611711653,
+            "confidence": 0.95
+          },
+          "s_real": {
+            "successes": 834,
+            "trials": 1000,
+            "estimate": 0.834,
+            "ci_low": 0.8096691971622607,
+            "ci_high": 0.8557745281693885,
+            "confidence": 0.95
+          }
+        },
+        "per_signal_stage_match": {
+          "s_conf": {
+            "successes": 978,
+            "trials": 979,
+            "estimate": 0.9989785495403473,
+            "ci_low": 0.9942368942761828,
+            "ci_high": 0.9998196661504568,
+            "confidence": 0.95
+          },
+          "s_decay": {
+            "successes": 550,
+            "trials": 720,
+            "estimate": 0.7638888888888888,
+            "ci_low": 0.7315182081945005,
+            "ci_high": 0.7934586294394038,
+            "confidence": 0.95
+          },
+          "s_noise": {
+            "successes": 970,
+            "trials": 970,
+            "estimate": 1.0,
+            "ci_low": 0.9960553550211899,
+            "ci_high": 1.0,
+            "confidence": 0.95
+          },
+          "s_real": {
+            "successes": 0,
+            "trials": 0,
+            "estimate": null,
+            "ci_low": null,
+            "ci_high": null,
+            "confidence": 0.95
+          }
+        },
+        "kill_precision": {
+          "successes": 2669,
+          "trials": 2835,
+          "estimate": 0.9414462081128748,
+          "ci_low": 0.9321914210267949,
+          "ci_high": 0.9495062842898633,
+          "confidence": 0.95
+        },
+        "kill_recall": {
+          "successes": 2669,
+          "trials": 3000,
+          "estimate": 0.8896666666666667,
+          "ci_low": 0.8779531747027277,
+          "ci_high": 0.9003835091906683,
+          "confidence": 0.95
+        }
+      },
+      "signals": [
+        {
+          "signal_id": "s_real",
+          "stage1_pass_rate": {
+            "successes": 882,
+            "trials": 1000,
+            "estimate": 0.882,
+            "ci_low": 0.8605279149182592,
+            "ci_high": 0.9005484415987768,
+            "confidence": 0.95
+          },
+          "stage2_kill_given_stage1_pass": {
+            "successes": 48,
+            "trials": 882,
+            "estimate": 0.05442176870748299,
+            "ci_low": 0.04129113777993444,
+            "ci_high": 0.07141690701355646,
+            "confidence": 0.95
+          },
+          "reasons": {
+            "decay.edge_declining": 48
+          },
+          "trend_kill_given_stage1_pass": {
+            "successes": 46,
+            "trials": 882,
+            "estimate": 0.05215419501133787,
+            "ci_low": 0.03932660915161605,
+            "ci_high": 0.06886595495380102,
+            "confidence": 0.95
+          },
+          "pipeline_pass_rate": {
+            "successes": 834,
+            "trials": 1000,
+            "estimate": 0.834,
+            "ci_low": 0.8096691971622607,
+            "ci_high": 0.8557745281693885,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_conf",
+          "stage1_pass_rate": {
+            "successes": 22,
+            "trials": 1000,
+            "estimate": 0.022,
+            "ci_low": 0.014572707764791058,
+            "ci_high": 0.03308567334739963,
+            "confidence": 0.95
+          },
+          "stage2_kill_given_stage1_pass": {
+            "successes": 1,
+            "trials": 22,
+            "estimate": 0.045454545454545456,
+            "ci_low": 0.00806942762126385,
+            "ci_high": 0.21798045838657332,
+            "confidence": 0.95
+          },
+          "reasons": {
+            "decay.edge_declining": 1
+          },
+          "trend_kill_given_stage1_pass": {
+            "successes": 1,
+            "trials": 22,
+            "estimate": 0.045454545454545456,
+            "ci_low": 0.00806942762126385,
+            "ci_high": 0.21798045838657332,
+            "confidence": 0.95
+          },
+          "pipeline_pass_rate": {
+            "successes": 21,
+            "trials": 1000,
+            "estimate": 0.021,
+            "ci_low": 0.013775739567924286,
+            "ci_high": 0.03189029506123752,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_decay",
+          "stage1_pass_rate": {
+            "successes": 830,
+            "trials": 1000,
+            "estimate": 0.83,
+            "ci_low": 0.805465935038086,
+            "ci_high": 0.8520084043614475,
+            "confidence": 0.95
+          },
+          "stage2_kill_given_stage1_pass": {
+            "successes": 550,
+            "trials": 830,
+            "estimate": 0.6626506024096386,
+            "ci_low": 0.6298011370757667,
+            "ci_high": 0.6940014241231719,
+            "confidence": 0.95
+          },
+          "reasons": {
+            "decay.edge_declining": 550
+          },
+          "trend_kill_given_stage1_pass": {
+            "successes": 549,
+            "trials": 830,
+            "estimate": 0.6614457831325301,
+            "ci_low": 0.6285739892864909,
+            "ci_high": 0.6928300344220851,
+            "confidence": 0.95
+          },
+          "pipeline_pass_rate": {
+            "successes": 280,
+            "trials": 1000,
+            "estimate": 0.28,
+            "ci_low": 0.25305370081259326,
+            "ci_high": 0.30863007292105105,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_noise",
+          "stage1_pass_rate": {
+            "successes": 30,
+            "trials": 1000,
+            "estimate": 0.03,
+            "ci_low": 0.0210937388288347,
+            "ci_high": 0.042503414147587126,
+            "confidence": 0.95
+          },
+          "stage2_kill_given_stage1_pass": {
+            "successes": 0,
+            "trials": 30,
+            "estimate": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.11351339317396876,
+            "confidence": 0.95
+          },
+          "reasons": {},
+          "trend_kill_given_stage1_pass": {
+            "successes": 2,
+            "trials": 30,
+            "estimate": 0.06666666666666667,
+            "ci_low": 0.018477023791270378,
+            "ci_high": 0.2132345836261692,
+            "confidence": 0.95
+          },
+          "pipeline_pass_rate": {
+            "successes": 30,
+            "trials": 1000,
+            "estimate": 0.03,
+            "ci_low": 0.0210937388288347,
+            "ci_high": 0.042503414147587126,
+            "confidence": 0.95
+          }
+        }
+      ],
+      "median_seconds": 4.540479770483216
+    },
+    {
+      "preset": "realistic",
+      "n_runs": 1000,
+      "n_incomplete": 0,
+      "aggregate": {
+        "n_runs": 1000,
+        "n_incomplete_runs": 0,
+        "stages": [
+          "causal",
+          "decay"
+        ],
+        "per_signal_correct": {
+          "s_conf": {
+            "successes": 989,
+            "trials": 1000,
+            "estimate": 0.989,
+            "ci_low": 0.9804106042992137,
+            "ci_high": 0.9938468259019134,
+            "confidence": 0.95
+          },
+          "s_decay": {
+            "successes": 956,
+            "trials": 1000,
+            "estimate": 0.956,
+            "ci_low": 0.9414482108495923,
+            "ci_high": 0.9670617854115815,
+            "confidence": 0.95
+          },
+          "s_noise": {
+            "successes": 985,
+            "trials": 1000,
+            "estimate": 0.985,
+            "ci_low": 0.9753990230730932,
+            "ci_high": 0.9908890211959184,
+            "confidence": 0.95
+          },
+          "s_real": {
+            "successes": 108,
+            "trials": 1000,
+            "estimate": 0.108,
+            "ci_low": 0.09024119856255189,
+            "ci_high": 0.12875898009012332,
+            "confidence": 0.95
+          }
+        },
+        "per_signal_stage_match": {
+          "s_conf": {
+            "successes": 988,
+            "trials": 989,
+            "estimate": 0.9989888776541962,
+            "ci_low": 0.9942949335794143,
+            "ci_high": 0.9998214897741867,
+            "confidence": 0.95
+          },
+          "s_decay": {
+            "successes": 4,
+            "trials": 956,
+            "estimate": 0.0041841004184100415,
+            "ci_low": 0.0016282816858805074,
+            "ci_high": 0.010708608653533557,
+            "confidence": 0.95
+          },
+          "s_noise": {
+            "successes": 985,
+            "trials": 985,
+            "estimate": 1.0,
+            "ci_low": 0.9961151923936568,
+            "ci_high": 0.9999999999999999,
+            "confidence": 0.95
+          },
+          "s_real": {
+            "successes": 0,
+            "trials": 0,
+            "estimate": null,
+            "ci_low": null,
+            "ci_high": null,
+            "confidence": 0.95
+          }
+        },
+        "kill_precision": {
+          "successes": 2930,
+          "trials": 3822,
+          "estimate": 0.7666143380429095,
+          "ci_low": 0.7529407108999395,
+          "ci_high": 0.7797525598317254,
+          "confidence": 0.95
+        },
+        "kill_recall": {
+          "successes": 2930,
+          "trials": 3000,
+          "estimate": 0.9766666666666667,
+          "ci_low": 0.9706242987655306,
+          "ci_high": 0.9814898654496588,
+          "confidence": 0.95
+        }
+      },
+      "signals": [
+        {
+          "signal_id": "s_real",
+          "stage1_pass_rate": {
+            "successes": 117,
+            "trials": 1000,
+            "estimate": 0.117,
+            "ci_low": 0.09852838761922869,
+            "ci_high": 0.13840290938070654,
+            "confidence": 0.95
+          },
+          "stage2_kill_given_stage1_pass": {
+            "successes": 9,
+            "trials": 117,
+            "estimate": 0.07692307692307693,
+            "ci_low": 0.04099517079890567,
+            "ci_high": 0.1397495755310995,
+            "confidence": 0.95
+          },
+          "reasons": {
+            "decay.edge_declining": 9
+          },
+          "trend_kill_given_stage1_pass": {
+            "successes": 10,
+            "trials": 117,
+            "estimate": 0.08547008547008547,
+            "ci_low": 0.047087483244617576,
+            "ci_high": 0.15020787427064003,
+            "confidence": 0.95
+          },
+          "pipeline_pass_rate": {
+            "successes": 108,
+            "trials": 1000,
+            "estimate": 0.108,
+            "ci_low": 0.09024119856255189,
+            "ci_high": 0.12875898009012332,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_conf",
+          "stage1_pass_rate": {
+            "successes": 12,
+            "trials": 1000,
+            "estimate": 0.012,
+            "ci_low": 0.006877647806403522,
+            "ci_high": 0.02085726847549828,
+            "confidence": 0.95
+          },
+          "stage2_kill_given_stage1_pass": {
+            "successes": 1,
+            "trials": 12,
+            "estimate": 0.08333333333333333,
+            "ci_low": 0.014865094404917095,
+            "ci_high": 0.35387991114111694,
+            "confidence": 0.95
+          },
+          "reasons": {
+            "decay.edge_declining": 1
+          },
+          "trend_kill_given_stage1_pass": {
+            "successes": 0,
+            "trials": 12,
+            "estimate": 0.0,
+            "ci_low": 2.7755575615628914e-17,
+            "ci_high": 0.24249400665524085,
+            "confidence": 0.95
+          },
+          "pipeline_pass_rate": {
+            "successes": 11,
+            "trials": 1000,
+            "estimate": 0.011,
+            "ci_low": 0.006153174098086638,
+            "ci_high": 0.019589395700786275,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_decay",
+          "stage1_pass_rate": {
+            "successes": 48,
+            "trials": 1000,
+            "estimate": 0.048,
+            "ci_low": 0.036393301020807914,
+            "ci_high": 0.06306608865013393,
+            "confidence": 0.95
+          },
+          "stage2_kill_given_stage1_pass": {
+            "successes": 4,
+            "trials": 48,
+            "estimate": 0.08333333333333333,
+            "ci_low": 0.032883756818091775,
+            "ci_high": 0.1955330179036728,
+            "confidence": 0.95
+          },
+          "reasons": {
+            "decay.edge_declining": 4
+          },
+          "trend_kill_given_stage1_pass": {
+            "successes": 6,
+            "trials": 48,
+            "estimate": 0.125,
+            "ci_low": 0.058570514385719794,
+            "ci_high": 0.24700458286386834,
+            "confidence": 0.95
+          },
+          "pipeline_pass_rate": {
+            "successes": 44,
+            "trials": 1000,
+            "estimate": 0.044,
+            "ci_low": 0.0329382145884185,
+            "ci_high": 0.058551789150407776,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_noise",
+          "stage1_pass_rate": {
+            "successes": 15,
+            "trials": 1000,
+            "estimate": 0.015,
+            "ci_low": 0.009110978804081668,
+            "ci_high": 0.024600976926906798,
+            "confidence": 0.95
+          },
+          "stage2_kill_given_stage1_pass": {
+            "successes": 0,
+            "trials": 15,
+            "estimate": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.20388330103584862,
+            "confidence": 0.95
+          },
+          "reasons": {},
+          "trend_kill_given_stage1_pass": {
+            "successes": 0,
+            "trials": 15,
+            "estimate": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.20388330103584862,
+            "confidence": 0.95
+          },
+          "pipeline_pass_rate": {
+            "successes": 15,
+            "trials": 1000,
+            "estimate": 0.015,
+            "ci_low": 0.009110978804081668,
+            "ci_high": 0.024600976926906798,
+            "confidence": 0.95
+          }
+        }
+      ],
+      "median_seconds": 3.4921023749921005
+    },
+    {
+      "preset": "hidden_confounder",
+      "n_runs": 1000,
+      "n_incomplete": 0,
+      "aggregate": {
+        "n_runs": 1000,
+        "n_incomplete_runs": 0,
+        "stages": [
+          "causal",
+          "decay"
+        ],
+        "per_signal_correct": {
+          "s_decay": {
+            "successes": 710,
+            "trials": 1000,
+            "estimate": 0.71,
+            "ci_low": 0.681114796429996,
+            "ci_high": 0.7372779650060708,
+            "confidence": 0.95
+          },
+          "s_noise": {
+            "successes": 962,
+            "trials": 1000,
+            "estimate": 0.962,
+            "ci_low": 0.9482730796686497,
+            "ci_high": 0.9721909954906974,
+            "confidence": 0.95
+          },
+          "s_real": {
+            "successes": 855,
+            "trials": 1000,
+            "estimate": 0.855,
+            "ci_low": 0.8318179377037748,
+            "ci_high": 0.875465063771481,
+            "confidence": 0.95
+          }
+        },
+        "per_signal_stage_match": {
+          "s_decay": {
+            "successes": 561,
+            "trials": 710,
+            "estimate": 0.7901408450704225,
+            "ci_low": 0.7586667674093679,
+            "ci_high": 0.8184922010269104,
+            "confidence": 0.95
+          },
+          "s_noise": {
+            "successes": 961,
+            "trials": 962,
+            "estimate": 0.998960498960499,
+            "ci_low": 0.9941354695971218,
+            "ci_high": 0.999816478968198,
+            "confidence": 0.95
+          },
+          "s_real": {
+            "successes": 0,
+            "trials": 0,
+            "estimate": null,
+            "ci_low": null,
+            "ci_high": null,
+            "confidence": 0.95
+          }
+        },
+        "kill_precision": {
+          "successes": 1672,
+          "trials": 1817,
+          "estimate": 0.9201981287837094,
+          "ci_low": 0.9068332567757686,
+          "ci_high": 0.9317900031476918,
+          "confidence": 0.95
+        },
+        "kill_recall": {
+          "successes": 1672,
+          "trials": 2000,
+          "estimate": 0.836,
+          "ci_low": 0.8191308990416238,
+          "ci_high": 0.851580845185374,
+          "confidence": 0.95
+        }
+      },
+      "signals": [
+        {
+          "signal_id": "s_real",
+          "stage1_pass_rate": {
+            "successes": 904,
+            "trials": 1000,
+            "estimate": 0.904,
+            "ci_low": 0.8841648792420682,
+            "ci_high": 0.9207430999016033,
+            "confidence": 0.95
+          },
+          "stage2_kill_given_stage1_pass": {
+            "successes": 49,
+            "trials": 904,
+            "estimate": 0.05420353982300885,
+            "ci_low": 0.0412411792099881,
+            "ci_high": 0.07093860486044685,
+            "confidence": 0.95
+          },
+          "reasons": {
+            "decay.edge_declining": 49
+          },
+          "trend_kill_given_stage1_pass": {
+            "successes": 55,
+            "trials": 904,
+            "estimate": 0.06084070796460177,
+            "ci_low": 0.047039065652730125,
+            "ci_high": 0.07835888540424922,
+            "confidence": 0.95
+          },
+          "pipeline_pass_rate": {
+            "successes": 855,
+            "trials": 1000,
+            "estimate": 0.855,
+            "ci_low": 0.8318179377037748,
+            "ci_high": 0.875465063771481,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_conf",
+          "stage1_pass_rate": {
+            "successes": 735,
+            "trials": 1000,
+            "estimate": 0.735,
+            "ci_low": 0.7067846797715454,
+            "ci_high": 0.7614167437402437,
+            "confidence": 0.95
+          },
+          "stage2_kill_given_stage1_pass": {
+            "successes": 33,
+            "trials": 735,
+            "estimate": 0.044897959183673466,
+            "ci_low": 0.03214610095795097,
+            "ci_high": 0.06238224201318108,
+            "confidence": 0.95
+          },
+          "reasons": {
+            "decay.edge_declining": 33
+          },
+          "trend_kill_given_stage1_pass": {
+            "successes": 32,
+            "trials": 735,
+            "estimate": 0.04353741496598639,
+            "ci_low": 0.031006296231589514,
+            "ci_high": 0.06081510606083143,
+            "confidence": 0.95
+          },
+          "pipeline_pass_rate": {
+            "successes": 702,
+            "trials": 1000,
+            "estimate": 0.702,
+            "ci_low": 0.6729225763109662,
+            "ci_high": 0.7295314132608696,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_decay",
+          "stage1_pass_rate": {
+            "successes": 851,
+            "trials": 1000,
+            "estimate": 0.851,
+            "ci_low": 0.8275879764800763,
+            "ci_high": 0.871725639063064,
+            "confidence": 0.95
+          },
+          "stage2_kill_given_stage1_pass": {
+            "successes": 561,
+            "trials": 851,
+            "estimate": 0.6592244418331374,
+            "ci_low": 0.626728018596001,
+            "ci_high": 0.6902898298058079,
+            "confidence": 0.95
+          },
+          "reasons": {
+            "decay.edge_declining": 561
+          },
+          "trend_kill_given_stage1_pass": {
+            "successes": 560,
+            "trials": 851,
+            "estimate": 0.6580493537015276,
+            "ci_low": 0.6255319819130061,
+            "ci_high": 0.6891462513714464,
+            "confidence": 0.95
+          },
+          "pipeline_pass_rate": {
+            "successes": 290,
+            "trials": 1000,
+            "estimate": 0.29,
+            "ci_low": 0.2627220349939292,
+            "ci_high": 0.31888520357000394,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_noise",
+          "stage1_pass_rate": {
+            "successes": 39,
+            "trials": 1000,
+            "estimate": 0.039,
+            "ci_low": 0.02865896090418048,
+            "ci_high": 0.05286931041950135,
+            "confidence": 0.95
+          },
+          "stage2_kill_given_stage1_pass": {
+            "successes": 1,
+            "trials": 39,
+            "estimate": 0.02564102564102564,
+            "ci_low": 0.004540703100990098,
+            "ci_high": 0.13180990169850076,
+            "confidence": 0.95
+          },
+          "reasons": {
+            "decay.edge_declining": 1
+          },
+          "trend_kill_given_stage1_pass": {
+            "successes": 2,
+            "trials": 39,
+            "estimate": 0.05128205128205128,
+            "ci_low": 0.014177955415274113,
+            "ci_high": 0.16885640047613612,
+            "confidence": 0.95
+          },
+          "pipeline_pass_rate": {
+            "successes": 38,
+            "trials": 1000,
+            "estimate": 0.038,
+            "ci_low": 0.02780900450930263,
+            "ci_high": 0.05172692033135032,
+            "confidence": 0.95
+          }
+        }
+      ],
+      "median_seconds": 3.8074856250023004
+    }
+  ],
+  "criteria": [
+    {
+      "name": "complete",
+      "signal_id": null,
+      "rate": null,
+      "bound": 0.0,
+      "threshold": 0.0,
+      "passed": true
+    },
+    {
+      "name": "null_kill_upper",
+      "signal_id": "s_real",
+      "rate": {
+        "successes": 48,
+        "trials": 882,
+        "estimate": 0.05442176870748299,
+        "ci_low": 0.04129113777993444,
+        "ci_high": 0.07141690701355646,
+        "confidence": 0.95
+      },
+      "bound": 0.07141690701355646,
+      "threshold": 0.075,
+      "passed": true
+    },
+    {
+      "name": "decay_kill_lower",
+      "signal_id": "s_decay",
+      "rate": {
+        "successes": 550,
+        "trials": 830,
+        "estimate": 0.6626506024096386,
+        "ci_low": 0.6298011370757667,
+        "ci_high": 0.6940014241231719,
+        "confidence": 0.95
+      },
+      "bound": 0.6298011370757667,
+      "threshold": 0.52,
+      "passed": true
+    }
+  ],
+  "accepted": true
+}

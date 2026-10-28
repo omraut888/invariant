@@ -361,7 +361,7 @@ after the run: `test_budget_plan_shrinks_reported_seeds_then_declares_infeasible
 `n_report_seeds: null` and failed once 9686660 recorded 200 (the fast suite was not rerun
 before that commit). `plan_budget` was correct, and the full run does not call it; the test
 now checks both the recorded and the unrecorded case.
-Report: `runs/dro_study/785d04df850d2136/report.json`.
+Report: `runs/dro_study/785d04df850d2136/report.json`; archived at [`docs/results/0013-dro-method-study/report.json`](../results/0013-dro-method-study/report.json).
 
 ### Rule outcome: Ridge-CV, no deviation
 - **Size gates** (kill-test rejections against 1/N on the nulls, M = 1683, Wilson 95%; the

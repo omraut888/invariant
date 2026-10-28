@@ -1,0 +1,842 @@
+{
+  "accepted": true,
+  "alpha": 0.05,
+  "config": {
+    "acceptance": {
+      "null_pass_upper_max": 0.075,
+      "null_signals": [
+        "s_conf",
+        "s_noise"
+      ],
+      "preset": "base",
+      "true_pass_lower_min": 0.7,
+      "true_signals": [
+        "s_real",
+        "s_decay"
+      ]
+    },
+    "confidence": 0.95,
+    "n_boot": null,
+    "n_obs": null,
+    "n_seeds": 500,
+    "presets": [
+      "base",
+      "realistic",
+      "hidden_confounder"
+    ],
+    "root_seed": 20261019
+  },
+  "criteria": [
+    {
+      "bound": 0.0,
+      "name": "complete",
+      "passed": true,
+      "rate": null,
+      "signal_id": null,
+      "threshold": 0.0
+    },
+    {
+      "bound": 0.053771365501634506,
+      "name": "null_pass_upper",
+      "passed": true,
+      "rate": {
+        "ci_high": 0.053771365501634506,
+        "ci_low": 0.02133451980853219,
+        "confidence": 0.95,
+        "estimate": 0.034,
+        "successes": 17,
+        "trials": 500
+      },
+      "signal_id": "s_conf",
+      "threshold": 0.075
+    },
+    {
+      "bound": 0.033851670908739286,
+      "name": "null_pass_upper",
+      "passed": true,
+      "rate": {
+        "ci_high": 0.033851670908739286,
+        "ci_low": 0.009498193296197078,
+        "confidence": 0.95,
+        "estimate": 0.018,
+        "successes": 9,
+        "trials": 500
+      },
+      "signal_id": "s_noise",
+      "threshold": 0.075
+    },
+    {
+      "bound": 0.809585245166297,
+      "name": "true_pass_lower",
+      "passed": true,
+      "rate": {
+        "ci_high": 0.8731692085961551,
+        "ci_low": 0.809585245166297,
+        "confidence": 0.95,
+        "estimate": 0.844,
+        "successes": 422,
+        "trials": 500
+      },
+      "signal_id": "s_real",
+      "threshold": 0.7
+    },
+    {
+      "bound": 0.7988646838026932,
+      "name": "true_pass_lower",
+      "passed": true,
+      "rate": {
+        "ci_high": 0.8640422567689898,
+        "ci_low": 0.7988646838026932,
+        "confidence": 0.95,
+        "estimate": 0.834,
+        "successes": 417,
+        "trials": 500
+      },
+      "signal_id": "s_decay",
+      "threshold": 0.7
+    }
+  ],
+  "git_dirty": false,
+  "git_sha": "ba43129a2d5b052b942065370e6d625b84df981f",
+  "n_seeds": 500,
+  "presets": [
+    {
+      "aggregate": {
+        "kill_precision": {
+          "ci_high": 0.8772411072767186,
+          "ci_low": 0.8366422815857548,
+          "confidence": 0.95,
+          "estimate": 0.8581497797356828,
+          "successes": 974,
+          "trials": 1135
+        },
+        "kill_recall": {
+          "ci_high": 0.9821960617983837,
+          "ci_low": 0.9621761711573101,
+          "confidence": 0.95,
+          "estimate": 0.974,
+          "successes": 974,
+          "trials": 1000
+        },
+        "n_incomplete_runs": 0,
+        "n_runs": 500,
+        "per_signal_correct": {
+          "s_conf": {
+            "ci_high": 0.9786654801914678,
+            "ci_low": 0.9462286344983655,
+            "confidence": 0.95,
+            "estimate": 0.966,
+            "successes": 483,
+            "trials": 500
+          },
+          "s_decay": {
+            "ci_high": 0.8640422567689898,
+            "ci_low": 0.7988646838026932,
+            "confidence": 0.95,
+            "estimate": 0.834,
+            "successes": 417,
+            "trials": 500
+          },
+          "s_noise": {
+            "ci_high": 0.990501806703803,
+            "ci_low": 0.9661483290912607,
+            "confidence": 0.95,
+            "estimate": 0.982,
+            "successes": 491,
+            "trials": 500
+          },
+          "s_real": {
+            "ci_high": 0.8731692085961551,
+            "ci_low": 0.809585245166297,
+            "confidence": 0.95,
+            "estimate": 0.844,
+            "successes": 422,
+            "trials": 500
+          }
+        },
+        "per_signal_stage_match": {
+          "s_conf": {
+            "ci_high": 0.9999999999999998,
+            "ci_low": 0.9921094254585474,
+            "confidence": 0.95,
+            "estimate": 1.0,
+            "successes": 483,
+            "trials": 483
+          },
+          "s_decay": {
+            "ci_high": null,
+            "ci_low": null,
+            "confidence": 0.95,
+            "estimate": null,
+            "successes": 0,
+            "trials": 0
+          },
+          "s_noise": {
+            "ci_high": 1.0,
+            "ci_low": 0.9922369907528583,
+            "confidence": 0.95,
+            "estimate": 1.0,
+            "successes": 491,
+            "trials": 491
+          },
+          "s_real": {
+            "ci_high": null,
+            "ci_low": null,
+            "confidence": 0.95,
+            "estimate": null,
+            "successes": 0,
+            "trials": 0
+          }
+        },
+        "stages": [
+          "causal"
+        ]
+      },
+      "median_seconds": 2.3961279794966686,
+      "n_incomplete": 0,
+      "n_runs": 500,
+      "preset": "base",
+      "signals": [
+        {
+          "bootstrap_coverage": {
+            "ci_high": 0.8891294011637603,
+            "ci_low": 0.8187354179568991,
+            "confidence": 0.95,
+            "estimate": 0.8575197889182058,
+            "successes": 325,
+            "trials": 379
+          },
+          "expected_t_hybrid_mean": 4.421464062648819,
+          "expected_verdict": "pass",
+          "identifiable": true,
+          "low_power_runs": 0,
+          "mci_family_rate": {
+            "ci_high": 0.4070623846866158,
+            "ci_low": 0.32301143591892645,
+            "confidence": 0.95,
+            "estimate": 0.364,
+            "successes": 182,
+            "trials": 500
+          },
+          "pass_rate": {
+            "ci_high": 0.8731692085961551,
+            "ci_low": 0.809585245166297,
+            "confidence": 0.95,
+            "estimate": 0.844,
+            "successes": 422,
+            "trials": 500
+          },
+          "predicted_power": 0.9675273720193402,
+          "realized_t_lag1_mean": 3.778780775728536,
+          "realized_t_lag1_se": 0.08150953039887589,
+          "reasons": {
+            "causal.no_significant_link": 53,
+            "causal.not_significant_after_correction": 25
+          },
+          "signal_id": "s_real"
+        },
+        {
+          "bootstrap_coverage": {
+            "ci_high": 0.9304008374300164,
+            "ci_low": 0.8165707956145146,
+            "confidence": 0.95,
+            "estimate": 0.8852459016393442,
+            "successes": 108,
+            "trials": 122
+          },
+          "expected_t_hybrid_mean": -8.46299354941551e-16,
+          "expected_verdict": "kill",
+          "identifiable": true,
+          "low_power_runs": 0,
+          "mci_family_rate": {
+            "ci_high": 0.051344869045441784,
+            "ci_low": 0.019791513626571118,
+            "confidence": 0.95,
+            "estimate": 0.032,
+            "successes": 16,
+            "trials": 500
+          },
+          "pass_rate": {
+            "ci_high": 0.053771365501634506,
+            "ci_low": 0.02133451980853219,
+            "confidence": 0.95,
+            "estimate": 0.034,
+            "successes": 17,
+            "trials": 500
+          },
+          "predicted_power": 0.009999999999999992,
+          "realized_t_lag1_mean": 0.02811454458258693,
+          "realized_t_lag1_se": 0.04279852883358209,
+          "reasons": {
+            "causal.no_significant_link": 481,
+            "causal.not_significant_after_correction": 2
+          },
+          "signal_id": "s_conf"
+        },
+        {
+          "bootstrap_coverage": {
+            "ci_high": 0.9631830438879306,
+            "ci_low": 0.9161311864148395,
+            "confidence": 0.95,
+            "estimate": 0.9441489361702128,
+            "successes": 355,
+            "trials": 376
+          },
+          "expected_t_hybrid_mean": 4.085247359738995,
+          "expected_verdict": "pass",
+          "identifiable": true,
+          "low_power_runs": 0,
+          "mci_family_rate": {
+            "ci_high": 0.36007499875158333,
+            "ci_low": 0.27870026117642177,
+            "confidence": 0.95,
+            "estimate": 0.318,
+            "successes": 159,
+            "trials": 500
+          },
+          "pass_rate": {
+            "ci_high": 0.8640422567689898,
+            "ci_low": 0.7988646838026932,
+            "confidence": 0.95,
+            "estimate": 0.834,
+            "successes": 417,
+            "trials": 500
+          },
+          "predicted_power": 0.9344040091896435,
+          "realized_t_lag1_mean": 3.447750534255916,
+          "realized_t_lag1_se": 0.06483091659633973,
+          "reasons": {
+            "causal.no_significant_link": 52,
+            "causal.not_significant_after_correction": 31
+          },
+          "signal_id": "s_decay"
+        },
+        {
+          "bootstrap_coverage": {
+            "ci_high": 0.9415386202561884,
+            "ci_low": 0.8387827994358381,
+            "confidence": 0.95,
+            "estimate": 0.9015151515151515,
+            "successes": 119,
+            "trials": 132
+          },
+          "expected_t_hybrid_mean": 0.0,
+          "expected_verdict": "kill",
+          "identifiable": true,
+          "low_power_runs": 0,
+          "mci_family_rate": {
+            "ci_high": 0.05858477253064388,
+            "ci_low": 0.024460118055830385,
+            "confidence": 0.95,
+            "estimate": 0.038,
+            "successes": 19,
+            "trials": 500
+          },
+          "pass_rate": {
+            "ci_high": 0.033851670908739286,
+            "ci_low": 0.009498193296197078,
+            "confidence": 0.95,
+            "estimate": 0.018,
+            "successes": 9,
+            "trials": 500
+          },
+          "predicted_power": 0.009999999999999997,
+          "realized_t_lag1_mean": 0.004878388882919777,
+          "realized_t_lag1_se": 0.042525794379472896,
+          "reasons": {
+            "causal.no_significant_link": 489,
+            "causal.not_significant_after_correction": 2
+          },
+          "signal_id": "s_noise"
+        }
+      ]
+    },
+    {
+      "aggregate": {
+        "kill_precision": {
+          "ci_high": 0.5413843227385284,
+          "ci_low": 0.4964737225081275,
+          "confidence": 0.95,
+          "estimate": 0.5189673340358272,
+          "successes": 985,
+          "trials": 1898
+        },
+        "kill_recall": {
+          "ci_high": 0.9908890211959184,
+          "ci_low": 0.9753990230730932,
+          "confidence": 0.95,
+          "estimate": 0.985,
+          "successes": 985,
+          "trials": 1000
+        },
+        "n_incomplete_runs": 0,
+        "n_runs": 500,
+        "per_signal_correct": {
+          "s_conf": {
+            "ci_high": 0.9932022102091564,
+            "ci_low": 0.9713869308622147,
+            "confidence": 0.95,
+            "estimate": 0.986,
+            "successes": 493,
+            "trials": 500
+          },
+          "s_decay": {
+            "ci_high": 0.053771365501634506,
+            "ci_low": 0.02133451980853219,
+            "confidence": 0.95,
+            "estimate": 0.034,
+            "successes": 17,
+            "trials": 500
+          },
+          "s_noise": {
+            "ci_high": 0.9918707469666117,
+            "ci_low": 0.9687488914666058,
+            "confidence": 0.95,
+            "estimate": 0.984,
+            "successes": 492,
+            "trials": 500
+          },
+          "s_real": {
+            "ci_high": 0.17316686494445405,
+            "ci_low": 0.11232266018786358,
+            "confidence": 0.95,
+            "estimate": 0.14,
+            "successes": 70,
+            "trials": 500
+          }
+        },
+        "per_signal_stage_match": {
+          "s_conf": {
+            "ci_high": 1.0,
+            "ci_low": 0.9922682401951476,
+            "confidence": 0.95,
+            "estimate": 1.0,
+            "successes": 493,
+            "trials": 493
+          },
+          "s_decay": {
+            "ci_high": null,
+            "ci_low": null,
+            "confidence": 0.95,
+            "estimate": null,
+            "successes": 0,
+            "trials": 0
+          },
+          "s_noise": {
+            "ci_high": 1.0,
+            "ci_low": 0.9922526469855293,
+            "confidence": 0.95,
+            "estimate": 1.0,
+            "successes": 492,
+            "trials": 492
+          },
+          "s_real": {
+            "ci_high": null,
+            "ci_low": null,
+            "confidence": 0.95,
+            "estimate": null,
+            "successes": 0,
+            "trials": 0
+          }
+        },
+        "stages": [
+          "causal"
+        ]
+      },
+      "median_seconds": 2.1326038954975957,
+      "n_incomplete": 0,
+      "n_runs": 500,
+      "preset": "realistic",
+      "signals": [
+        {
+          "bootstrap_coverage": {
+            "ci_high": 0.919254394921653,
+            "ci_low": 0.8246918409798443,
+            "confidence": 0.95,
+            "estimate": 0.8797814207650273,
+            "successes": 161,
+            "trials": 183
+          },
+          "expected_t_hybrid_mean": 1.4759605987369364,
+          "expected_verdict": "pass",
+          "identifiable": true,
+          "low_power_runs": 500,
+          "mci_family_rate": {
+            "ci_high": 0.1470418369634342,
+            "ci_low": 0.09081365651103794,
+            "confidence": 0.95,
+            "estimate": 0.116,
+            "successes": 58,
+            "trials": 500
+          },
+          "pass_rate": {
+            "ci_high": 0.17316686494445405,
+            "ci_low": 0.11232266018786358,
+            "confidence": 0.95,
+            "estimate": 0.14,
+            "successes": 70,
+            "trials": 500
+          },
+          "predicted_power": 0.135720079603018,
+          "realized_t_lag1_mean": 1.2281574989606328,
+          "realized_t_lag1_se": 0.05392434345604324,
+          "reasons": {
+            "causal.no_significant_link": 379,
+            "causal.not_significant_after_correction": 51
+          },
+          "signal_id": "s_real"
+        },
+        {
+          "bootstrap_coverage": {
+            "ci_high": 0.9012874996108018,
+            "ci_low": 0.7764621251952817,
+            "confidence": 0.95,
+            "estimate": 0.8492063492063492,
+            "successes": 107,
+            "trials": 126
+          },
+          "expected_t_hybrid_mean": -7.5548099182428e-17,
+          "expected_verdict": "kill",
+          "identifiable": true,
+          "low_power_runs": 0,
+          "mci_family_rate": {
+            "ci_high": 0.060973595834850805,
+            "ci_low": 0.02604079738977726,
+            "confidence": 0.95,
+            "estimate": 0.04,
+            "successes": 20,
+            "trials": 500
+          },
+          "pass_rate": {
+            "ci_high": 0.028613069137785288,
+            "ci_low": 0.006797789790843492,
+            "confidence": 0.95,
+            "estimate": 0.014,
+            "successes": 7,
+            "trials": 500
+          },
+          "predicted_power": 0.009999999999999997,
+          "realized_t_lag1_mean": 0.024056735537324937,
+          "realized_t_lag1_se": 0.04480079900542429,
+          "reasons": {
+            "causal.no_significant_link": 476,
+            "causal.not_significant_after_correction": 17
+          },
+          "signal_id": "s_conf"
+        },
+        {
+          "bootstrap_coverage": {
+            "ci_high": 0.9706826312446541,
+            "ci_low": 0.8984059096067698,
+            "confidence": 0.95,
+            "estimate": 0.9447852760736196,
+            "successes": 154,
+            "trials": 163
+          },
+          "expected_t_hybrid_mean": 1.0226463075559644,
+          "expected_verdict": "pass",
+          "identifiable": true,
+          "low_power_runs": 500,
+          "mci_family_rate": {
+            "ci_high": 0.08205618785625499,
+            "ci_low": 0.0406837291117572,
+            "confidence": 0.95,
+            "estimate": 0.058,
+            "successes": 29,
+            "trials": 500
+          },
+          "pass_rate": {
+            "ci_high": 0.053771365501634506,
+            "ci_low": 0.02133451980853219,
+            "confidence": 0.95,
+            "estimate": 0.034,
+            "successes": 17,
+            "trials": 500
+          },
+          "predicted_power": 0.06034975515582787,
+          "realized_t_lag1_mean": 0.7972168359336596,
+          "realized_t_lag1_se": 0.04532851915341086,
+          "reasons": {
+            "causal.no_significant_link": 457,
+            "causal.not_significant_after_correction": 26
+          },
+          "signal_id": "s_decay"
+        },
+        {
+          "bootstrap_coverage": {
+            "ci_high": 0.9337212042929989,
+            "ci_low": 0.8247655486183226,
+            "confidence": 0.95,
+            "estimate": 0.890625,
+            "successes": 114,
+            "trials": 128
+          },
+          "expected_t_hybrid_mean": 0.0,
+          "expected_verdict": "kill",
+          "identifiable": true,
+          "low_power_runs": 0,
+          "mci_family_rate": {
+            "ci_high": 0.06335158575433016,
+            "ci_low": 0.027632310108451703,
+            "confidence": 0.95,
+            "estimate": 0.042,
+            "successes": 21,
+            "trials": 500
+          },
+          "pass_rate": {
+            "ci_high": 0.03125110853339426,
+            "ci_low": 0.008129253033388314,
+            "confidence": 0.95,
+            "estimate": 0.016,
+            "successes": 8,
+            "trials": 500
+          },
+          "predicted_power": 0.009999999999999997,
+          "realized_t_lag1_mean": -0.019935633329872342,
+          "realized_t_lag1_se": 0.04450329415529158,
+          "reasons": {
+            "causal.no_significant_link": 486,
+            "causal.not_significant_after_correction": 6
+          },
+          "signal_id": "s_noise"
+        }
+      ]
+    },
+    {
+      "aggregate": {
+        "kill_precision": {
+          "ci_high": 0.8313535837016145,
+          "ci_low": 0.7681497484894008,
+          "confidence": 0.95,
+          "estimate": 0.8016393442622951,
+          "successes": 489,
+          "trials": 610
+        },
+        "kill_recall": {
+          "ci_high": 0.9876719917300725,
+          "ci_low": 0.9610391387886836,
+          "confidence": 0.95,
+          "estimate": 0.978,
+          "successes": 489,
+          "trials": 500
+        },
+        "n_incomplete_runs": 0,
+        "n_runs": 500,
+        "per_signal_correct": {
+          "s_decay": {
+            "ci_high": 0.8948832761516801,
+            "ci_low": 0.8355052092686175,
+            "confidence": 0.95,
+            "estimate": 0.868,
+            "successes": 434,
+            "trials": 500
+          },
+          "s_noise": {
+            "ci_high": 0.9876719917300725,
+            "ci_low": 0.9610391387886836,
+            "confidence": 0.95,
+            "estimate": 0.978,
+            "successes": 489,
+            "trials": 500
+          },
+          "s_real": {
+            "ci_high": 0.9145085848433969,
+            "ci_low": 0.8595444295965924,
+            "confidence": 0.95,
+            "estimate": 0.89,
+            "successes": 445,
+            "trials": 500
+          }
+        },
+        "per_signal_stage_match": {
+          "s_decay": {
+            "ci_high": null,
+            "ci_low": null,
+            "confidence": 0.95,
+            "estimate": null,
+            "successes": 0,
+            "trials": 0
+          },
+          "s_noise": {
+            "ci_high": 1.0,
+            "ci_low": 0.992205487683836,
+            "confidence": 0.95,
+            "estimate": 1.0,
+            "successes": 489,
+            "trials": 489
+          },
+          "s_real": {
+            "ci_high": null,
+            "ci_low": null,
+            "confidence": 0.95,
+            "estimate": null,
+            "successes": 0,
+            "trials": 0
+          }
+        },
+        "stages": [
+          "causal"
+        ]
+      },
+      "median_seconds": 1.8466904794986476,
+      "n_incomplete": 0,
+      "n_runs": 500,
+      "preset": "hidden_confounder",
+      "signals": [
+        {
+          "bootstrap_coverage": {
+            "ci_high": 0.7479762910824708,
+            "ci_low": 0.6573166720568637,
+            "confidence": 0.95,
+            "estimate": 0.7046632124352331,
+            "successes": 272,
+            "trials": 386
+          },
+          "expected_t_hybrid_mean": 6.013273935417099,
+          "expected_verdict": "pass",
+          "identifiable": true,
+          "low_power_runs": 0,
+          "mci_family_rate": {
+            "ci_high": 0.44354587729757294,
+            "ci_low": 0.35797899079473766,
+            "confidence": 0.95,
+            "estimate": 0.4,
+            "successes": 200,
+            "trials": 500
+          },
+          "pass_rate": {
+            "ci_high": 0.9145085848433969,
+            "ci_low": 0.8595444295965924,
+            "confidence": 0.95,
+            "estimate": 0.89,
+            "successes": 445,
+            "trials": 500
+          },
+          "predicted_power": 0.9997063846181391,
+          "realized_t_lag1_mean": 3.981620308970024,
+          "realized_t_lag1_se": 0.08599361069972404,
+          "reasons": {
+            "causal.no_significant_link": 46,
+            "causal.not_significant_after_correction": 9
+          },
+          "signal_id": "s_real"
+        },
+        {
+          "bootstrap_coverage": {
+            "ci_high": 0.9384619905642824,
+            "ci_low": 0.8499458032983596,
+            "confidence": 0.95,
+            "estimate": 0.9028571428571428,
+            "successes": 158,
+            "trials": 175
+          },
+          "expected_t_hybrid_mean": 3.4664799727830307,
+          "expected_verdict": "kill",
+          "identifiable": false,
+          "low_power_runs": 0,
+          "mci_family_rate": {
+            "ci_high": 0.12276455586255913,
+            "ci_low": 0.0714264085922213,
+            "confidence": 0.95,
+            "estimate": 0.094,
+            "successes": 47,
+            "trials": 500
+          },
+          "pass_rate": {
+            "ci_high": 0.7670514607968943,
+            "ci_low": 0.6894413425907917,
+            "confidence": 0.95,
+            "estimate": 0.73,
+            "successes": 365,
+            "trials": 500
+          },
+          "predicted_power": 0.813441697124194,
+          "realized_t_lag1_mean": 2.425269278835666,
+          "realized_t_lag1_se": 0.07495621048211357,
+          "reasons": {
+            "causal.no_significant_link": 116,
+            "causal.not_significant_after_correction": 19
+          },
+          "signal_id": "s_conf"
+        },
+        {
+          "bootstrap_coverage": {
+            "ci_high": 0.9673268019357822,
+            "ci_low": 0.9222273694821416,
+            "confidence": 0.95,
+            "estimate": 0.9493333333333334,
+            "successes": 356,
+            "trials": 375
+          },
+          "expected_t_hybrid_mean": 4.078590646334638,
+          "expected_verdict": "pass",
+          "identifiable": true,
+          "low_power_runs": 0,
+          "mci_family_rate": {
+            "ci_high": 0.3498019986826773,
+            "ci_low": 0.26912574805455886,
+            "confidence": 0.95,
+            "estimate": 0.308,
+            "successes": 154,
+            "trials": 500
+          },
+          "pass_rate": {
+            "ci_high": 0.8948832761516801,
+            "ci_low": 0.8355052092686175,
+            "confidence": 0.95,
+            "estimate": 0.868,
+            "successes": 434,
+            "trials": 500
+          },
+          "predicted_power": 0.9335497011121557,
+          "realized_t_lag1_mean": 3.4280709117801553,
+          "realized_t_lag1_se": 0.06596066601856813,
+          "reasons": {
+            "causal.no_significant_link": 53,
+            "causal.not_significant_after_correction": 13
+          },
+          "signal_id": "s_decay"
+        },
+        {
+          "bootstrap_coverage": {
+            "ci_high": 0.9337212042929989,
+            "ci_low": 0.8247655486183226,
+            "confidence": 0.95,
+            "estimate": 0.890625,
+            "successes": 114,
+            "trials": 128
+          },
+          "expected_t_hybrid_mean": 0.0,
+          "expected_verdict": "kill",
+          "identifiable": true,
+          "low_power_runs": 0,
+          "mci_family_rate": {
+            "ci_high": 0.06571944287232845,
+            "ci_low": 0.02923395562860718,
+            "confidence": 0.95,
+            "estimate": 0.044,
+            "successes": 22,
+            "trials": 500
+          },
+          "pass_rate": {
+            "ci_high": 0.03896086121131637,
+            "ci_low": 0.012328008269927582,
+            "confidence": 0.95,
+            "estimate": 0.022,
+            "successes": 11,
+            "trials": 500
+          },
+          "predicted_power": 0.009999999999999997,
+          "realized_t_lag1_mean": -0.02293622355904361,
+          "realized_t_lag1_se": 0.0437251617146656,
+          "reasons": {
+            "causal.no_significant_link": 488,
+            "causal.not_significant_after_correction": 1
+          },
+          "signal_id": "s_noise"
+        }
+      ]
+    }
+  ],
+  "tigramite_version": "5.2.10.1"
+}

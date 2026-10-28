@@ -1,0 +1,1678 @@
+{
+  "config": {
+    "root_seed": 20261021,
+    "n_seeds": null,
+    "ksg_n_seeds": 337,
+    "ksg_budget_hours": 6.0,
+    "n_obs": 6000,
+    "tau_max": 5,
+    "pc_alpha": 0.2,
+    "causal_alpha": 0.05,
+    "decline": {
+      "alpha": 0.05,
+      "n_boot": 999,
+      "trim": 0.15,
+      "step": 25
+    },
+    "window": 252,
+    "grid": {
+      "tau_step": 21,
+      "hl_min": 5.0,
+      "hl_max": 50000.0,
+      "n_hl": 121
+    },
+    "size_cutoff": 0.075,
+    "all_pass_prob": 0.9,
+    "coverage_min": 0.9,
+    "confidence": 0.95,
+    "kill_gates": [
+      "d1_base",
+      "k_garch_hi",
+      "k_rho99",
+      "k_realistic"
+    ],
+    "estimator_gates": [
+      "d1_base",
+      "d2_ident"
+    ],
+    "coverage_gates": [
+      "d2_ident",
+      "d3_ident_fast"
+    ],
+    "selection_scenario": "d2_ident",
+    "simplicity": [
+      "partial_corr",
+      "gaussian_te",
+      "ksg"
+    ],
+    "n_rmse_boot": 2000
+  },
+  "n_seeds": 1610,
+  "ksg_n_seeds": 337,
+  "ksg_eligible": false,
+  "git_sha": "fe3bd87638f1840f51a9f3b0f3ee2d9e2eebbd65",
+  "git_dirty": false,
+  "rejections": [
+    {
+      "scenario": "d1_base",
+      "signal": "s_real",
+      "gate": true,
+      "rate": {
+        "successes": 70,
+        "trials": 1610,
+        "estimate": 0.043478260869565216,
+        "ci_low": 0.03455626468250289,
+        "ci_high": 0.05457359255006905,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 60,
+        "trials": 1370,
+        "estimate": 0.043795620437956206,
+        "ci_low": 0.03417522995802486,
+        "ci_high": 0.05596723737368579,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 89,
+        "trials": 1610,
+        "estimate": 0.055279503105590065,
+        "ci_low": 0.0451385423923743,
+        "ci_high": 0.06753761785051211,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "d1_base",
+      "signal": "s_decay",
+      "gate": false,
+      "rate": {
+        "successes": 955,
+        "trials": 1610,
+        "estimate": 0.593167701863354,
+        "ci_low": 0.5689778826051143,
+        "ci_high": 0.6169139832657894,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 831,
+        "trials": 1335,
+        "estimate": 0.6224719101123596,
+        "ci_low": 0.5961513552204111,
+        "ci_high": 0.6480896621499616,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 978,
+        "trials": 1610,
+        "estimate": 0.6074534161490683,
+        "ci_low": 0.5833719917561254,
+        "ci_high": 0.6310232935483168,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "d2_ident",
+      "signal": "s_real",
+      "gate": false,
+      "rate": {
+        "successes": 89,
+        "trials": 1610,
+        "estimate": 0.055279503105590065,
+        "ci_low": 0.0451385423923743,
+        "ci_high": 0.06753761785051211,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 83,
+        "trials": 1409,
+        "estimate": 0.058907026259758695,
+        "ci_low": 0.04777064871579624,
+        "ci_high": 0.07244203173772162,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 92,
+        "trials": 1610,
+        "estimate": 0.05714285714285714,
+        "ci_low": 0.04682347613016478,
+        "ci_high": 0.0695705214301397,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "d2_ident",
+      "signal": "s_decay",
+      "gate": false,
+      "rate": {
+        "successes": 1587,
+        "trials": 1610,
+        "estimate": 0.9857142857142858,
+        "ci_low": 0.9786542770040559,
+        "ci_high": 0.9904619837362553,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 1586,
+        "trials": 1608,
+        "estimate": 0.986318407960199,
+        "ci_low": 0.9793710962533373,
+        "ci_high": 0.9909476602478775,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 1581,
+        "trials": 1610,
+        "estimate": 0.9819875776397515,
+        "ci_low": 0.9742509608025891,
+        "ci_high": 0.9874296253028858,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "d3_ident_fast",
+      "signal": "s_real",
+      "gate": false,
+      "rate": {
+        "successes": 93,
+        "trials": 1610,
+        "estimate": 0.0577639751552795,
+        "ci_low": 0.04738586945850258,
+        "ci_high": 0.07024740720760793,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 86,
+        "trials": 1400,
+        "estimate": 0.06142857142857143,
+        "ci_low": 0.05001094321474395,
+        "ci_high": 0.07524640526705034,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 88,
+        "trials": 1610,
+        "estimate": 0.0546583850931677,
+        "ci_low": 0.04457766605079642,
+        "ci_high": 0.06685921508628397,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "d3_ident_fast",
+      "signal": "s_decay",
+      "gate": false,
+      "rate": {
+        "successes": 1596,
+        "trials": 1610,
+        "estimate": 0.991304347826087,
+        "ci_low": 0.9854566295077425,
+        "ci_high": 0.9948131431848231,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 1593,
+        "trials": 1605,
+        "estimate": 0.9925233644859813,
+        "ci_low": 0.9869768188654846,
+        "ci_high": 0.9957178968455946,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 1591,
+        "trials": 1610,
+        "estimate": 0.9881987577639751,
+        "ci_low": 0.9816413544741991,
+        "ci_high": 0.9924320226893362,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "k_garch_hi",
+      "signal": "s_real",
+      "gate": true,
+      "rate": {
+        "successes": 71,
+        "trials": 1610,
+        "estimate": 0.044099378881987575,
+        "ci_low": 0.03510889835220515,
+        "ci_high": 0.055260237986172814,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 62,
+        "trials": 1367,
+        "estimate": 0.04535479151426482,
+        "ci_low": 0.035540327580307784,
+        "ci_high": 0.057717326686053144,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 88,
+        "trials": 1610,
+        "estimate": 0.0546583850931677,
+        "ci_low": 0.04457766605079642,
+        "ci_high": 0.06685921508628397,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "k_garch_hi",
+      "signal": "s_decay",
+      "gate": false,
+      "rate": {
+        "successes": 958,
+        "trials": 1610,
+        "estimate": 0.5950310559006211,
+        "ci_low": 0.5708541795611335,
+        "ci_high": 0.6187555236271882,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 839,
+        "trials": 1342,
+        "estimate": 0.6251862891207154,
+        "ci_low": 0.5989644106780738,
+        "ci_high": 0.6506935247331469,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 990,
+        "trials": 1610,
+        "estimate": 0.6149068322981367,
+        "ci_low": 0.5908904020597789,
+        "ci_high": 0.6383762325143356,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "k_rho99",
+      "signal": "s_real",
+      "gate": true,
+      "rate": {
+        "successes": 77,
+        "trials": 1610,
+        "estimate": 0.04782608695652174,
+        "ci_low": 0.03843554078480268,
+        "ci_high": 0.05936927018841145,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 63,
+        "trials": 1309,
+        "estimate": 0.0481283422459893,
+        "ci_low": 0.037797346160611346,
+        "ci_high": 0.061103749587331245,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 65,
+        "trials": 1610,
+        "estimate": 0.040372670807453416,
+        "ci_low": 0.03180148239287449,
+        "ci_high": 0.05113197931066733,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "k_rho99",
+      "signal": "s_decay",
+      "gate": false,
+      "rate": {
+        "successes": 948,
+        "trials": 1610,
+        "estimate": 0.5888198757763975,
+        "ci_low": 0.5646012408509399,
+        "ci_high": 0.6126156712793215,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 814,
+        "trials": 1315,
+        "estimate": 0.6190114068441065,
+        "ci_low": 0.5924530619744053,
+        "ci_high": 0.6448764501565556,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 959,
+        "trials": 1610,
+        "estimate": 0.5956521739130435,
+        "ci_low": 0.5714796912011256,
+        "ci_high": 0.6193692910930021,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "k_realistic",
+      "signal": "s_real",
+      "gate": true,
+      "rate": {
+        "successes": 82,
+        "trials": 1610,
+        "estimate": 0.05093167701863354,
+        "ci_low": 0.041220916371920914,
+        "ci_high": 0.06278029013032332,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 10,
+        "trials": 219,
+        "estimate": 0.045662100456621,
+        "ci_low": 0.024989013068053595,
+        "ci_high": 0.08199942143092256,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 79,
+        "trials": 1610,
+        "estimate": 0.04906832298136646,
+        "ci_low": 0.03954832297444924,
+        "ci_high": 0.060735046210376925,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "k_realistic",
+      "signal": "s_decay",
+      "gate": false,
+      "rate": {
+        "successes": 168,
+        "trials": 1610,
+        "estimate": 0.10434782608695652,
+        "ci_low": 0.09034470238512063,
+        "ci_high": 0.12023450721644172,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 12,
+        "trials": 58,
+        "estimate": 0.20689655172413793,
+        "ci_low": 0.12251483969490558,
+        "ci_high": 0.3276921792148341,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 197,
+        "trials": 1610,
+        "estimate": 0.12236024844720497,
+        "ci_low": 0.10724583450803428,
+        "ci_high": 0.1392724691619028,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "k_hidden",
+      "signal": "s_real",
+      "gate": false,
+      "rate": {
+        "successes": 78,
+        "trials": 1610,
+        "estimate": 0.0484472049689441,
+        "ci_low": 0.0389916984336566,
+        "ci_high": 0.06005239164536354,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 71,
+        "trials": 1417,
+        "estimate": 0.05010585744530699,
+        "ci_low": 0.039913424561697636,
+        "ci_high": 0.06273100343925844,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 86,
+        "trials": 1610,
+        "estimate": 0.05341614906832298,
+        "ci_low": 0.04345710252603917,
+        "ci_high": 0.06550122039942917,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "k_hidden",
+      "signal": "s_decay",
+      "gate": false,
+      "rate": {
+        "successes": 953,
+        "trials": 1610,
+        "estimate": 0.5919254658385094,
+        "ci_low": 0.5677272159841302,
+        "ci_high": 0.6156860916751614,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 846,
+        "trials": 1369,
+        "estimate": 0.6179693206720234,
+        "ci_low": 0.5919348909997937,
+        "ci_high": 0.6433435513321164,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 969,
+        "trials": 1610,
+        "estimate": 0.6018633540372671,
+        "ci_low": 0.5777369965343031,
+        "ci_high": 0.625504776817885,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "p_onset0.3_h250",
+      "signal": "s_real",
+      "gate": false,
+      "rate": {
+        "successes": 76,
+        "trials": 1610,
+        "estimate": 0.04720496894409938,
+        "ci_low": 0.03787985857526062,
+        "ci_high": 0.05868567329214748,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 60,
+        "trials": 1336,
+        "estimate": 0.04491017964071856,
+        "ci_low": 0.03504887127802288,
+        "ci_high": 0.05738106362613907,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 83,
+        "trials": 1610,
+        "estimate": 0.0515527950310559,
+        "ci_low": 0.04177932812641614,
+        "ci_high": 0.06346115748163414,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "p_onset0.3_h250",
+      "signal": "s_decay",
+      "gate": false,
+      "rate": {
+        "successes": 975,
+        "trials": 1610,
+        "estimate": 0.6055900621118012,
+        "ci_low": 0.5814932984392039,
+        "ci_high": 0.6291841495478202,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 310,
+        "trials": 486,
+        "estimate": 0.6378600823045267,
+        "ci_low": 0.5942032981166813,
+        "ci_high": 0.6793546002339573,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 982,
+        "trials": 1610,
+        "estimate": 0.6099378881987577,
+        "ci_low": 0.5858774806497365,
+        "ci_high": 0.6334749210779297,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "p_onset0.6_h125",
+      "signal": "s_real",
+      "gate": false,
+      "rate": {
+        "successes": 71,
+        "trials": 1610,
+        "estimate": 0.044099378881987575,
+        "ci_low": 0.03510889835220515,
+        "ci_high": 0.055260237986172814,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 62,
+        "trials": 1370,
+        "estimate": 0.04525547445255475,
+        "ci_low": 0.03546215332110913,
+        "ci_high": 0.05759185811514005,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 90,
+        "trials": 1610,
+        "estimate": 0.055900621118012424,
+        "ci_low": 0.04569980683001865,
+        "ci_high": 0.0682156325186738,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "p_onset0.6_h125",
+      "signal": "s_decay",
+      "gate": false,
+      "rate": {
+        "successes": 1017,
+        "trials": 1610,
+        "estimate": 0.6316770186335404,
+        "ci_low": 0.6078283728941236,
+        "ci_high": 0.6548987975367537,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 854,
+        "trials": 1292,
+        "estimate": 0.6609907120743034,
+        "ci_low": 0.6347354121802232,
+        "ci_high": 0.6862915137359987,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 1028,
+        "trials": 1610,
+        "estimate": 0.6385093167701863,
+        "ci_low": 0.6147377214171476,
+        "ci_high": 0.6616215191775959,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "p_onset0.6_h500",
+      "signal": "s_real",
+      "gate": false,
+      "rate": {
+        "successes": 75,
+        "trials": 1610,
+        "estimate": 0.046583850931677016,
+        "ci_low": 0.03732466062872529,
+        "ci_high": 0.058001592132876784,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 65,
+        "trials": 1374,
+        "estimate": 0.04730713245997089,
+        "ci_low": 0.0372888714875489,
+        "ci_high": 0.059849633065253684,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 86,
+        "trials": 1610,
+        "estimate": 0.05341614906832298,
+        "ci_low": 0.04345710252603917,
+        "ci_high": 0.06550122039942917,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "p_onset0.6_h500",
+      "signal": "s_decay",
+      "gate": false,
+      "rate": {
+        "successes": 832,
+        "trials": 1610,
+        "estimate": 0.5167701863354037,
+        "ci_low": 0.4923496996230115,
+        "ci_high": 0.5411108362337511,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 769,
+        "trials": 1414,
+        "estimate": 0.5438472418670438,
+        "ci_low": 0.5178026275225331,
+        "ci_high": 0.5696542593025553,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 845,
+        "trials": 1610,
+        "estimate": 0.5248447204968945,
+        "ci_low": 0.5004213834355837,
+        "ci_high": 0.5491497807966574,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "p_onset0.8_h125",
+      "signal": "s_real",
+      "gate": false,
+      "rate": {
+        "successes": 80,
+        "trials": 1610,
+        "estimate": 0.049689440993788817,
+        "ci_low": 0.04010540612411781,
+        "ci_high": 0.06141724216651438,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 69,
+        "trials": 1386,
+        "estimate": 0.049783549783549784,
+        "ci_low": 0.03952585123609089,
+        "ci_high": 0.06253000407063539,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 86,
+        "trials": 1610,
+        "estimate": 0.05341614906832298,
+        "ci_low": 0.04345710252603917,
+        "ci_high": 0.06550122039942917,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "p_onset0.8_h125",
+      "signal": "s_decay",
+      "gate": false,
+      "rate": {
+        "successes": 713,
+        "trials": 1610,
+        "estimate": 0.44285714285714284,
+        "ci_low": 0.41875835177515836,
+        "ci_high": 0.46722797049068737,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 693,
+        "trials": 1494,
+        "estimate": 0.463855421686747,
+        "ci_low": 0.438692946020072,
+        "ci_high": 0.48920329469085566,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 576,
+        "trials": 1610,
+        "estimate": 0.3577639751552795,
+        "ci_low": 0.33471369616786306,
+        "ci_high": 0.3814913886025574,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "p_onset0.8_h250",
+      "signal": "s_real",
+      "gate": false,
+      "rate": {
+        "successes": 73,
+        "trials": 1610,
+        "estimate": 0.0453416149068323,
+        "ci_low": 0.03621575427816924,
+        "ci_high": 0.05663194027182078,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 67,
+        "trials": 1377,
+        "estimate": 0.048656499636891795,
+        "ci_low": 0.03849497403357935,
+        "ci_high": 0.06132927294291095,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 86,
+        "trials": 1610,
+        "estimate": 0.05341614906832298,
+        "ci_low": 0.04345710252603917,
+        "ci_high": 0.06550122039942917,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "p_onset0.8_h250",
+      "signal": "s_decay",
+      "gate": false,
+      "rate": {
+        "successes": 561,
+        "trials": 1610,
+        "estimate": 0.3484472049689441,
+        "ci_low": 0.325558469252962,
+        "ci_high": 0.37205742893036803,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 546,
+        "trials": 1493,
+        "estimate": 0.36570663094440725,
+        "ci_low": 0.3416498630647847,
+        "ci_high": 0.390452693530666,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 483,
+        "trials": 1610,
+        "estimate": 0.3,
+        "ci_low": 0.2781132868480976,
+        "ci_high": 0.32283884108236244,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "p_onset0.8_h500",
+      "signal": "s_real",
+      "gate": false,
+      "rate": {
+        "successes": 78,
+        "trials": 1610,
+        "estimate": 0.0484472049689441,
+        "ci_low": 0.0389916984336566,
+        "ci_high": 0.06005239164536354,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 72,
+        "trials": 1385,
+        "estimate": 0.05198555956678701,
+        "ci_low": 0.041483797243359044,
+        "ci_high": 0.06496568832011962,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 84,
+        "trials": 1610,
+        "estimate": 0.05217391304347826,
+        "ci_low": 0.042338167782753004,
+        "ci_high": 0.06414159693110327,
+        "confidence": 0.95
+      }
+    },
+    {
+      "scenario": "p_onset0.8_h500",
+      "signal": "s_decay",
+      "gate": false,
+      "rate": {
+        "successes": 356,
+        "trials": 1610,
+        "estimate": 0.22111801242236026,
+        "ci_low": 0.201523734662269,
+        "ci_high": 0.242039946830826,
+        "confidence": 0.95
+      },
+      "rate_given_stage1_pass": {
+        "successes": 345,
+        "trials": 1505,
+        "estimate": 0.2292358803986711,
+        "ci_low": 0.208704639326827,
+        "ci_high": 0.251145833871993,
+        "confidence": 0.95
+      },
+      "trend_rate": {
+        "successes": 344,
+        "trials": 1610,
+        "estimate": 0.21366459627329193,
+        "ci_low": 0.1943364954714826,
+        "ci_high": 0.23435583675194008,
+        "confidence": 0.95
+      }
+    }
+  ],
+  "kill_failed_gates": [],
+  "kill_test_passes": true,
+  "estimators": [
+    {
+      "scenario": "d1_base",
+      "signal": "s_real",
+      "estimator": "partial_corr",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 186,
+        "trials": 1610,
+        "estimate": 0.115527950310559,
+        "ci_low": 0.10082064677517655,
+        "ci_high": 0.13206558673089422,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.004733569849563793,
+      "no_decay_in_ci": 0.884472049689441
+    },
+    {
+      "scenario": "d1_base",
+      "signal": "s_decay",
+      "estimator": "partial_corr",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 1169,
+        "trials": 1610,
+        "estimate": 0.7260869565217392,
+        "ci_low": 0.7037841750092363,
+        "ci_high": 0.7473134195041568,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 1605,
+        "trials": 1610,
+        "estimate": 0.9968944099378882,
+        "ci_low": 0.9927505142632047,
+        "ci_high": 0.998672770381615,
+        "confidence": 0.95
+      },
+      "lam_true": 0.005545177444479563,
+      "lam_bias": 0.07954554691092035,
+      "lam_sd": 0.061453392010452565,
+      "lam_rmse": 0.10050705327851696,
+      "median_lam_hat": 0.12838731705324713,
+      "no_decay_in_ci": 0.27391304347826084
+    },
+    {
+      "scenario": "d1_base",
+      "signal": "s_real",
+      "estimator": "gaussian_te",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 167,
+        "trials": 1610,
+        "estimate": 0.10372670807453416,
+        "ci_low": 0.08976419235885005,
+        "ci_high": 0.11957573813690625,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.8962732919254658
+    },
+    {
+      "scenario": "d1_base",
+      "signal": "s_decay",
+      "estimator": "gaussian_te",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 784,
+        "trials": 1610,
+        "estimate": 0.48695652173913045,
+        "ci_low": 0.4626015908122496,
+        "ci_high": 0.5113735479658239,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 1610,
+        "trials": 1610,
+        "estimate": 1.0,
+        "ci_low": 0.9976196801738496,
+        "ci_high": 0.9999999999999999,
+        "confidence": 0.95
+      },
+      "lam_true": 0.005545177444479563,
+      "lam_bias": 0.1103205295945008,
+      "lam_sd": 0.04530300702623606,
+      "lam_rmse": 0.11925479837871229,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.5130434782608696
+    },
+    {
+      "scenario": "d1_base",
+      "signal": "s_real",
+      "estimator": "ksg",
+      "n": 337,
+      "claims_decay": {
+        "successes": 39,
+        "trials": 337,
+        "estimate": 0.11572700296735905,
+        "ci_low": 0.085821762764931,
+        "ci_high": 0.15429415242879058,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.884272997032641
+    },
+    {
+      "scenario": "d1_base",
+      "signal": "s_decay",
+      "estimator": "ksg",
+      "n": 337,
+      "claims_decay": {
+        "successes": 82,
+        "trials": 337,
+        "estimate": 0.2433234421364985,
+        "ci_low": 0.20057134350641942,
+        "ci_high": 0.29186129482761086,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 336,
+        "trials": 337,
+        "estimate": 0.9970326409495549,
+        "ci_low": 0.9833856580157099,
+        "ci_high": 0.9994759960773532,
+        "confidence": 0.95
+      },
+      "lam_true": 0.005545177444479563,
+      "lam_bias": 0.10453779550285575,
+      "lam_sd": 0.049131880309436785,
+      "lam_rmse": 0.11547696445481033,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.7566765578635015
+    },
+    {
+      "scenario": "d2_ident",
+      "signal": "s_real",
+      "estimator": "partial_corr",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 195,
+        "trials": 1610,
+        "estimate": 0.12111801242236025,
+        "ci_low": 0.10607638869988198,
+        "ci_high": 0.13796335675844304,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.0036211110891616926,
+      "no_decay_in_ci": 0.8788819875776398
+    },
+    {
+      "scenario": "d2_ident",
+      "signal": "s_decay",
+      "estimator": "partial_corr",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 1603,
+        "trials": 1610,
+        "estimate": 0.9956521739130435,
+        "ci_low": 0.9910523963569979,
+        "ci_high": 0.9978923300762097,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 1431,
+        "trials": 1610,
+        "estimate": 0.8888198757763975,
+        "ci_low": 0.8725295414666199,
+        "ci_high": 0.9032591787679516,
+        "confidence": 0.95
+      },
+      "lam_true": 0.0027725887222397813,
+      "lam_bias": 0.019567701395486796,
+      "lam_sd": 0.04294527427717912,
+      "lam_rmse": 0.047180991880388524,
+      "median_lam_hat": 0.003224943596839701,
+      "no_decay_in_ci": 0.004347826086956522
+    },
+    {
+      "scenario": "d2_ident",
+      "signal": "s_real",
+      "estimator": "gaussian_te",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 190,
+        "trials": 1610,
+        "estimate": 0.11801242236024845,
+        "ci_low": 0.1031551440520099,
+        "ci_high": 0.134688205877285,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.8819875776397516
+    },
+    {
+      "scenario": "d2_ident",
+      "signal": "s_decay",
+      "estimator": "gaussian_te",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 1582,
+        "trials": 1610,
+        "estimate": 0.9826086956521739,
+        "ci_low": 0.9749794559585295,
+        "ci_high": 0.9879404092527514,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 1449,
+        "trials": 1610,
+        "estimate": 0.9,
+        "ci_low": 0.884380379715716,
+        "ci_high": 0.9137153644233639,
+        "confidence": 0.95
+      },
+      "lam_true": 0.0027725887222397813,
+      "lam_bias": 0.037557724065949864,
+      "lam_sd": 0.0543232702922121,
+      "lam_rmse": 0.0660285347558862,
+      "median_lam_hat": 0.0040599634456643845,
+      "no_decay_in_ci": 0.017391304347826087
+    },
+    {
+      "scenario": "d2_ident",
+      "signal": "s_real",
+      "estimator": "ksg",
+      "n": 337,
+      "claims_decay": {
+        "successes": 36,
+        "trials": 337,
+        "estimate": 0.10682492581602374,
+        "ci_low": 0.07816551755123263,
+        "ci_high": 0.14434690533037436,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.8931750741839762
+    },
+    {
+      "scenario": "d2_ident",
+      "signal": "s_decay",
+      "estimator": "ksg",
+      "n": 337,
+      "claims_decay": {
+        "successes": 327,
+        "trials": 337,
+        "estimate": 0.9703264094955489,
+        "ci_low": 0.9462476382883626,
+        "ci_high": 0.9838035388683569,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 284,
+        "trials": 337,
+        "estimate": 0.8427299703264095,
+        "ci_low": 0.8000256041382257,
+        "ci_high": 0.8777088498781849,
+        "confidence": 0.95
+      },
+      "lam_true": 0.0027725887222397813,
+      "lam_bias": 0.0496816322107788,
+      "lam_sd": 0.05988230157827332,
+      "lam_rmse": 0.077740041151053,
+      "median_lam_hat": 0.00874692608760072,
+      "no_decay_in_ci": 0.02967359050445104
+    },
+    {
+      "scenario": "d3_ident_fast",
+      "signal": "s_real",
+      "estimator": "partial_corr",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 190,
+        "trials": 1610,
+        "estimate": 0.11801242236024845,
+        "ci_low": 0.1031551440520099,
+        "ci_high": 0.134688205877285,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.0029866806621922782,
+      "no_decay_in_ci": 0.8819875776397516
+    },
+    {
+      "scenario": "d3_ident_fast",
+      "signal": "s_decay",
+      "estimator": "partial_corr",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 1606,
+        "trials": 1610,
+        "estimate": 0.9975155279503105,
+        "ci_low": 0.993629137527183,
+        "ci_high": 0.9990334262234425,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 1473,
+        "trials": 1610,
+        "estimate": 0.9149068322981366,
+        "ci_low": 0.9002704559212895,
+        "ci_high": 0.9275679867571347,
+        "confidence": 0.95
+      },
+      "lam_true": 0.005545177444479563,
+      "lam_bias": 0.02928463359365628,
+      "lam_sd": 0.049391090012269656,
+      "lam_rmse": 0.05740691885554497,
+      "median_lam_hat": 0.006947930358427645,
+      "no_decay_in_ci": 0.002484472049689441
+    },
+    {
+      "scenario": "d3_ident_fast",
+      "signal": "s_real",
+      "estimator": "gaussian_te",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 178,
+        "trials": 1610,
+        "estimate": 0.11055900621118013,
+        "ci_low": 0.0961585816352816,
+        "ci_high": 0.126813419024341,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.8894409937888199
+    },
+    {
+      "scenario": "d3_ident_fast",
+      "signal": "s_decay",
+      "estimator": "gaussian_te",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 1592,
+        "trials": 1610,
+        "estimate": 0.9888198757763975,
+        "ci_low": 0.9823962344127598,
+        "ci_high": 0.9929164218565815,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 1531,
+        "trials": 1610,
+        "estimate": 0.9509316770186336,
+        "ci_low": 0.939264953789623,
+        "ci_high": 0.9604516770255508,
+        "confidence": 0.95
+      },
+      "lam_true": 0.005545177444479563,
+      "lam_bias": 0.05014654777732909,
+      "lam_sd": 0.05655092509995694,
+      "lam_rmse": 0.07556915404986882,
+      "median_lam_hat": 0.04059963445664382,
+      "no_decay_in_ci": 0.011180124223602485
+    },
+    {
+      "scenario": "d3_ident_fast",
+      "signal": "s_real",
+      "estimator": "ksg",
+      "n": 337,
+      "claims_decay": {
+        "successes": 31,
+        "trials": 337,
+        "estimate": 0.09198813056379822,
+        "ci_low": 0.06556195354404573,
+        "ci_high": 0.127611315484037,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.9080118694362018
+    },
+    {
+      "scenario": "d3_ident_fast",
+      "signal": "s_decay",
+      "estimator": "ksg",
+      "n": 337,
+      "claims_decay": {
+        "successes": 327,
+        "trials": 337,
+        "estimate": 0.9703264094955489,
+        "ci_low": 0.9462476382883626,
+        "ci_high": 0.9838035388683569,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 310,
+        "trials": 337,
+        "estimate": 0.9198813056379822,
+        "ci_low": 0.885942385261508,
+        "ci_high": 0.9443556687932289,
+        "confidence": 0.95
+      },
+      "lam_true": 0.005545177444479563,
+      "lam_bias": 0.05177390156062441,
+      "lam_sd": 0.05607563727799201,
+      "lam_rmse": 0.076260626711115,
+      "median_lam_hat": 0.04383847688586826,
+      "no_decay_in_ci": 0.02967359050445104
+    },
+    {
+      "scenario": "k_garch_hi",
+      "signal": "s_real",
+      "estimator": "partial_corr",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 185,
+        "trials": 1610,
+        "estimate": 0.11490683229813664,
+        "ci_low": 0.1002373774491809,
+        "ci_high": 0.13140957695108385,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.005111191152702297,
+      "no_decay_in_ci": 0.8850931677018633
+    },
+    {
+      "scenario": "k_garch_hi",
+      "signal": "s_decay",
+      "estimator": "partial_corr",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 1168,
+        "trials": 1610,
+        "estimate": 0.7254658385093168,
+        "ci_low": 0.7031492404634684,
+        "ci_high": 0.7467090749441184,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 1604,
+        "trials": 1610,
+        "estimate": 0.9962732919254659,
+        "ci_low": 0.9918930744389713,
+        "ci_high": 0.9982909311000423,
+        "confidence": 0.95
+      },
+      "lam_true": 0.005545177444479563,
+      "lam_bias": 0.07878957625051064,
+      "lam_sd": 0.06198723286620438,
+      "lam_rmse": 0.10023885359335613,
+      "median_lam_hat": 0.12838731705324713,
+      "no_decay_in_ci": 0.2745341614906832
+    },
+    {
+      "scenario": "k_garch_hi",
+      "signal": "s_real",
+      "estimator": "gaussian_te",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 169,
+        "trials": 1610,
+        "estimate": 0.10496894409937889,
+        "ci_low": 0.09092537573493434,
+        "ci_high": 0.12089311297243405,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.8950310559006212
+    },
+    {
+      "scenario": "k_garch_hi",
+      "signal": "s_decay",
+      "estimator": "gaussian_te",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 798,
+        "trials": 1610,
+        "estimate": 0.4956521739130435,
+        "ci_low": 0.4712691825005282,
+        "ci_high": 0.5200558637588297,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 1610,
+        "trials": 1610,
+        "estimate": 1.0,
+        "ci_low": 0.9976196801738496,
+        "ci_high": 0.9999999999999999,
+        "confidence": 0.95
+      },
+      "lam_true": 0.005545177444479563,
+      "lam_bias": 0.10907308472975887,
+      "lam_sd": 0.04628620993451675,
+      "lam_rmse": 0.11848215203616132,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.5043478260869565
+    },
+    {
+      "scenario": "k_rho99",
+      "signal": "s_real",
+      "estimator": "partial_corr",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 190,
+        "trials": 1610,
+        "estimate": 0.11801242236024845,
+        "ci_low": 0.1031551440520099,
+        "ci_high": 0.134688205877285,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.12838731705324713,
+      "no_decay_in_ci": 0.8819875776397516
+    },
+    {
+      "scenario": "k_rho99",
+      "signal": "s_decay",
+      "estimator": "partial_corr",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 1149,
+        "trials": 1610,
+        "estimate": 0.7136645962732919,
+        "ci_low": 0.6910953868185806,
+        "ci_high": 0.7352166255786917,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 1600,
+        "trials": 1610,
+        "estimate": 0.9937888198757764,
+        "ci_low": 0.9886041712387563,
+        "ci_high": 0.996622717877033,
+        "confidence": 0.95
+      },
+      "lam_true": 0.005545177444479563,
+      "lam_bias": 0.08023586307027912,
+      "lam_sd": 0.061299997910190064,
+      "lam_rmse": 0.10096112864680608,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.28633540372670807
+    },
+    {
+      "scenario": "k_rho99",
+      "signal": "s_real",
+      "estimator": "gaussian_te",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 173,
+        "trials": 1610,
+        "estimate": 0.10745341614906832,
+        "ci_low": 0.09324967722477251,
+        "ci_high": 0.12352592790581995,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.8925465838509317
+    },
+    {
+      "scenario": "k_rho99",
+      "signal": "s_decay",
+      "estimator": "gaussian_te",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 775,
+        "trials": 1610,
+        "estimate": 0.4813664596273292,
+        "ci_low": 0.4570334580243208,
+        "ci_high": 0.5057881688014985,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 1610,
+        "trials": 1610,
+        "estimate": 1.0,
+        "ci_low": 0.9976196801738496,
+        "ci_high": 0.9999999999999999,
+        "confidence": 0.95
+      },
+      "lam_true": 0.005545177444479563,
+      "lam_bias": 0.11053703181681741,
+      "lam_sd": 0.04495682144828529,
+      "lam_rmse": 0.11932433048703775,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.5186335403726708
+    },
+    {
+      "scenario": "k_realistic",
+      "signal": "s_real",
+      "estimator": "partial_corr",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 198,
+        "trials": 1610,
+        "estimate": 0.12298136645962733,
+        "ci_low": 0.10783075699459799,
+        "ci_high": 0.1399268257811451,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.8770186335403727
+    },
+    {
+      "scenario": "k_realistic",
+      "signal": "s_decay",
+      "estimator": "partial_corr",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 306,
+        "trials": 1610,
+        "estimate": 0.19006211180124225,
+        "ci_low": 0.17164347634573174,
+        "ci_high": 0.20995624985706202,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 1605,
+        "trials": 1610,
+        "estimate": 0.9968944099378882,
+        "ci_low": 0.9927505142632047,
+        "ci_high": 0.998672770381615,
+        "confidence": 0.95
+      },
+      "lam_true": 0.005545177444479563,
+      "lam_bias": 0.10591763732687196,
+      "lam_sd": 0.05015486588872601,
+      "lam_rmse": 0.1171857245584801,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.8099378881987578
+    },
+    {
+      "scenario": "k_realistic",
+      "signal": "s_real",
+      "estimator": "gaussian_te",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 112,
+        "trials": 1610,
+        "estimate": 0.06956521739130435,
+        "ci_low": 0.0581351486637444,
+        "ci_high": 0.08304443101268058,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.9304347826086956
+    },
+    {
+      "scenario": "k_realistic",
+      "signal": "s_decay",
+      "estimator": "gaussian_te",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 132,
+        "trials": 1610,
+        "estimate": 0.08198757763975155,
+        "ci_low": 0.06956072310745338,
+        "ci_high": 0.09640443868509209,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 1610,
+        "trials": 1610,
+        "estimate": 1.0,
+        "ci_low": 0.9976196801738496,
+        "ci_high": 0.9999999999999999,
+        "confidence": 0.95
+      },
+      "lam_true": 0.005545177444479563,
+      "lam_bias": 0.10862170975703611,
+      "lam_sd": 0.04865283149703375,
+      "lam_rmse": 0.11901387984604024,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.9180124223602485
+    },
+    {
+      "scenario": "k_hidden",
+      "signal": "s_real",
+      "estimator": "partial_corr",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 196,
+        "trials": 1610,
+        "estimate": 0.12173913043478261,
+        "ci_low": 0.1066610447862603,
+        "ci_high": 0.13861797977787071,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.005111191152702297,
+      "no_decay_in_ci": 0.8782608695652174
+    },
+    {
+      "scenario": "k_hidden",
+      "signal": "s_decay",
+      "estimator": "partial_corr",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 1170,
+        "trials": 1610,
+        "estimate": 0.7267080745341615,
+        "ci_low": 0.704419162432511,
+        "ci_high": 0.747917711186688,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 1603,
+        "trials": 1610,
+        "estimate": 0.9956521739130435,
+        "ci_low": 0.9910523963569979,
+        "ci_high": 0.9978923300762097,
+        "confidence": 0.95
+      },
+      "lam_true": 0.005545177444479563,
+      "lam_bias": 0.07923803955430292,
+      "lam_sd": 0.06150525944812249,
+      "lam_rmse": 0.10029563413609638,
+      "median_lam_hat": 0.12838731705324713,
+      "no_decay_in_ci": 0.2732919254658385
+    },
+    {
+      "scenario": "k_hidden",
+      "signal": "s_real",
+      "estimator": "gaussian_te",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 187,
+        "trials": 1610,
+        "estimate": 0.11614906832298137,
+        "ci_low": 0.10140405908210778,
+        "ci_high": 0.13272145352976905,
+        "confidence": 0.95
+      },
+      "coverage": null,
+      "lam_true": null,
+      "lam_bias": null,
+      "lam_sd": null,
+      "lam_rmse": null,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.8838509316770187
+    },
+    {
+      "scenario": "k_hidden",
+      "signal": "s_decay",
+      "estimator": "gaussian_te",
+      "n": 1610,
+      "claims_decay": {
+        "successes": 776,
+        "trials": 1610,
+        "estimate": 0.48198757763975153,
+        "ci_low": 0.45765198897914394,
+        "ci_high": 0.5064089169524812,
+        "confidence": 0.95
+      },
+      "coverage": {
+        "successes": 1610,
+        "trials": 1610,
+        "estimate": 1.0,
+        "ci_low": 0.9976196801738496,
+        "ci_high": 0.9999999999999999,
+        "confidence": 0.95
+      },
+      "lam_true": 0.005545177444479563,
+      "lam_bias": 0.11035362396117317,
+      "lam_sd": 0.045490839160207734,
+      "lam_rmse": 0.11935683230143618,
+      "median_lam_hat": 0.13862943611198905,
+      "no_decay_in_ci": 0.5180124223602485
+    }
+  ],
+  "admissible": {
+    "ksg": false,
+    "gaussian_te": false,
+    "partial_corr": false
+  },
+  "estimator_failed_gates": {
+    "ksg": [
+      "d1_base/false_decay",
+      "d2_ident/false_decay",
+      "d2_ident/coverage",
+      "d3_ident_fast/coverage"
+    ],
+    "gaussian_te": [
+      "d1_base/false_decay",
+      "d2_ident/false_decay",
+      "d2_ident/coverage"
+    ],
+    "partial_corr": [
+      "d1_base/false_decay",
+      "d2_ident/false_decay",
+      "d2_ident/coverage"
+    ]
+  },
+  "rmse": [],
+  "selected": null,
+  "selection_reason": "no estimator is admissible; Stage 2 reports no half-life (returns to review)",
+  "median_seconds": {
+    "main": 12.675112479500967,
+    "ksg": 222.28759195799648
+  }
+}

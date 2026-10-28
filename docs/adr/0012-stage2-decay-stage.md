@@ -143,7 +143,7 @@ Limits of the rule, stated before the run:
 If any criterion fails, Stage 2 is not done and the decision returns to review. No threshold
 changes after the run.
 
-## Validation results (M = 1000, commit `90ce789`, clean tree; report `runs/decay_stage_validation/41068846d9e5ae98/report.json`)
+## Validation results (M = 1000, commit `90ce789`, clean tree; report `runs/decay_stage_validation/41068846d9e5ae98/report.json`; archived at [`docs/results/0012-decay-stage-validation/report.json`](../results/0012-decay-stage-validation/report.json))
 Every replication completed and every ledger chain verified (B3). The median runtime per
 replication, both stages included, was 3.5–4.5 s.
 

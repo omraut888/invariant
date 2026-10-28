@@ -302,7 +302,7 @@ directory is new. The restarted run reported `n_reused=20928`. It ran the remain
 main-arm tasks and all 1,011 KSG tasks at `fe3bd87` and finished without error. The old
 directory (`01df4c82cfd33b73`) and both logs are kept.
 
-## Results (M = 1610, M_ksg = 337, commit `fe3bd87`, clean tree; report `runs/decay_study/3566ebefd08713f9/report.json`)
+## Results (M = 1610, M_ksg = 337, commit `fe3bd87`, clean tree; report `runs/decay_study/3566ebefd08713f9/report.json`; archived at [`docs/results/0011-decay-study/report.json`](../results/0011-decay-study/report.json))
 Main-arm records 0–20,927 came from the run at `f7b4e5c` (see the post-launch bug fix above).
 Everything else ran at `fe3bd87`. No crash. All rates are decision-unit rates at α = .05 with
 95% Wilson CIs.

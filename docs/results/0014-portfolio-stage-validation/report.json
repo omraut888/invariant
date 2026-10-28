@@ -1,0 +1,726 @@
+{
+  "config": {
+    "root_seed": 20261027,
+    "n_seeds": 1273,
+    "confidence": 0.95,
+    "n_boot": null,
+    "pipeline_n_obs": null,
+    "overrides": {},
+    "size": {
+      "scenarios": [
+        "d3_null",
+        "d5_null_heavy"
+      ],
+      "n_obs": 5001,
+      "members": [
+        "s_real",
+        "s_decay"
+      ],
+      "upper_max": 0.075
+    },
+    "power": {
+      "signal": "s_real",
+      "lower_min": 0.7
+    }
+  },
+  "n_seeds": 1273,
+  "git_sha": "cb60ab93d012a99e36a35814f352932587329ab4",
+  "git_dirty": false,
+  "lw_alpha": 0.05,
+  "scenarios": [
+    {
+      "kind": "size",
+      "scenario": "d3_null",
+      "n_runs": 1273,
+      "n_ran": 1273,
+      "stage_pass": {
+        "successes": 63,
+        "trials": 1273,
+        "estimate": 0.04948939512961508,
+        "ci_low": 0.03887146033058551,
+        "ci_high": 0.06281810960287924,
+        "confidence": 0.95
+      },
+      "arms": [
+        {
+          "arm": "equal_weight",
+          "decides": false,
+          "n": 1273,
+          "sharpe": -0.008088584648180994,
+          "sharpe_net": -0.008292054625326319,
+          "invested": 1.0,
+          "cash": 0.0,
+          "turnover": 0.0002674511901577962,
+          "beats_equal_weight": null
+        },
+        {
+          "arm": "markowitz",
+          "decides": false,
+          "n": 1273,
+          "sharpe": -0.0027995126769159596,
+          "sharpe_net": -0.37458823680373254,
+          "invested": 0.9633030915298649,
+          "cash": 0.014433120079701715,
+          "turnover": 0.46640406697507564,
+          "beats_equal_weight": {
+            "successes": 54,
+            "trials": 1273,
+            "estimate": 0.04241948153967007,
+            "ci_low": 0.03265597751647005,
+            "ci_high": 0.05493630580740651,
+            "confidence": 0.95
+          }
+        },
+        {
+          "arm": "dro_fc",
+          "decides": false,
+          "n": 1273,
+          "sharpe": -0.022391279731510793,
+          "sharpe_net": -0.06293921840984615,
+          "invested": 0.00807500902884124,
+          "cash": 0.9906757649093534,
+          "turnover": 0.006320972243500198,
+          "beats_equal_weight": {
+            "successes": 49,
+            "trials": 1273,
+            "estimate": 0.0384917517674784,
+            "ci_low": 0.029237145461537647,
+            "ci_high": 0.05052331196812328,
+            "confidence": 0.95
+          }
+        },
+        {
+          "arm": "ridge_cv",
+          "decides": true,
+          "n": 1273,
+          "sharpe": -0.008406545441645444,
+          "sharpe_net": -0.3078451735599175,
+          "invested": 0.5255619678945119,
+          "cash": 0.4144121525786979,
+          "turnover": 0.29494809752964807,
+          "beats_equal_weight": {
+            "successes": 63,
+            "trials": 1273,
+            "estimate": 0.04948939512961508,
+            "ci_low": 0.03887146033058551,
+            "ci_high": 0.06281810960287924,
+            "confidence": 0.95
+          }
+        },
+        {
+          "arm": "dro_cv",
+          "decides": false,
+          "n": 1273,
+          "sharpe": -0.0108683532665464,
+          "sharpe_net": -0.2509406821459344,
+          "invested": 0.35455476940265945,
+          "cash": 0.6306942364793758,
+          "turnover": 0.1858130777411676,
+          "beats_equal_weight": {
+            "successes": 59,
+            "trials": 1273,
+            "estimate": 0.046347211311861744,
+            "ci_low": 0.036100045914476915,
+            "ci_high": 0.0593240633036153,
+            "confidence": 0.95
+          }
+        }
+      ],
+      "marginals": [
+        {
+          "signal_id": "s_decay",
+          "n": 1273,
+          "mean_marginal_sharpe": 0.014043278353126064,
+          "ci_excludes_zero": {
+            "successes": 72,
+            "trials": 1273,
+            "estimate": 0.056559308719560095,
+            "ci_low": 0.04515302422804703,
+            "ci_high": 0.07063383231500589,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_real",
+          "n": 1273,
+          "mean_marginal_sharpe": 0.019649337627540883,
+          "ci_excludes_zero": {
+            "successes": 75,
+            "trials": 1273,
+            "estimate": 0.0589159465828751,
+            "ci_low": 0.04725950994225209,
+            "ci_high": 0.07322644213733022,
+            "confidence": 0.95
+          }
+        }
+      ],
+      "signals": [],
+      "member_sets": {
+        "s_real,s_decay": 1273
+      },
+      "aggregate": null,
+      "median_seconds": 48.043597500014585
+    },
+    {
+      "kind": "size",
+      "scenario": "d5_null_heavy",
+      "n_runs": 1273,
+      "n_ran": 1273,
+      "stage_pass": {
+        "successes": 55,
+        "trials": 1273,
+        "estimate": 0.04320502749410841,
+        "ci_low": 0.03334287647102174,
+        "ci_high": 0.05581577203169796,
+        "confidence": 0.95
+      },
+      "arms": [
+        {
+          "arm": "equal_weight",
+          "decides": false,
+          "n": 1273,
+          "sharpe": -0.009000804153014127,
+          "sharpe_net": -0.009205492766700686,
+          "invested": 1.0,
+          "cash": 0.0,
+          "turnover": 0.0002674511901577962,
+          "beats_equal_weight": null
+        },
+        {
+          "arm": "markowitz",
+          "decides": false,
+          "n": 1273,
+          "sharpe": -0.01853939116995986,
+          "sharpe_net": -0.3921990919174675,
+          "invested": 0.9616975440081165,
+          "cash": 0.01507706186904472,
+          "turnover": 0.4664469446355076,
+          "beats_equal_weight": {
+            "successes": 55,
+            "trials": 1273,
+            "estimate": 0.04320502749410841,
+            "ci_low": 0.03334287647102174,
+            "ci_high": 0.05581577203169796,
+            "confidence": 0.95
+          }
+        },
+        {
+          "arm": "dro_fc",
+          "decides": false,
+          "n": 1273,
+          "sharpe": -0.028930683514158187,
+          "sharpe_net": -0.06913054202327114,
+          "invested": 0.008198545006698886,
+          "cash": 0.9905673557859271,
+          "turnover": 0.006458122619147053,
+          "beats_equal_weight": {
+            "successes": 43,
+            "trials": 1273,
+            "estimate": 0.03377847604084839,
+            "ci_low": 0.025173165581592882,
+            "ci_high": 0.04518910077500925,
+            "confidence": 0.95
+          }
+        },
+        {
+          "arm": "ridge_cv",
+          "decides": true,
+          "n": 1273,
+          "sharpe": -0.02280925408359258,
+          "sharpe_net": -0.3227818199657836,
+          "invested": 0.5205083379431723,
+          "cash": 0.4192235427639327,
+          "turnover": 0.2928057158681559,
+          "beats_equal_weight": {
+            "successes": 55,
+            "trials": 1273,
+            "estimate": 0.04320502749410841,
+            "ci_low": 0.03334287647102174,
+            "ci_high": 0.05581577203169796,
+            "confidence": 0.95
+          }
+        },
+        {
+          "arm": "dro_cv",
+          "decides": false,
+          "n": 1273,
+          "sharpe": -0.02705973468589464,
+          "sharpe_net": -0.26660958367160326,
+          "invested": 0.34920217398109604,
+          "cash": 0.6361228863634979,
+          "turnover": 0.1827499818785938,
+          "beats_equal_weight": {
+            "successes": 54,
+            "trials": 1273,
+            "estimate": 0.04241948153967007,
+            "ci_low": 0.03265597751647005,
+            "ci_high": 0.05493630580740651,
+            "confidence": 0.95
+          }
+        }
+      ],
+      "marginals": [
+        {
+          "signal_id": "s_decay",
+          "n": 1273,
+          "mean_marginal_sharpe": 0.006324405201039975,
+          "ci_excludes_zero": {
+            "successes": 57,
+            "trials": 1273,
+            "estimate": 0.04477611940298507,
+            "ci_low": 0.03471959402946165,
+            "ci_high": 0.057571784830944314,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_real",
+          "n": 1273,
+          "mean_marginal_sharpe": 0.015430579144066082,
+          "ci_excludes_zero": {
+            "successes": 72,
+            "trials": 1273,
+            "estimate": 0.056559308719560095,
+            "ci_low": 0.04515302422804703,
+            "ci_high": 0.07063383231500589,
+            "confidence": 0.95
+          }
+        }
+      ],
+      "signals": [],
+      "member_sets": {
+        "s_real,s_decay": 1273
+      },
+      "aggregate": null,
+      "median_seconds": 55.57830966700567
+    },
+    {
+      "kind": "pipeline",
+      "scenario": "d1_base",
+      "n_runs": 1273,
+      "n_ran": 1224,
+      "stage_pass": {
+        "successes": 1007,
+        "trials": 1224,
+        "estimate": 0.8227124183006536,
+        "ci_low": 0.8003170123289484,
+        "ci_high": 0.8430885302390408,
+        "confidence": 0.95
+      },
+      "arms": [
+        {
+          "arm": "equal_weight",
+          "decides": false,
+          "n": 1224,
+          "sharpe": 0.4363962450499869,
+          "sharpe_net": 0.43623773001050753,
+          "invested": 1.0,
+          "cash": 0.0,
+          "turnover": 0.0002110595187842971,
+          "beats_equal_weight": null
+        },
+        {
+          "arm": "markowitz",
+          "decides": false,
+          "n": 1224,
+          "sharpe": 1.263826456648176,
+          "sharpe_net": 0.9497036644430378,
+          "invested": 0.9782689739748437,
+          "cash": 0.008405652256681483,
+          "turnover": 0.4594078831297763,
+          "beats_equal_weight": {
+            "successes": 935,
+            "trials": 1224,
+            "estimate": 0.7638888888888888,
+            "ci_low": 0.7392941973773296,
+            "ci_high": 0.7868323602162411,
+            "confidence": 0.95
+          }
+        },
+        {
+          "arm": "dro_fc",
+          "decides": false,
+          "n": 1224,
+          "sharpe": 1.1963765297620539,
+          "sharpe_net": 1.0128333541771797,
+          "invested": 0.2961715113792809,
+          "cash": 0.691374769972714,
+          "turnover": 0.14036089414617292,
+          "beats_equal_weight": {
+            "successes": 871,
+            "trials": 1224,
+            "estimate": 0.7116013071895425,
+            "ci_low": 0.6855914938177728,
+            "ci_high": 0.7362870771318707,
+            "confidence": 0.95
+          }
+        },
+        {
+          "arm": "ridge_cv",
+          "decides": true,
+          "n": 1224,
+          "sharpe": 1.3214827923645227,
+          "sharpe_net": 1.0348352640944753,
+          "invested": 0.7795395384831856,
+          "cash": 0.18229041651837322,
+          "turnover": 0.37499095610500277,
+          "beats_equal_weight": {
+            "successes": 1007,
+            "trials": 1224,
+            "estimate": 0.8227124183006536,
+            "ci_low": 0.8003170123289484,
+            "ci_high": 0.8430885302390408,
+            "confidence": 0.95
+          }
+        },
+        {
+          "arm": "dro_cv",
+          "decides": false,
+          "n": 1224,
+          "sharpe": 1.274606802350715,
+          "sharpe_net": 1.0004203452908758,
+          "invested": 0.6821771272178493,
+          "cash": 0.301586636483776,
+          "turnover": 0.3300558385175067,
+          "beats_equal_weight": {
+            "successes": 933,
+            "trials": 1224,
+            "estimate": 0.7622549019607843,
+            "ci_low": 0.7376089861617735,
+            "ci_high": 0.7852598218491745,
+            "confidence": 0.95
+          }
+        }
+      ],
+      "marginals": [
+        {
+          "signal_id": "s_conf",
+          "n": 34,
+          "mean_marginal_sharpe": 0.18095965479209306,
+          "ci_excludes_zero": {
+            "successes": 8,
+            "trials": 34,
+            "estimate": 0.23529411764705882,
+            "ci_low": 0.12436985532639575,
+            "ci_high": 0.3999613792253638,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_decay",
+          "n": 292,
+          "mean_marginal_sharpe": 0.2648532376176296,
+          "ci_excludes_zero": {
+            "successes": 87,
+            "trials": 292,
+            "estimate": 0.2979452054794521,
+            "ci_low": 0.24838671483608415,
+            "ci_high": 0.352751001052755,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_noise",
+          "n": 24,
+          "mean_marginal_sharpe": 0.017121384516883834,
+          "ci_excludes_zero": {
+            "successes": 1,
+            "trials": 24,
+            "estimate": 0.041666666666666664,
+            "ci_low": 0.007393456165505782,
+            "ci_high": 0.20241806478655938,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_real",
+          "n": 1203,
+          "mean_marginal_sharpe": 0.8756350869777413,
+          "ci_excludes_zero": {
+            "successes": 1061,
+            "trials": 1203,
+            "estimate": 0.8819617622610141,
+            "ci_low": 0.8625017144769653,
+            "ci_high": 0.8989901892715451,
+            "confidence": 0.95
+          }
+        }
+      ],
+      "signals": [
+        {
+          "signal_id": "s_conf",
+          "reached_stage3": {
+            "successes": 34,
+            "trials": 1273,
+            "estimate": 0.02670856245090338,
+            "ci_low": 0.019175044418351484,
+            "ci_high": 0.03708993532866248,
+            "confidence": 0.95
+          },
+          "stage3_pass_given_reached": {
+            "successes": 29,
+            "trials": 34,
+            "estimate": 0.8529411764705882,
+            "ci_low": 0.6987194350454783,
+            "ci_high": 0.9355055855521753,
+            "confidence": 0.95
+          },
+          "passes_all": {
+            "successes": 29,
+            "trials": 1273,
+            "estimate": 0.022780832678711706,
+            "ci_low": 0.015907689891187064,
+            "ci_high": 0.03252546396161125,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_decay",
+          "reached_stage3": {
+            "successes": 292,
+            "trials": 1273,
+            "estimate": 0.2293794186959937,
+            "ci_low": 0.20711828336394908,
+            "ci_high": 0.25326891252459244,
+            "confidence": 0.95
+          },
+          "stage3_pass_given_reached": {
+            "successes": 270,
+            "trials": 292,
+            "estimate": 0.9246575342465754,
+            "ci_low": 0.8885655133210336,
+            "ci_high": 0.9497213210820842,
+            "confidence": 0.95
+          },
+          "passes_all": {
+            "successes": 270,
+            "trials": 1273,
+            "estimate": 0.21209740769835037,
+            "ci_low": 0.19052438222947155,
+            "ci_high": 0.23540277972452117,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_noise",
+          "reached_stage3": {
+            "successes": 24,
+            "trials": 1273,
+            "estimate": 0.018853102906520033,
+            "ci_low": 0.012701530401766435,
+            "ci_high": 0.02789979755681623,
+            "confidence": 0.95
+          },
+          "stage3_pass_given_reached": {
+            "successes": 19,
+            "trials": 24,
+            "estimate": 0.7916666666666666,
+            "ci_low": 0.5952954674681133,
+            "ci_high": 0.9075517464714814,
+            "confidence": 0.95
+          },
+          "passes_all": {
+            "successes": 19,
+            "trials": 1273,
+            "estimate": 0.014925373134328358,
+            "ci_low": 0.009575675384378004,
+            "ci_high": 0.023193826679989007,
+            "confidence": 0.95
+          }
+        },
+        {
+          "signal_id": "s_real",
+          "reached_stage3": {
+            "successes": 1203,
+            "trials": 1273,
+            "estimate": 0.9450117831893166,
+            "ci_low": 0.9310979198264319,
+            "ci_high": 0.9562479539882015,
+            "confidence": 0.95
+          },
+          "stage3_pass_given_reached": {
+            "successes": 996,
+            "trials": 1203,
+            "estimate": 0.827930174563591,
+            "ci_low": 0.8055660499010453,
+            "ci_high": 0.8482066509233015,
+            "confidence": 0.95
+          },
+          "passes_all": {
+            "successes": 996,
+            "trials": 1273,
+            "estimate": 0.7824037706205813,
+            "ci_low": 0.7589063120894565,
+            "ci_high": 0.8042019697046489,
+            "confidence": 0.95
+          }
+        }
+      ],
+      "member_sets": {
+        "s_real": 889,
+        "s_real,s_decay": 261,
+        "(none)": 49,
+        "s_real,s_conf": 23,
+        "s_real,s_noise": 17,
+        "s_decay": 17,
+        "s_real,s_conf,s_decay": 8,
+        "s_real,s_decay,s_noise": 4,
+        "s_conf": 1,
+        "s_decay,s_noise": 1,
+        "s_real,s_conf,s_noise": 1,
+        "s_noise": 1,
+        "s_conf,s_decay": 1
+      },
+      "aggregate": {
+        "n_runs": 1273,
+        "n_incomplete_runs": 0,
+        "stages": [
+          "causal",
+          "decay",
+          "portfolio"
+        ],
+        "per_signal_correct": {
+          "s_conf": {
+            "successes": 1244,
+            "trials": 1273,
+            "estimate": 0.9772191673212883,
+            "ci_low": 0.9674745360383888,
+            "ci_high": 0.9840923101088129,
+            "confidence": 0.95
+          },
+          "s_decay": {
+            "successes": 1003,
+            "trials": 1273,
+            "estimate": 0.7879025923016496,
+            "ci_low": 0.7645972202754788,
+            "ci_high": 0.8094756177705283,
+            "confidence": 0.95
+          },
+          "s_noise": {
+            "successes": 1254,
+            "trials": 1273,
+            "estimate": 0.9850746268656716,
+            "ci_low": 0.9768061733200109,
+            "ci_high": 0.9904243246156219,
+            "confidence": 0.95
+          },
+          "s_real": {
+            "successes": 996,
+            "trials": 1273,
+            "estimate": 0.7824037706205813,
+            "ci_low": 0.7589063120894565,
+            "ci_high": 0.8042019697046489,
+            "confidence": 0.95
+          }
+        },
+        "per_signal_stage_match": {
+          "s_conf": {
+            "successes": 1238,
+            "trials": 1244,
+            "estimate": 0.9951768488745981,
+            "ci_low": 0.9895172224692359,
+            "ci_high": 0.9977876881756904,
+            "confidence": 0.95
+          },
+          "s_decay": {
+            "successes": 928,
+            "trials": 1003,
+            "estimate": 0.9252243270189432,
+            "ci_low": 0.9072742147819298,
+            "ci_high": 0.9399296746954787,
+            "confidence": 0.95
+          },
+          "s_noise": {
+            "successes": 1248,
+            "trials": 1254,
+            "estimate": 0.9952153110047847,
+            "ci_low": 0.9896004935966414,
+            "ci_high": 0.9978053446275601,
+            "confidence": 0.95
+          },
+          "s_real": {
+            "successes": 0,
+            "trials": 0,
+            "estimate": null,
+            "ci_low": null,
+            "ci_high": null,
+            "confidence": 0.95
+          }
+        },
+        "kill_precision": {
+          "successes": 3501,
+          "trials": 3778,
+          "estimate": 0.9266807834833245,
+          "ci_low": 0.9179285772919695,
+          "ci_high": 0.9345661756227527,
+          "confidence": 0.95
+        },
+        "kill_recall": {
+          "successes": 3501,
+          "trials": 3819,
+          "estimate": 0.9167321288295365,
+          "ci_low": 0.9075451607272931,
+          "ci_high": 0.925081573676158,
+          "confidence": 0.95
+        }
+      },
+      "median_seconds": 126.2162742500077
+    }
+  ],
+  "criteria": [
+    {
+      "name": "V1_size",
+      "scope": "d3_null",
+      "rate": {
+        "successes": 63,
+        "trials": 1273,
+        "estimate": 0.04948939512961508,
+        "ci_low": 0.03887146033058551,
+        "ci_high": 0.06281810960287924,
+        "confidence": 0.95
+      },
+      "bound": 0.06281810960287924,
+      "threshold": 0.075,
+      "passed": true
+    },
+    {
+      "name": "V1_size",
+      "scope": "d5_null_heavy",
+      "rate": {
+        "successes": 55,
+        "trials": 1273,
+        "estimate": 0.04320502749410841,
+        "ci_low": 0.03334287647102174,
+        "ci_high": 0.05581577203169796,
+        "confidence": 0.95
+      },
+      "bound": 0.05581577203169796,
+      "threshold": 0.075,
+      "passed": true
+    },
+    {
+      "name": "V2_power",
+      "scope": "s_real",
+      "rate": {
+        "successes": 996,
+        "trials": 1203,
+        "estimate": 0.827930174563591,
+        "ci_low": 0.8055660499010453,
+        "ci_high": 0.8482066509233015,
+        "confidence": 0.95
+      },
+      "bound": 0.8055660499010453,
+      "threshold": 0.7,
+      "passed": true
+    },
+    {
+      "name": "V3_complete",
+      "scope": "all",
+      "rate": null,
+      "bound": null,
+      "threshold": 3819.0,
+      "passed": true
+    }
+  ],
+  "accepted": true
+}

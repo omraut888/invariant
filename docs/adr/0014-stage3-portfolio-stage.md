@@ -211,7 +211,9 @@ changes after the run.
 - **min_obs 6000**: would never run on the real panel (above).
 
 ## Results (2026-10-28)
-Run `runs/portfolio_stage_validation/21d7006da9f51e29`, commit cb60ab9 (clean), worktree
+Run `runs/portfolio_stage_validation/21d7006da9f51e29` (report archived at
+[`docs/results/0014-portfolio-stage-validation/report.json`](../results/0014-portfolio-stage-validation/report.json)),
+commit cb60ab9 (clean), worktree
 `../invariant-portfolio-run`, 8 workers, root seed 20261027, M = 1273, 3819 tasks. No bug was
 found after launch; the run did not restart or resume. Wilson 95% intervals throughout.
 

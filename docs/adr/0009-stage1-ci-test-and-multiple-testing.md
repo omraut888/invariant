@@ -102,7 +102,7 @@ review.
 (tests/unit/test_calibration.py). The output directory is keyed by a hash of (study config, M,
 git state), and the uncommitted patch is saved next to the report.
 
-## Results (M = 1654, T = 6000, report `runs/causal_ci_study/487866d2fda16623/report.json`)
+## Results (M = 1654, T = 6000, report `runs/causal_ci_study/487866d2fda16623/report.json`; archived at [`docs/results/0009-causal-ci-study-1/report.json`](../results/0009-causal-ci-study-1/report.json))
 Code: commit `09d3f44`. The run was recorded as `54a4ffe` + `dirty.patch`, and that tree is
 identical to `09d3f44` outside `docs/adr/` (verified).
 
@@ -249,7 +249,7 @@ full run invalidates it.
    correlation for its conditioning set, times sqrt(n - 1)), so `low_power` flags the method
    actually used.
 
-## Study 2 results (M = 1785, commit `e3217bc`, clean tree; report `runs/causal_ci_study/c7cb0210a18a30fd/report.json`)
+## Study 2 results (M = 1785, commit `e3217bc`, clean tree; report `runs/causal_ci_study/c7cb0210a18a30fd/report.json`; archived at [`docs/results/0009-causal-ci-study-2/report.json`](../results/0009-causal-ci-study-2/report.json))
 The consistency check passed: 148,860 overlapping `*|mci` cells equal study 1 bit for bit.
 
 The rule selected `wls20|hybrid`. **That selection is void: see the defect below.**
@@ -369,7 +369,7 @@ Its rates were not used. Any mismatch in the full run invalidates it.
 The MCI p-value is recorded in the ledger as a diagnostic. GroundTruth gains the chosen
 decision test's expected t, so `low_power` matches the method in use.
 
-## Study 3 results (M = 1785, commit `ff38fc2`, clean tree; report `runs/causal_ci_study/188421e7d7adadc3/report.json`)
+## Study 3 results (M = 1785, commit `ff38fc2`, clean tree; report `runs/causal_ci_study/188421e7d7adadc3/report.json`; archived at [`docs/results/0009-causal-ci-study-3/report.json`](../results/0009-causal-ci-study-3/report.json))
 The consistency check passed: 210,630 `parcorr|*` cells equal study 2 bit for bit. No admissible
 pair is degenerate: the 1% and 5% quantiles of its lag-1 null p-values are ~.01 and ~.05.
 
@@ -466,7 +466,7 @@ pass all 11 gates on data it has never seen?
   0.9928 and all 11 with probability >= 0.92 (union bound). A failure is therefore strong
   evidence of miscalibration, not proof. A true-0.06 pair passes one gate with probability 0.708.
 
-## Confirmation results (M = 1785, commit `694c75f`, clean tree; report `runs/causal_ci_study/617e5f4a76f2f39a/report.json`)
+## Confirmation results (M = 1785, commit `694c75f`, clean tree; report `runs/causal_ci_study/617e5f4a76f2f39a/report.json`; archived at [`docs/results/0009-causal-ci-confirmation/report.json`](../results/0009-causal-ci-confirmation/report.json))
 **Outcome under the rule: confirmed.** `hc3|hybrid` is admissible on the fresh seed: no gate
 failed, and the largest Wilson upper bound is .058, on E2 s_decay. `cwls20|hybrid` is also
 admissible. The report's `selected` field (`cwls20|hybrid`) is not used, as pre-registered.

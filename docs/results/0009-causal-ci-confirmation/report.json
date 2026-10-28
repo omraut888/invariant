@@ -1,0 +1,2554 @@
+{
+  "config": {
+    "scenario_set": "study3",
+    "root_seed": 20261018,
+    "n_seeds": null,
+    "n_obs": 6000,
+    "tau_max": 5,
+    "pc_alpha": 0.2,
+    "alpha": 0.05,
+    "size_cutoff": 0.075,
+    "all_pass_prob": 0.9,
+    "confidence": 0.95,
+    "tests": [
+      {
+        "label": "hc3",
+        "test": "parcorr_hc3",
+        "wls_window": 10
+      },
+      {
+        "label": "cwls20",
+        "test": "parcorr_wls_centered",
+        "wls_window": 20
+      }
+    ],
+    "decisions": [
+      "hybrid"
+    ],
+    "selection_scenario": "e3_default",
+    "selection_families": [
+      "s_real->R",
+      "s_decay->R"
+    ],
+    "tie_break": "simplicity",
+    "decision_simplicity": [
+      "hybrid"
+    ],
+    "ci_simplicity": [
+      "hc3",
+      "cwls20"
+    ]
+  },
+  "n_seeds": 1785,
+  "n_gating": 11,
+  "per_family_pass_prob_at_alpha": 0.9927919896816441,
+  "all_pass_prob_lower_bound": 0.9207118864980847,
+  "max_passing_rejections": 112,
+  "tigramite_version": "5.2.10.1",
+  "git_sha": "694c75fca0a80a3f0c6a7e53330eac6208e741a5",
+  "git_dirty": false,
+  "families": [
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_real->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 76,
+        "trials": 1785,
+        "estimate": 0.04257703081232493,
+        "ci_low": 0.03415165419431139,
+        "ci_high": 0.05296699908390237,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_real->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 79,
+        "trials": 1785,
+        "estimate": 0.044257703081232495,
+        "ci_low": 0.03565552379632174,
+        "ci_high": 0.05481725567927764,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_real->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 105,
+        "trials": 1785,
+        "estimate": 0.058823529411764705,
+        "ci_low": 0.048826171025804006,
+        "ci_high": 0.07071570216047074,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.39174522270552903
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_real->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 95,
+        "trials": 1785,
+        "estimate": 0.05322128851540616,
+        "ci_low": 0.043734280500183534,
+        "ci_high": 0.06462717202813915,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.1402113121041676
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_real",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 82,
+        "trials": 1785,
+        "estimate": 0.04593837535014006,
+        "ci_low": 0.03716308987216077,
+        "ci_high": 0.05666381580082423,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_real",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 82,
+        "trials": 1785,
+        "estimate": 0.04593837535014006,
+        "ci_low": 0.03716308987216077,
+        "ci_high": 0.05666381580082423,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_conf->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 51,
+        "trials": 1785,
+        "estimate": 0.02857142857142857,
+        "ci_low": 0.021797417466172815,
+        "ci_high": 0.037370184167160765,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_conf->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 63,
+        "trials": 1785,
+        "estimate": 0.03529411764705882,
+        "ci_low": 0.027683138189268097,
+        "ci_high": 0.044900968233607966,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 96,
+        "trials": 1785,
+        "estimate": 0.05378151260504202,
+        "ci_low": 0.04424211669161614,
+        "ci_high": 0.06523737790250177,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.727004865983116
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 91,
+        "trials": 1785,
+        "estimate": 0.050980392156862744,
+        "ci_low": 0.04170615095931096,
+        "ci_high": 0.06218313330583089,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.9908773970714966
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_conf",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 104,
+        "trials": 1785,
+        "estimate": 0.05826330532212885,
+        "ci_low": 0.04831567860853692,
+        "ci_high": 0.07010815251194262,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_conf",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 104,
+        "trials": 1785,
+        "estimate": 0.05826330532212885,
+        "ci_low": 0.04831567860853692,
+        "ci_high": 0.07010815251194262,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_decay->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 84,
+        "trials": 1785,
+        "estimate": 0.047058823529411764,
+        "ci_low": 0.038170093222281265,
+        "ci_high": 0.05789289658229414,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_decay->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 89,
+        "trials": 1785,
+        "estimate": 0.04985994397759104,
+        "ci_low": 0.04069408471769913,
+        "ci_high": 0.06095911541585232,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_decay->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 84,
+        "trials": 1785,
+        "estimate": 0.047058823529411764,
+        "ci_low": 0.038170093222281265,
+        "ci_high": 0.05789289658229414,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.09564827107099239
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_decay->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 103,
+        "trials": 1785,
+        "estimate": 0.057703081232493,
+        "ci_low": 0.04780546529164849,
+        "ci_high": 0.06950032376303586,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.02459061167093457
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_decay",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 84,
+        "trials": 1785,
+        "estimate": 0.047058823529411764,
+        "ci_low": 0.038170093222281265,
+        "ci_high": 0.05789289658229414,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_decay",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 83,
+        "trials": 1785,
+        "estimate": 0.04649859943977591,
+        "ci_low": 0.03766640008579336,
+        "ci_high": 0.057278547652986844,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_noise->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 61,
+        "trials": 1785,
+        "estimate": 0.03417366946778711,
+        "ci_low": 0.02669584743862446,
+        "ci_high": 0.04365217485266118,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_noise->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 51,
+        "trials": 1785,
+        "estimate": 0.02857142857142857,
+        "ci_low": 0.021797417466172815,
+        "ci_high": 0.037370184167160765,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 83,
+        "trials": 1785,
+        "estimate": 0.04649859943977591,
+        "ci_low": 0.03766640008579336,
+        "ci_high": 0.057278547652986844,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.0001775884775493242
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 88,
+        "trials": 1785,
+        "estimate": 0.04929971988795518,
+        "ci_low": 0.04018856952924985,
+        "ci_high": 0.06034658853850638,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.058851601322735037
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_noise",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 90,
+        "trials": 1785,
+        "estimate": 0.05042016806722689,
+        "ci_low": 0.04119994699649694,
+        "ci_high": 0.06157129520284971,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->s_noise",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 86,
+        "trials": 1785,
+        "estimate": 0.048179271708683476,
+        "ci_low": 0.039178602810217254,
+        "ci_high": 0.05912047112594857,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "z->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 43,
+        "trials": 1785,
+        "estimate": 0.024089635854341738,
+        "ci_low": 0.017933211734658058,
+        "ci_high": 0.03229005337231387,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "z->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 56,
+        "trials": 1785,
+        "estimate": 0.03137254901960784,
+        "ci_low": 0.024238247155701075,
+        "ci_high": 0.040519564806608545,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "z->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 90,
+        "trials": 1785,
+        "estimate": 0.05042016806722689,
+        "ci_low": 0.04119994699649694,
+        "ci_high": 0.06157129520284971,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.009544830785633276
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "z->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 71,
+        "trials": 1785,
+        "estimate": 0.039775910364145656,
+        "ci_low": 0.03165399385940164,
+        "ci_high": 0.049874449089836084,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.042905796446812694
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->z",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 84,
+        "trials": 1785,
+        "estimate": 0.047058823529411764,
+        "ci_low": 0.038170093222281265,
+        "ci_high": 0.05789289658229414,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->z",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 77,
+        "trials": 1785,
+        "estimate": 0.043137254901960784,
+        "ci_low": 0.03465252090674297,
+        "ci_high": 0.05358417443726599,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 100,
+        "trials": 1785,
+        "estimate": 0.056022408963585436,
+        "ci_low": 0.046276538248148175,
+        "ci_high": 0.06767512460915055,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 121,
+        "trials": 1785,
+        "estimate": 0.06778711484593837,
+        "ci_low": 0.05702923093533639,
+        "ci_high": 0.08040131530366164,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 92,
+        "trials": 1785,
+        "estimate": 0.0515406162464986,
+        "ci_low": 0.04221269134519395,
+        "ci_high": 0.0627946349857431,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.6423583914598068
+    },
+    {
+      "scenario": "e2_garch_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 100,
+        "trials": 1785,
+        "estimate": 0.056022408963585436,
+        "ci_low": 0.046276538248148175,
+        "ci_high": 0.06767512460915055,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.08656245868778056
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_conf->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 52,
+        "trials": 1785,
+        "estimate": 0.029131652661064426,
+        "ci_low": 0.02228413443351016,
+        "ci_high": 0.03800150926561863,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_conf->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 65,
+        "trials": 1785,
+        "estimate": 0.036414565826330535,
+        "ci_low": 0.028672693168899248,
+        "ci_high": 0.04614749738556725,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 90,
+        "trials": 1785,
+        "estimate": 0.05042016806722689,
+        "ci_low": 0.04119994699649694,
+        "ci_high": 0.06157129520284971,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.011356798828219715
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 97,
+        "trials": 1785,
+        "estimate": 0.05434173669467787,
+        "ci_low": 0.04475026500062644,
+        "ci_high": 0.06584727165928667,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.005626966945360316
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_noise->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 56,
+        "trials": 1785,
+        "estimate": 0.03137254901960784,
+        "ci_low": 0.024238247155701075,
+        "ci_high": 0.040519564806608545,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_noise->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 51,
+        "trials": 1785,
+        "estimate": 0.02857142857142857,
+        "ci_low": 0.021797417466172815,
+        "ci_high": 0.037370184167160765,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 87,
+        "trials": 1785,
+        "estimate": 0.04873949579831933,
+        "ci_low": 0.03968340698857876,
+        "ci_high": 0.05973370901338227,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.0003937776533953959
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 92,
+        "trials": 1785,
+        "estimate": 0.0515406162464986,
+        "ci_low": 0.04221269134519395,
+        "ci_high": 0.0627946349857431,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.012394392927833925
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R@2..",
+      "role": "null",
+      "lags": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 364,
+        "trials": 1785,
+        "estimate": 0.20392156862745098,
+        "ci_low": 0.1858753853182346,
+        "ci_high": 0.2232393829089987,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R@2..",
+      "role": "null",
+      "lags": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 301,
+        "trials": 1785,
+        "estimate": 0.16862745098039217,
+        "ci_low": 0.1519734873975081,
+        "ci_high": 0.18670463068462717,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 110,
+        "trials": 1785,
+        "estimate": 0.06162464985994398,
+        "ci_low": 0.051382693181084,
+        "ci_high": 0.07374939033416679,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 139,
+        "trials": 1785,
+        "estimate": 0.07787114845938375,
+        "ci_low": 0.06632676255499637,
+        "ci_high": 0.09122854086831542,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 94,
+        "trials": 1785,
+        "estimate": 0.05266106442577031,
+        "ci_low": 0.04322676103694075,
+        "ci_high": 0.06401664942558674,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.30036601819701947
+    },
+    {
+      "scenario": "e3_default",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 109,
+        "trials": 1785,
+        "estimate": 0.06106442577030812,
+        "ci_low": 0.05087085903820386,
+        "ci_high": 0.07314318241125171,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.003394148289689828
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 1578,
+        "trials": 1785,
+        "estimate": 0.8840336134453781,
+        "ci_low": 0.8683484523869801,
+        "ci_high": 0.898069383715634,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 1603,
+        "trials": 1785,
+        "estimate": 0.8980392156862745,
+        "ci_low": 0.8831358851417318,
+        "ci_high": 0.9112330026057626,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 1461,
+        "trials": 1785,
+        "estimate": 0.8184873949579832,
+        "ci_low": 0.7999287184301196,
+        "ci_high": 0.8356781959744555,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_real->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 1498,
+        "trials": 1785,
+        "estimate": 0.8392156862745098,
+        "ci_low": 0.8214492556861833,
+        "ci_high": 0.8555252151528144,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_decay->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 1573,
+        "trials": 1785,
+        "estimate": 0.8812324929971989,
+        "ci_low": 0.8653995913911728,
+        "ci_high": 0.8954280343824653,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_decay->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 1633,
+        "trials": 1785,
+        "estimate": 0.9148459383753501,
+        "ci_low": 0.9009902533602986,
+        "ci_high": 0.926919896361052,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_decay->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 1500,
+        "trials": 1785,
+        "estimate": 0.8403361344537815,
+        "ci_low": 0.8226152455294895,
+        "ci_high": 0.8565953094410985,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "s_decay->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 1504,
+        "trials": 1785,
+        "estimate": 0.8425770308123249,
+        "ci_low": 0.824948111190293,
+        "ci_high": 0.858734612043476,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "z->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 1408,
+        "trials": 1785,
+        "estimate": 0.7887955182072829,
+        "ci_low": 0.7692506308171538,
+        "ci_high": 0.8071000541002753,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e3_default",
+      "family": "z->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 1373,
+        "trials": 1785,
+        "estimate": 0.769187675070028,
+        "ci_low": 0.7490752968321939,
+        "ci_high": 0.7881439157824031,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_conf->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 61,
+        "trials": 1785,
+        "estimate": 0.03417366946778711,
+        "ci_low": 0.02669584743862446,
+        "ci_high": 0.04365217485266118,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_conf->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 77,
+        "trials": 1785,
+        "estimate": 0.043137254901960784,
+        "ci_low": 0.03465252090674297,
+        "ci_high": 0.05358417443726599,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 93,
+        "trials": 1785,
+        "estimate": 0.052100840336134456,
+        "ci_low": 0.04271956303314682,
+        "ci_high": 0.06340580536358546,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.7480848627164489
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_conf->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 108,
+        "trials": 1785,
+        "estimate": 0.06050420168067227,
+        "ci_low": 0.050359286341565626,
+        "ci_high": 0.07253671304209475,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.49171714095129426
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_noise->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 64,
+        "trials": 1785,
+        "estimate": 0.035854341736694675,
+        "ci_low": 0.02817763898113964,
+        "ci_high": 0.045524509507531626,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_noise->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 53,
+        "trials": 1785,
+        "estimate": 0.02969187675070028,
+        "ci_low": 0.022771595404759447,
+        "ci_high": 0.038632090360164545,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 83,
+        "trials": 1785,
+        "estimate": 0.04649859943977591,
+        "ci_low": 0.03766640008579336,
+        "ci_high": 0.057278547652986844,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 1.7580824344833894e-05
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_noise->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 99,
+        "trials": 1785,
+        "estimate": 0.05546218487394958,
+        "ci_low": 0.04576748010667333,
+        "ci_high": 0.06706614068483019,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.008393005203889532
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R@2..",
+      "role": "null",
+      "lags": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 305,
+        "trials": 1785,
+        "estimate": 0.17086834733893558,
+        "ci_low": 0.15411848974343376,
+        "ci_high": 0.18903179660188232,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R@2..",
+      "role": "null",
+      "lags": [
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 297,
+        "trials": 1785,
+        "estimate": 0.16638655462184873,
+        "ci_low": 0.1498295882415856,
+        "ci_high": 0.1843763615773688,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 94,
+        "trials": 1785,
+        "estimate": 0.05266106442577031,
+        "ci_low": 0.04322676103694075,
+        "ci_high": 0.06401664942558674,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 129,
+        "trials": 1785,
+        "estimate": 0.07226890756302522,
+        "ci_low": 0.06115322766922218,
+        "ci_high": 0.08522165509613752,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 90,
+        "trials": 1785,
+        "estimate": 0.05042016806722689,
+        "ci_low": 0.04119994699649694,
+        "ci_high": 0.06157129520284971,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.7669824391330587
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 101,
+        "trials": 1785,
+        "estimate": 0.05658263305322129,
+        "ci_low": 0.04678589118844181,
+        "ci_high": 0.06828381373465212,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.33908188051731936
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 443,
+        "trials": 1785,
+        "estimate": 0.24817927170868348,
+        "ci_low": 0.22869560058965863,
+        "ci_high": 0.26874449083539603,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 450,
+        "trials": 1785,
+        "estimate": 0.25210084033613445,
+        "ci_low": 0.23250416651572078,
+        "ci_high": 0.27276221936990036,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 562,
+        "trials": 1785,
+        "estimate": 0.31484593837535013,
+        "ci_low": 0.2937167511354464,
+        "ci_high": 0.33677034611923784,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_real->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 547,
+        "trials": 1785,
+        "estimate": 0.30644257703081235,
+        "ci_low": 0.28549041819435494,
+        "ci_high": 0.3282260480734013,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_decay->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 187,
+        "trials": 1785,
+        "estimate": 0.10476190476190476,
+        "ci_low": 0.09139364531298795,
+        "ci_high": 0.11982767726849373,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_decay->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 213,
+        "trials": 1785,
+        "estimate": 0.11932773109243698,
+        "ci_low": 0.10510055815386737,
+        "ci_high": 0.1351898581382897,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_decay->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 257,
+        "trials": 1785,
+        "estimate": 0.14397759103641455,
+        "ci_low": 0.12845550374539813,
+        "ci_high": 0.16102876344174802,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "s_decay->R@1",
+      "role": "alternative",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 280,
+        "trials": 1785,
+        "estimate": 0.1568627450980392,
+        "ci_low": 0.14073074873568123,
+        "ci_high": 0.1744684859647547,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "z->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 318,
+        "trials": 1785,
+        "estimate": 0.1781512605042017,
+        "ci_low": 0.1610971623654339,
+        "ci_high": 0.1965876708352199,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e5_realistic",
+      "family": "z->R",
+      "role": "alternative",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 256,
+        "trials": 1785,
+        "estimate": 0.1434173669467787,
+        "ci_low": 0.127922766668369,
+        "ci_high": 0.16044345845298197,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "s_vol->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 43,
+        "trials": 1785,
+        "estimate": 0.024089635854341738,
+        "ci_low": 0.017933211734658058,
+        "ci_high": 0.03229005337231387,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "s_vol->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 46,
+        "trials": 1785,
+        "estimate": 0.0257703081232493,
+        "ci_low": 0.019375762457535837,
+        "ci_high": 0.03420162884682171,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "s_vol->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 70,
+        "trials": 1785,
+        "estimate": 0.0392156862745098,
+        "ci_low": 0.0311558578539172,
+        "ci_high": 0.049254543029525324,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.0002882958260964866
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "s_vol->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 63,
+        "trials": 1785,
+        "estimate": 0.03529411764705882,
+        "ci_low": 0.027683138189268097,
+        "ci_high": 0.044900968233607966,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.0010476090655360086
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 100,
+        "trials": 1785,
+        "estimate": 0.056022408963585436,
+        "ci_low": 0.046276538248148175,
+        "ci_high": 0.06767512460915055,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 126,
+        "trials": 1785,
+        "estimate": 0.07058823529411765,
+        "ci_low": 0.05960511186331,
+        "ci_high": 0.08341564470466409,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 90,
+        "trials": 1785,
+        "estimate": 0.05042016806722689,
+        "ci_low": 0.04119994699649694,
+        "ci_high": 0.06157129520284971,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.47738142747705103
+    },
+    {
+      "scenario": "e4_vol_null",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 102,
+        "trials": 1785,
+        "estimate": 0.05714285714285714,
+        "ci_low": 0.04729553485967909,
+        "ci_high": 0.06889221212921004,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.10656981798911136
+    },
+    {
+      "scenario": "e4_low_persist",
+      "family": "s_vol->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 70,
+        "trials": 1785,
+        "estimate": 0.0392156862745098,
+        "ci_low": 0.0311558578539172,
+        "ci_high": 0.049254543029525324,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_low_persist",
+      "family": "s_vol->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 94,
+        "trials": 1785,
+        "estimate": 0.05266106442577031,
+        "ci_low": 0.04322676103694075,
+        "ci_high": 0.06401664942558674,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_low_persist",
+      "family": "s_vol->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 97,
+        "trials": 1785,
+        "estimate": 0.05434173669467787,
+        "ci_low": 0.04475026500062644,
+        "ci_high": 0.06584727165928667,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.18744365370879168
+    },
+    {
+      "scenario": "e4_low_persist",
+      "family": "s_vol->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 107,
+        "trials": 1785,
+        "estimate": 0.05994397759103642,
+        "ci_low": 0.04984797846183873,
+        "ci_high": 0.07192997885602644,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.01136597761645333
+    },
+    {
+      "scenario": "e4_low_persist",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 108,
+        "trials": 1785,
+        "estimate": 0.06050420168067227,
+        "ci_low": 0.050359286341565626,
+        "ci_high": 0.07253671304209475,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_low_persist",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 147,
+        "trials": 1785,
+        "estimate": 0.08235294117647059,
+        "ci_low": 0.0704791634230115,
+        "ci_high": 0.09602047652666193,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_low_persist",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 98,
+        "trials": 1785,
+        "estimate": 0.054901960784313725,
+        "ci_low": 0.04525872093296815,
+        "ci_high": 0.06645685779274016,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.658109520650727
+    },
+    {
+      "scenario": "e4_low_persist",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 131,
+        "trials": 1785,
+        "estimate": 0.07338935574229692,
+        "ci_low": 0.06218634451604468,
+        "ci_high": 0.08642462238090544,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 5.275056832840994e-06
+    },
+    {
+      "scenario": "e4_high_persist",
+      "family": "s_vol->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 39,
+        "trials": 1785,
+        "estimate": 0.021848739495798318,
+        "ci_low": 0.016023656441948236,
+        "ci_high": 0.029727440401842862,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_high_persist",
+      "family": "s_vol->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 38,
+        "trials": 1785,
+        "estimate": 0.021288515406162466,
+        "ci_low": 0.01554897719724206,
+        "ci_high": 0.029084077580753834,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_high_persist",
+      "family": "s_vol->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 84,
+        "trials": 1785,
+        "estimate": 0.047058823529411764,
+        "ci_low": 0.038170093222281265,
+        "ci_high": 0.05789289658229414,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 3.557460972562859e-05
+    },
+    {
+      "scenario": "e4_high_persist",
+      "family": "s_vol->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 65,
+        "trials": 1785,
+        "estimate": 0.036414565826330535,
+        "ci_low": 0.028672693168899248,
+        "ci_high": 0.04614749738556725,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 7.556030579105061e-10
+    },
+    {
+      "scenario": "e4_high_persist",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 100,
+        "trials": 1785,
+        "estimate": 0.056022408963585436,
+        "ci_low": 0.046276538248148175,
+        "ci_high": 0.06767512460915055,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_high_persist",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 112,
+        "trials": 1785,
+        "estimate": 0.06274509803921569,
+        "ci_low": 0.0524071326959056,
+        "ci_high": 0.07496103495093559,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_high_persist",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 77,
+        "trials": 1785,
+        "estimate": 0.043137254901960784,
+        "ci_low": 0.03465252090674297,
+        "ci_high": 0.05358417443726599,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.35957265076379696
+    },
+    {
+      "scenario": "e4_high_persist",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 93,
+        "trials": 1785,
+        "estimate": 0.052100840336134456,
+        "ci_low": 0.04271956303314682,
+        "ci_high": 0.06340580536358546,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.7038343964471301
+    },
+    {
+      "scenario": "e4_rv22",
+      "family": "s_vol->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 47,
+        "trials": 1785,
+        "estimate": 0.026330532212885154,
+        "ci_low": 0.019858423920679793,
+        "ci_high": 0.03483700944947297,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_rv22",
+      "family": "s_vol->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 64,
+        "trials": 1785,
+        "estimate": 0.035854341736694675,
+        "ci_low": 0.02817763898113964,
+        "ci_high": 0.045524509507531626,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_rv22",
+      "family": "s_vol->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 66,
+        "trials": 1785,
+        "estimate": 0.03697478991596639,
+        "ci_low": 0.02916828868583629,
+        "ci_high": 0.046769943934425406,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.0032141360130117833
+    },
+    {
+      "scenario": "e4_rv22",
+      "family": "s_vol->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 78,
+        "trials": 1785,
+        "estimate": 0.043697478991596636,
+        "ci_low": 0.035153813339216584,
+        "ci_high": 0.05420092407058758,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.0020870579546678884
+    },
+    {
+      "scenario": "e4_rv22",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 96,
+        "trials": 1785,
+        "estimate": 0.05378151260504202,
+        "ci_low": 0.04424211669161614,
+        "ci_high": 0.06523737790250177,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_rv22",
+      "family": "R->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 127,
+        "trials": 1785,
+        "estimate": 0.0711484593837535,
+        "ci_low": 0.060120939555616995,
+        "ci_high": 0.08401785907815228,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e4_rv22",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 91,
+        "trials": 1785,
+        "estimate": 0.050980392156862744,
+        "ci_low": 0.04170615095931096,
+        "ci_high": 0.06218313330583089,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.31307360781724525
+    },
+    {
+      "scenario": "e4_rv22",
+      "family": "R->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 96,
+        "trials": 1785,
+        "estimate": 0.05378151260504202,
+        "ci_low": 0.04424211669161614,
+        "ci_high": 0.06523737790250177,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.15289986036796133
+    },
+    {
+      "scenario": "e6_stambaugh",
+      "family": "s_stam->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 36,
+        "trials": 1785,
+        "estimate": 0.020168067226890758,
+        "ci_low": 0.014603159388880002,
+        "ci_high": 0.02779381125752548,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e6_stambaugh",
+      "family": "s_stam->R",
+      "role": "gating_null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 35,
+        "trials": 1785,
+        "estimate": 0.0196078431372549,
+        "ci_low": 0.014132114532616046,
+        "ci_high": 0.02714681404799423,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e6_stambaugh",
+      "family": "s_stam->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 74,
+        "trials": 1785,
+        "estimate": 0.04145658263305322,
+        "ci_low": 0.03315122996735333,
+        "ci_high": 0.05173133917927002,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.0005593822881568287
+    },
+    {
+      "scenario": "e6_stambaugh",
+      "family": "s_stam->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 76,
+        "trials": 1785,
+        "estimate": 0.04257703081232493,
+        "ci_low": 0.03415165419431139,
+        "ci_high": 0.05296699908390237,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 6.08469771764013e-07
+    },
+    {
+      "scenario": "e6_stambaugh_short",
+      "family": "s_stam->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 89,
+        "trials": 1785,
+        "estimate": 0.04985994397759104,
+        "ci_low": 0.04069408471769913,
+        "ci_high": 0.06095911541585232,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e6_stambaugh_short",
+      "family": "s_stam->R",
+      "role": "null",
+      "lags": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 63,
+        "trials": 1785,
+        "estimate": 0.03529411764705882,
+        "ci_low": 0.027683138189268097,
+        "ci_high": 0.044900968233607966,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": null
+    },
+    {
+      "scenario": "e6_stambaugh_short",
+      "family": "s_stam->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "hc3|hybrid",
+      "rate": {
+        "successes": 138,
+        "trials": 1785,
+        "estimate": 0.0773109243697479,
+        "ci_low": 0.06580853561511832,
+        "ci_high": 0.09062872574239825,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.00028434199113403554
+    },
+    {
+      "scenario": "e6_stambaugh_short",
+      "family": "s_stam->R@1",
+      "role": "null",
+      "lags": [
+        1
+      ],
+      "test": "cwls20|hybrid",
+      "rate": {
+        "successes": 94,
+        "trials": 1785,
+        "estimate": 0.05266106442577031,
+        "ci_low": 0.04322676103694075,
+        "ci_high": 0.06401664942558674,
+        "confidence": 0.95
+      },
+      "ks_uniform_p": 0.24692173933107953
+    }
+  ],
+  "admissible": {
+    "hc3|hybrid": true,
+    "cwls20|hybrid": true
+  },
+  "failed_gates": {
+    "hc3|hybrid": [],
+    "cwls20|hybrid": []
+  },
+  "power": [
+    {
+      "test": "hc3|hybrid",
+      "power": 0.8826330532212885,
+      "diff_from_best": 0.023809523809523808,
+      "diff_ci_low": 0.012199524666458487,
+      "diff_ci_high": 0.03541952295258913
+    },
+    {
+      "test": "cwls20|hybrid",
+      "power": 0.9064425770308123,
+      "diff_from_best": 0.0,
+      "diff_ci_low": 0.0,
+      "diff_ci_high": 0.0
+    }
+  ],
+  "median_seconds": {
+    "hc3|hybrid": 0.1335957910050638,
+    "cwls20|hybrid": 0.15120283299620496
+  },
+  "selected": "cwls20|hybrid",
+  "selection_reason": "admissible: ['hc3|hybrid', 'cwls20|hybrid']; highest power: cwls20|hybrid; statistically tied with it: ['cwls20|hybrid']; simplest of those: cwls20|hybrid"
+}
