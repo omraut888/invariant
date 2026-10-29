@@ -188,3 +188,79 @@ Politis & White (2009):
   high-volatility days".
 - This is the price of keeping volatility clustering, and it is expected to lower Stage 4's power
   against s_volfrag. The pilot measures how much.
+
+## Result: G0 failed again with the block-level generator (2026-10-29)
+One rerun, with G0 unchanged.
+
+**Block length L (reported).** The Politis–White rule picked L = 154, 127, 128, 153 and 89 days
+on `volfrag` seeds 0–4, about **2×** the 63 days the diagnostic suggested. `multi_asset` gives
+similar values (92–156), so this reflects the market's volatility persistence, not s_volfrag.
+
+**Result.**
+- Clustering is mostly preserved: the mean clustering statistic is .060 generated, against .070
+  observed (and .023 for the first generator).
+- But 13 of 25 asset series failed:
+  - `volatility_clustering`, 10 of 25 series: generated .032–.049 against a threshold of .05;
+  - `no_linear_autocorrelation`, 3 of 25 series: robust t 3.88, 4.24 and 4.24 against a bound
+    of 3.48, where the observed values are 1.54, 3.62 and 2.92.
+
+**Likely cause of the new linear-autocorrelation failures** (not verified separately). The
+moving-block pool was sampled with replacement. A path's neighbouring slots can draw overlapping
+observed stretches, so the same observed day reappears a few positions later. A duplicated
+heavy-tailed day creates spurious positive autocorrelation at that lag.
+
+## Decision: local no-overlap within a path (user, 2026-10-29)
+**Strict no-overlap is infeasible.** A path would need more mutually disjoint observed blocks
+than the observed path contains (greedy maximum of disjoint pool blocks, per type):
+
+| seed | L | slots needed (path of n / of 4n) | most disjoint blocks (low / high) | high slots needed at θ̂ (n / 4n) |
+|---|---|---|---|---|
+| 0 | 154 | 31 / 124 | 26 / 10 | ~7 / ~28 |
+| 1 | 127 | 38 / 150 | 30 / 15 | ~9 / ~36 |
+| 2 | 128 | 38 / 149 | 31 / 12 | ~8 / ~32 |
+| 3 | 153 | 31 / 124 | 28 / 10 | ~7 / ~28 |
+| 4 | 89 | 54 / 213 | 44 / 18 | ~13 / ~52 |
+
+The realism gate's 4×-length paths could not be generated at all. Even 1×-length paths would
+need low-type blocks close to a perfect packing, and random sequential packing falls well short
+of the maximum.
+
+**The rule.**
+- A block may not overlap the blocks of the previous m − 1 slots, with m = ⌈63/L⌉ + 1
+  (rejection sampling; `generator.no_overlap_slots`).
+- Blocks d slots apart can share a day only at positions more than (d − 1)L apart, so **no
+  observed day appears twice within 63 positions** of a generated path.
+- 63 is the longest lag any check uses: the realism features' three 21-day windows, which also
+  covers the stylized-facts checker's 20 lags.
+- At the selected L, m = 2: only neighbouring slots are restricted.
+- Repetition more than 63 positions apart remains (ordinary bootstrap reuse).
+- The interval's resampling is unaffected: it computes only per-type moments, for which block
+  adjacency is irrelevant.
+
+## Deviation: G0 re-specified as a paired comparison with the observed series (user, 2026-10-29)
+**Justification.** G0 as committed holds a generated path to fixed per-asset thresholds. Applied
+exactly as committed to the **observed** series (`volfrag` seeds 0–4, every asset, the
+out-of-sample P&L days), it fails **6 of 25 series (6 of 75 checks)**:
+
+| seed | asset | check | statistic | threshold |
+|---|---|---|---|---|
+| 1 | asset_01 | volatility_clustering | .045 | .05 |
+| 2 | asset_04 | volatility_clustering | .049 | .05 |
+| 4 | asset_00 | volatility_clustering | .047 | .05 |
+| 4 | asset_02 | volatility_clustering | .047 | .05 |
+| 4 | asset_03 | no_linear_autocorrelation | 3.616 | 3.481 |
+| 4 | asset_04 | volatility_clustering | .042 | .05 |
+
+The data the generator resamples do not pass G0 themselves, so as committed G0 cannot separate a
+faithful generator from a broken one.
+
+**G0 now.**
+- **Same paths:** `volfrag` seeds 0–4, every asset, one path at θ̂ of the observed length, same
+  seeds.
+- **The comparison:** each (seed, asset, check) outcome of the generated path is paired with the
+  same check on the observed series.
+- **The test:** "generated is not significantly worse than observed", by the exact one-sided
+  McNemar test (`tests/fixtures/paired_facts.mcnemar_worse`).
+- **Pass:** iff p ≥ .05.
+
+Fixed before G0's third run. If it fails, the work stops for review.
