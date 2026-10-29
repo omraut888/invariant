@@ -112,3 +112,79 @@ Fixed before any run that uses it.
   any robust strategy (pass rate, threshold from the pilot rule).
 - **Stage 4's claim** becomes: "survives the worst plausible mix of high- and low-volatility
   periods". It does not claim to recover a latent regime.
+
+## Result: G0 failed with within-state blocks (2026-10-29)
+**The first generator:**
+- a Markov chain over the day-level state;
+- each spell filled by stationary-bootstrap blocks (mean ⌈n^{1/3}⌉ = 17) restricted to observed
+  same-state segments.
+
+**What G0 found** (`tests/benchmark/test_adversarial_generator.py`: `volfrag` seeds 0–4, every
+asset, one path at θ̂ of the observed length). The generated paths keep heavy tails and the
+absence of linear autocorrelation, but **not volatility clustering**. Mean |r| ACF over lags 1–20
+(the checker's threshold is .05):
+
+| path | mean ACF |
+|---|---|
+| observed | .070 |
+| generator as designed (within-state blocks, mean 17) | .023 |
+| same, block mean 63 | .028 |
+| plain stationary bootstrap, ignoring states, block 17 | .042 |
+| plain stationary bootstrap, ignoring states, block 63 | .063 |
+
+**Cause.** The q = .70 state has short spells (about 16 days high and 38 low). Blocks that may not
+cross a state boundary were cut to an effective **8.7 days**, so longer nominal blocks barely
+helped. The clustering the checker measures spans up to 20 days; the binary state chain carries
+little of it, and the block joins destroyed the rest. Even a plain bootstrap needs blocks of
+about 63 days to keep it.
+
+**The smoke numbers from that generator are void:** seed 1, s_volfrag killed (UB −0.05), s_real
+passed (+1.46). No study or pilot seed ever ran on it.
+
+## Decision: a block-level chain, with a data-driven block length (user, 2026-10-29)
+Fixed before G0 is rerun. G0 itself is unchanged.
+
+**Block length L.** The Politis & White (2004) automatic selector, with the correction of Patton,
+Politis & White (2009):
+- **Input:** |r| of the equal-weight return on the observed out-of-sample P&L days.
+- **Why |r|:**
+  - the dependence the blocks must preserve is volatility clustering (the stylized fact G0 checks
+    and the quantity the realism features and the state are built on);
+  - raw returns are nearly serially uncorrelated, so the selector on r would pick blocks of about
+    1 day, which is the failure above.
+- **Rule:** L = max(2, min(round(b̂_CB), b_max)).
+  - b̂_CB is the circular- and moving-block estimate, because the blocks are fixed-length moving
+    blocks.
+  - b_max = ⌈min(3√n, n/3)⌉ is the selector's own cap.
+- **Settings:** the selector's published choices (K_N = max(5, ⌈√log₁₀ n⌉), c = 2,
+  m_max = ⌈√n⌉ + K_N, flat-top kernel), with no tuning.
+- **Computed per run, and reported.**
+
+**Generator.**
+- **Pool.** The pool is every moving block of L consecutive observed P&L days (Künsch 1989). A
+  block's **type** is high if more than half of its days are in the high-volatility state, and
+  low otherwise (a tie counts as low).
+- **Paths.** A generated path is a chain over block types, filled slot by slot with a uniformly
+  drawn pool block of that type and truncated to length. Each day keeps its observed row and its
+  own day-level state label.
+- **Fitted chain θ̂.** θ̂ comes from the non-overlapping tiling of the observed path into blocks of
+  L: the share of high tiles, and the mean run of high tiles in blocks.
+- **Adversary.** It moves the block-type share, the block-type mean run (in blocks), and the
+  starting type. The grid's spell axis is in blocks, from 1 to 1000/L, log-spaced as before.
+- **Objective.** Per block type k, the P&L moments are pooled over the days of all type-k pool
+  blocks. The horizon weights are the expected type shares over the ⌈H/L⌉ slots of the horizon,
+  with the last slot weighted by its length. SR_H is the mixture Sharpe of those.
+- **Interval.** Each bootstrap replicate redraws, for each type, as many type-k pool blocks as
+  the observed tiling has type-k tiles, recomputes the per-type moments, and re-minimises over
+  the plausible set.
+- **Unchanged:** the realism gate (features, MMD², null at θ̂, α = .05, 199 replicates, 4× length)
+  and kill rule A.
+
+**Coarseness of spell control (stated in advance).**
+- At L of about 60, a 252-day horizon is about 4 slots. Spells are controlled only in whole
+  blocks, and a "high" block contains low-state days, and the reverse.
+- So the adversary's lever is coarser and more diluted than with the day-level chain. The worst
+  plausible horizon is "about 4 blocks, mostly of the high type", not "252 consecutive
+  high-volatility days".
+- This is the price of keeping volatility clustering, and it is expected to lower Stage 4's power
+  against s_volfrag. The pilot measures how much.
