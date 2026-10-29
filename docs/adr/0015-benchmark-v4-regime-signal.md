@@ -162,8 +162,10 @@ killed at Stage 1.
 **Stylized facts:**
 - all three hold on every asset of `regime` on seed 0, the claim ADR 0003 makes for
   `multi_asset`;
-- paired over seeds 0–4, `regime` fails no more checks than `multi_asset`: **1 of 75 against 6
-  of 75**.
+- paired over seeds 0–4, `regime` fails **1 of 75** checks against **6 of 75** for
+  `multi_asset`. The test is the exact one-sided McNemar test on the paired (seed, asset,
+  check) outcomes (see the amendment): 0 checks fail only under `regime` and 5 only under
+  `multi_asset`, p = 1.0.
 
 ### Correction to ADR 0003
 ADR 0003 says the three stylized facts hold "on every asset in multi-asset mode". The test behind
@@ -271,3 +273,75 @@ see.
 **Rule:** the passing candidate with the smallest ic, then the smallest |κ|, then the highest
 h_quantile (a rarer reversal is a weaker signal). If no candidate passes, the calibration stops
 for review (half-day time-box).
+
+### Calibration result (one run, `docs/results/0015-volfrag-calibration/calibration.json`)
+**Chosen: ic = .20, stress_ratio κ = −1.5, h_quantile = .80. It is the only one of the 36
+candidates to pass all four criteria.**
+
+| criterion | chosen | threshold |
+|---|---|---|
+| C1: min `expected_t_hybrid` over assets and draws | **4.06** | ≥ 4 |
+| C2′: s_real's oracle Sharpe in the high-volatility state | **+1.16** (SE .08) | ≥ +0.3 |
+| C3: max ACF ratio to `multi_asset` | **.986** | ≤ 1 |
+| C4: s_volfrag's oracle Sharpe in the high-volatility state | **−1.38** (SE .14) | ≤ −1.0 |
+
+s_volfrag's low-volatility-state Sharpe is +3.58. 1/N's oracle-day Sharpe in the high-volatility
+state is +.37.
+
+**Two caveats.**
+- **C1's margin is thin** (4.06 against 4). Stage 1's power on s_volfrag will be below s_real's.
+- **The design space is narrow.**
+  - Eight candidates passed C1 and C3. Only one also met C4.
+  - At h_quantile .90 the reversal is too rare to make the vol21 state negative (C4 between
+    +.11 and +.97).
+  - At .70 and .80 with a smaller ic, the average edge is too weak for C1.
+
+**The two thresholds are different quantities.** The reversal fires on the top 20% of h_M (a
+latent quantity), while Stage 4's state is the top 30% of trailing realised volatility (an
+observed one). They differ because the state was fixed first (ADR 0016) and the signal
+calibrated to it, not the reverse.
+
+**Benchmark values (`volfrag`, `volfrag_null`):**
+- `volfrag`: the `multi_asset` market plus s_volfrag {ic .20, stress_ratio −1.5, h_quantile .80}.
+  - Per-state ICs (nominal asset): about +.29 in low volatility and −.20 in high.
+  - τ is the Monte Carlo .80-quantile of h_M: 1.23e-4 (seed 20261102, 2·10⁶ steps).
+- `volfrag_null`: the same market with μ = 0 and every IC 0.
+
+### Validation (`tests/benchmark/test_volfrag_benchmark.py`, plus extensions)
+- **τ:** the share of h_M above τ on a 400k-day path matches 1 − h_quantile (4 batch-means SEs).
+- **ICs:** s_volfrag's marginal IC and both per-state ICs match the ground truth (low > 0 > high).
+- **Return ACF:** matches simulation at lags 1–3.
+- **Graph:** the intervention test and the causality leakage test cover `volfrag`.
+- **Answer key:** s_volfrag is expected KILL at `adversarial` and is identifiable. s_regime is
+  now `identifiable = false`. `regime` and `volfrag` are mutually exclusive.
+- **Pinned outputs:** every pinned hash of the existing presets is unchanged.
+- **Stylized facts:**
+  - every asset passes on seed 0;
+  - **paired comparison with `multi_asset`, seeds 0–4:** `volfrag` fails **8 of 75** checks
+    against **6 of 75**. All six of `multi_asset`'s failures recur under `volfrag` (same seed,
+    asset and check, at similar values).
+
+  The two that fail only under `volfrag`, both at their thresholds:
+
+  | seed | asset | check | statistic | threshold |
+  |---|---|---|---|---|
+  | 4 | asset_01 | heavy_tails (excess kurtosis) | .974 | > 1.0 |
+  | 4 | asset_03 | no_linear_autocorrelation (max robust \|t\|) | 3.481 | ≤ 3.481 |
+
+  The shared failures:
+  - `volatility_clustering`: seed 1 asset_01; seed 2 asset_04; seed 4 assets 00, 02 and 04.
+    The mean |r| ACF is .039–.048 under `volfrag` and .042–.050 under `multi_asset`, against
+    .05.
+  - `no_linear_autocorrelation`: seed 2 asset_02. Robust t is 3.66 under `volfrag` and 3.53
+    under `multi_asset`.
+
+  The test is the **exact one-sided McNemar test** on the paired (seed, asset, check) outcomes
+  at α = .05 (`tests/fixtures/paired_facts.py`): 2 checks fail only under `volfrag` and 0 only
+  under `multi_asset`, **p = .25**. So `volfrag` is not significantly worse than the accepted
+  preset.
+
+  A plausible, unverified mechanism for the small excess: s_volfrag's large, serially
+  independent, near-Gaussian term dilutes the kurtosis and the clustering share of return
+  variance.
+
+The `regime` preset's comparison uses the same McNemar test (0 against 5, p = 1.0).

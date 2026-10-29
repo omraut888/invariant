@@ -21,6 +21,9 @@ structural equation of ``target_t``. ``mechanism`` says how:
 - ``linear_regime_switching`` (v4): as linear, but the coefficient is ``coefficient * c(xi_t)``
   with ``c`` from ``RegimeTruth.loading_multipliers``; ``coefficient`` is the calm value.
 - ``markov`` (v4): the regime's own lag-1 transition; ``coefficient`` is P(stress -> stress).
+- ``linear_vol_switching`` (v4.1): as linear, times ``c(h_{M,t})`` from
+  ``VolFragTruth.loading_multipliers`` (high market variance flips it); ``coefficient`` is the
+  low-volatility value.
 
 Expected outcomes
 -----------------
@@ -69,6 +72,7 @@ __all__ = [
     "RegimeTruth",
     "SignalTruth",
     "TargetTimingMismatchError",
+    "VolFragTruth",
 ]
 
 GROUND_TRUTH_SCHEMA_VERSION = 4  # 2: target_timing; 3: expected_t_hybrid; 4: regime (ADR 0015)
@@ -103,6 +107,7 @@ class Mechanism(StrEnum):
     LINEAR_TIME_VARYING = "linear_time_varying"
     VARIANCE = "variance"
     LINEAR_REGIME_SWITCHING = "linear_regime_switching"
+    LINEAR_VOL_SWITCHING = "linear_vol_switching"
     MARKOV = "markov"
 
 
@@ -131,6 +136,7 @@ class RealizedLoadings(_Frozen):
     market_beta: tuple[float, ...]
     # Calm-regime loading on S_regime (v4); excluded when unset so pre-v4 dumps are unchanged.
     beta_regime: tuple[float, ...] | None = Field(default=None, exclude_if=lambda v: v is None)
+    beta_volfrag: tuple[float, ...] | None = Field(default=None, exclude_if=lambda v: v is None)
 
     @model_validator(mode="after")
     def _same_length(self) -> Self:
@@ -140,8 +146,9 @@ class RealizedLoadings(_Frozen):
             len(self.beta_decay_initial),
             len(self.market_beta),
         }
-        if self.beta_regime is not None:
-            lengths.add(len(self.beta_regime))
+        for extra in (self.beta_regime, self.beta_volfrag):
+            if extra is not None:
+                lengths.add(len(extra))
         if len(lengths) != 1:
             raise ValueError("all loading vectors must have one entry per asset")
         return self
@@ -231,6 +238,24 @@ class RegimeTruth(_Frozen):
     regime_ic: tuple[RegimeIC, ...]
 
 
+class VolFragTruth(_Frozen):
+    """The volatility-state edge of a v4.1 benchmark (ADR 0015 amendment). States (low, high).
+
+    ``tau``: the population ``h_quantile``-quantile of the market's conditional variance, and
+    ``market_variance``: ``E[h_M | state]``. Both are Monte Carlo values from a fixed-seed
+    ``n_mc``-step simulation of the market GARCH (no closed form); ``P(high) = 1 - h_quantile``
+    holds by definition, so ICs are exact up to the error in ``tau``.
+    """
+
+    h_quantile: float
+    tau: float
+    n_mc: int
+    mc_seed: int
+    loading_multipliers: tuple[float, float]
+    market_variance: tuple[float, float]
+    state_ic: tuple[RegimeIC, ...]
+
+
 class GroundTruth(_Frozen):
     """The answer key exported with a synthetic dataset (see module docstring)."""
 
@@ -250,6 +275,7 @@ class GroundTruth(_Frozen):
     last_date: date
     dataset_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     regime: RegimeTruth | None = Field(default=None, exclude_if=lambda v: v is None)
+    volfrag: VolFragTruth | None = Field(default=None, exclude_if=lambda v: v is None)
 
     @model_validator(mode="after")
     def _check_graph(self) -> Self:

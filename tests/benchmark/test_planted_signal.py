@@ -75,6 +75,11 @@ def _shock(innov: Innovations, cfg: SyntheticMarketConfig, node: str, s: int) ->
         s_reg = innov.s_regime.copy()
         s_reg[s] += 1.0
         return replace(innov, s_regime=s_reg)
+    if node == "s_volfrag":
+        assert innov.s_volfrag is not None
+        s_vf = innov.s_volfrag.copy()
+        s_vf[s] += 1.0
+        return replace(innov, s_volfrag=s_vf)
     if node in STATE_NODES:
         state = innov.state.copy()
         state[s, STATE_NODES.index(node)] += 1.0
@@ -102,7 +107,7 @@ def _lag0_closure(gt: GroundTruth, nodes: set[str]) -> set[str]:
         out = grown
 
 
-@pytest.mark.parametrize("preset", [None, "multi_asset", "regime"])
+@pytest.mark.parametrize("preset", [None, "multi_asset", "regime", "volfrag"])
 def test_intervention_support_matches_ground_truth_graph(preset: str | None) -> None:
     """Shock each node's innovation at step s; what moves at s and s+1 must be what GT predicts.
 

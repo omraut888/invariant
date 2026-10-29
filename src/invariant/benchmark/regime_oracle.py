@@ -32,9 +32,14 @@ import numpy.typing as npt
 
 from invariant.benchmark.config import SyntheticMarketConfig
 from invariant.benchmark.synthetic import REGIME_NODE, generate_market
+from invariant.stages.adversarial.state import volatility_state
 from invariant.stages.dro.robust import MeanStdProblem
 
-__all__ = ["OracleRegimeSharpe", "oracle_regime_sharpe"]
+__all__ = ["OracleRegimeSharpe", "OracleStateSharpe", "oracle_regime_sharpe", "oracle_state_sharpe"]
+
+STAGE3_WINDOW = 1260
+"""First decision date of Stage 3's walk-forward; the volatility state is defined on dates from
+here on, as Stage 4 defines it."""
 
 FloatArray = npt.NDArray[np.float64]
 
@@ -67,6 +72,64 @@ def _projection(s: FloatArray, r: FloatArray) -> tuple[FloatArray, FloatArray, F
     a = r.mean(axis=0) - b * s.mean()
     resid = r - a - np.outer(s, b)
     return a, b, np.cov(resid, rowvar=False)
+
+
+def _oracle_weights(
+    config: SyntheticMarketConfig, member: str, train_seed: int, c: float
+) -> FloatArray:
+    """``w(S)`` on ``_GRID``, from the population projection estimated on a training path."""
+    train = generate_market(config, train_seed)
+    a, b, cov = _projection(train.features[member].to_numpy()[:-1], train.returns.to_numpy()[1:])
+    problem = MeanStdProblem(config.n_assets, c)
+    return np.array([problem.solve(a + b * g, cov, 0.0).w for g in _GRID])
+
+
+def _lookup(weights: FloatArray, s: FloatArray) -> FloatArray:
+    idx = np.clip(np.rint((s - _GRID[0]) / (_GRID[1] - _GRID[0])).astype(int), 0, len(_GRID) - 1)
+    return np.asarray(weights[idx], dtype=np.float64)
+
+
+@dataclass(frozen=True)
+class OracleStateSharpe:
+    """Annualised oracle and 1/N Sharpe ratios in Stage 4's observable volatility state."""
+
+    member: str
+    high: float
+    low: float
+    equal_weight_high: float
+    equal_weight_low: float
+
+
+def oracle_state_sharpe(
+    config: SyntheticMarketConfig,
+    member: str,
+    *,
+    train_seed: int,
+    test_seed: int,
+    c: float,
+    quantile: float = 0.70,
+) -> OracleStateSharpe:
+    """Oracle single-signal Sharpe by Stage 4's volatility state (vol21, ``quantile``).
+
+    Decision dates ``t >= STAGE3_WINDOW`` of the test path; the P&L on ``t + 1`` is labelled with
+    the state of day t, exactly as ``stages.adversarial.state.volatility_state`` defines it.
+    """
+    weights = _oracle_weights(config, member, train_seed, c)
+    test = generate_market(config, test_seed)
+    s = test.features[member].to_numpy()
+    r = test.returns.to_numpy()
+    dates = np.arange(STAGE3_WINDOW, len(r) - 1, dtype=np.int64)
+    pnl = np.einsum("ij,ij->i", _lookup(weights, s[dates]), r[dates + 1])
+    ew = r[dates + 1].mean(axis=1)
+    state, _ = volatility_state(r.mean(axis=1), dates, quantile=quantile)
+    hi, lo = state == 1, state == 0
+    return OracleStateSharpe(
+        member=member,
+        high=_sharpe(pnl[hi]),
+        low=_sharpe(pnl[lo]),
+        equal_weight_high=_sharpe(ew[hi]),
+        equal_weight_low=_sharpe(ew[lo]),
+    )
 
 
 def oracle_regime_sharpe(

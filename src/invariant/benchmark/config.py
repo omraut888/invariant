@@ -46,6 +46,7 @@ __all__ = [
     "RegimeParams",
     "RegimeSignalParams",
     "SyntheticMarketConfig",
+    "VolFragParams",
     "list_benchmark_presets",
     "load_benchmark_config",
     "load_benchmark_target_timing",
@@ -260,6 +261,30 @@ class RegimeParams(_Frozen):
         return (1.0, self.signal.stress_ratio)
 
 
+class VolFragParams(_Frozen):
+    """``S_volfrag`` (v4.1, ADR 0015 amendment): an edge that reverses in high market volatility.
+
+    A unit-variance, serially independent signal (rho = 0, as for S_regime: a persistent one
+    would autocorrelate returns, C3). Its term in ``R_t`` is ``c_t beta S_{t-1}`` with ``c_t = 1``
+    if the market factor's conditional variance ``h_{M,t} <= tau`` and ``stress_ratio`` otherwise;
+    ``tau`` is the population ``h_quantile``-quantile of ``h_M``. ``ic`` is the nominal IC of the
+    low-volatility edge.
+    """
+
+    ic: float = Field(ge=0.0, lt=1.0)
+    stress_ratio: float = Field(ge=-5.0, le=5.0)
+    h_quantile: float = Field(gt=0.0, lt=1.0)
+
+    @property
+    def loading_multipliers(self) -> tuple[float, float]:
+        """``c`` by volatility state (low, high)."""
+        return (1.0, self.stress_ratio)
+
+    @property
+    def high_share(self) -> float:
+        return 1.0 - self.h_quantile
+
+
 class SyntheticMarketConfig(_Frozen):
     """All generation parameters of the planted-signal market. Hashed into ``GroundTruth``.
 
@@ -287,6 +312,7 @@ class SyntheticMarketConfig(_Frozen):
     loading_dispersion: float = Field(default=0.0, ge=0.0, le=1.0)
     # Excluded from dumps when unset, so every pre-v4 config hashes exactly as before.
     regime: RegimeParams | None = Field(default=None, exclude_if=lambda v: v is None)
+    volfrag: VolFragParams | None = Field(default=None, exclude_if=lambda v: v is None)
 
     @model_validator(mode="after")
     def _check_structure(self) -> Self:
@@ -303,6 +329,11 @@ class SyntheticMarketConfig(_Frozen):
                     f"variance {sigma2:.3g} <= 0; no unit-variance process has this persistence "
                     "and correlation with Z",
                 )
+        if self.volfrag is not None:
+            if self.regime is not None:
+                raise ValueError("regime and volfrag are mutually exclusive (one v4 signal)")
+            if self.market is None:
+                raise ValueError("volfrag needs the market factor: its state is h_M")
         start = self.decay_start_index
         if not 1 <= start < self.n_obs - 1:
             raise ValueError(

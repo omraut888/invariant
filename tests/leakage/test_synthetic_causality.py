@@ -27,7 +27,7 @@ pytestmark = pytest.mark.leakage
 
 CFGS = {
     preset: load_benchmark_config(preset).model_copy(update={"n_obs": 120, "burn_in": 5})
-    for preset in ("multi_asset", "regime")
+    for preset in ("multi_asset", "regime", "volfrag")
 }
 N_TOTAL = CFGS["multi_asset"].n_total
 
@@ -48,6 +48,10 @@ def _redraw_after(innov: Innovations, cut: int, seed: int) -> Innovations:
         s_reg = innov.s_regime.copy()
         s_reg[cut + 1 :] = gen.standard_normal(s_reg[cut + 1 :].shape)
         regime = {"regime_u": u, "s_regime": s_reg}
+    if innov.s_volfrag is not None:
+        s_vf = innov.s_volfrag.copy()
+        s_vf[cut + 1 :] = gen.standard_normal(s_vf[cut + 1 :].shape)
+        regime = {"s_volfrag": s_vf}
     return replace(innov, state=state, eps=eps, eps_market=eps_m, **regime)
 
 

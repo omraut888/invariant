@@ -55,6 +55,7 @@ from __future__ import annotations
 import hashlib
 import math
 from dataclasses import dataclass
+from functools import lru_cache
 
 import numpy as np
 import numpy.typing as npt
@@ -65,6 +66,7 @@ from invariant.benchmark.config import (
     GarchParams,
     RegimeParams,
     SyntheticMarketConfig,
+    VolFragParams,
     signal_coefficients,
 )
 from invariant.benchmark.ground_truth import (
@@ -78,6 +80,7 @@ from invariant.benchmark.ground_truth import (
     RegimeIC,
     RegimeTruth,
     SignalTruth,
+    VolFragTruth,
 )
 from invariant.core.logging import get_logger
 from invariant.core.run_hash import RngFactory
@@ -89,6 +92,7 @@ __all__ = [
     "REGIME_SIGNAL",
     "SIGNAL_NODES",
     "STATE_NODES",
+    "VOLFRAG_SIGNAL",
     "Innovations",
     "SimulatedPaths",
     "SyntheticDataset",
@@ -108,6 +112,8 @@ __all__ = [
     "state_nodes",
     "stationary_covariance",
     "transition_matrices",
+    "volfrag_threshold",
+    "volfrag_truth",
 ]
 
 FloatArray = npt.NDArray[np.float64]
@@ -119,7 +125,11 @@ MARKET_NODE = "market"
 REGIME_SIGNAL = "s_regime"
 """v4 (ADR 0015): appended to the state as index 5 when ``config.regime`` is set."""
 REGIME_NODE = "regime"
-_REGIME = 5
+VOLFRAG_SIGNAL = "s_volfrag"
+"""v4.1 (ADR 0015 amendment): appended to the state as index 5 when ``config.volfrag`` is set."""
+VOLFRAG_MC_SEED = 20261102
+VOLFRAG_N_MC = 2_000_000
+_REGIME = 5  # index of the v4 extra signal (s_regime or s_volfrag)
 _CALM, _STRESS = 0, 1
 
 DETECTABILITY_T = 3.0
@@ -130,9 +140,18 @@ def asset_names(n_assets: int) -> tuple[str, ...]:
     return tuple(f"asset_{i:02d}" for i in range(n_assets))
 
 
+def _extra_signal(config: SyntheticMarketConfig) -> str | None:
+    if config.regime is not None:
+        return REGIME_SIGNAL
+    if config.volfrag is not None:
+        return VOLFRAG_SIGNAL
+    return None
+
+
 def state_nodes(config: SyntheticMarketConfig) -> tuple[str, ...]:
-    """``STATE_NODES``, plus ``s_regime`` when the config has a regime block."""
-    return STATE_NODES + ((REGIME_SIGNAL,) if config.regime is not None else ())
+    """``STATE_NODES``, plus ``s_regime`` or ``s_volfrag`` when the config has a v4 block."""
+    extra = _extra_signal(config)
+    return STATE_NODES + ((extra,) if extra is not None else ())
 
 
 def signal_nodes(config: SyntheticMarketConfig) -> tuple[str, ...]:
@@ -166,9 +185,9 @@ def transition_matrices(config: SyntheticMarketConfig) -> tuple[FloatArray, Floa
         a[k, k] = rho
         a[k, _Z] = gamma
         b[k, k] = math.sqrt(sigma2)
-    if config.regime is None:
+    if config.regime is None and config.volfrag is None:
         return a, b
-    rho_r = config.regime.signal.rho
+    rho_r = config.regime.signal.rho if config.regime is not None else 0.0
     a6, b6 = np.zeros((6, 6)), np.zeros((6, 6))
     a6[:5, :5], b6[:5, :5] = a, b
     a6[_REGIME, _REGIME] = rho_r
@@ -227,6 +246,22 @@ def regime_conditional_variance(
     return float(cond[0]), float(cond[1])
 
 
+@lru_cache(maxsize=8)
+def volfrag_threshold(garch: GarchParams, h_quantile: float) -> tuple[float, float, float]:
+    """``(tau, E[h | h <= tau], E[h | h > tau])`` for a GARCH-t's conditional variance h.
+
+    ``tau`` is the population ``h_quantile``-quantile of h. There is no closed form, so it is
+    the empirical quantile of a fixed-seed (``VOLFRAG_MC_SEED``) ``VOLFRAG_N_MC``-step
+    simulation started at the unconditional variance (the first 10,000 steps are dropped).
+    """
+    gen = np.random.default_rng(VOLFRAG_MC_SEED)
+    eps = _standardized_t(gen, garch.nu, VOLFRAG_N_MC + 10_000)
+    h, _ = _garch_path(eps, garch)
+    h = h[10_000:]
+    tau = float(np.quantile(h, h_quantile))
+    return tau, float(h[h <= tau].mean()), float(h[h > tau].mean())
+
+
 def _unconditional_variance(regime: RegimeParams, garch: GarchParams, vol_ratio: float) -> float:
     pi_c, pi_s = regime.stationary
     return garch.sigma_bar**2 * (pi_c + pi_s * vol_ratio**2)
@@ -265,17 +300,22 @@ def draw_loadings(config: SyntheticMarketConfig, rng: RngFactory) -> RealizedLoa
     mult = np.exp(delta * xi - delta**2 / 2.0)
     nominal_ic = np.array([config.factor.ic, config.real.ic, config.decay.ic])
     betas = mult * nominal_ic * noise_sd[:, None]
-    beta_regime = None
+    beta_regime = beta_volfrag = None
     if regime is not None:
         xi_r = rng.generator("loadings/regime").standard_normal(n)
         mult_r = np.exp(delta * xi_r - delta**2 / 2.0)
         beta_regime = tuple(float(v) for v in mult_r * regime.signal.ic * noise_sd)
+    if config.volfrag is not None:
+        xi_v = rng.generator("loadings/volfrag").standard_normal(n)
+        mult_v = np.exp(delta * xi_v - delta**2 / 2.0)
+        beta_volfrag = tuple(float(v) for v in mult_v * config.volfrag.ic * noise_sd)
     return RealizedLoadings(
         beta_z=tuple(float(v) for v in betas[:, 0]),
         beta_real=tuple(float(v) for v in betas[:, 1]),
         beta_decay_initial=tuple(float(v) for v in betas[:, 2]),
         market_beta=tuple(float(v) for v in market_beta),
         beta_regime=beta_regime,
+        beta_volfrag=beta_volfrag,
     )
 
 
@@ -296,6 +336,7 @@ class Innovations:
     eps_market: FloatArray | None
     regime_u: FloatArray | None = None
     s_regime: FloatArray | None = None
+    s_volfrag: FloatArray | None = None
 
 
 def _standardized_t(gen: np.random.Generator, nu: float, n: int) -> FloatArray:
@@ -320,6 +361,14 @@ def draw_innovations(config: SyntheticMarketConfig, rng: RngFactory) -> Innovati
     eps_market = None
     if config.market is not None:
         eps_market = _standardized_t(rng.generator("eps/market"), config.market.garch.nu, n)
+    if config.volfrag is not None:
+        return Innovations(
+            x0=x0,
+            state=state,
+            eps=eps,
+            eps_market=eps_market,
+            s_volfrag=rng.generator(f"state/{VOLFRAG_SIGNAL}").standard_normal(n),
+        )
     if config.regime is None:
         return Innovations(x0=x0, state=state, eps=eps, eps_market=eps_market)
     # chol is 6 x 6 here but s_regime is independent with unit variance, so x0 drawn above from
@@ -404,8 +453,8 @@ def simulate(
     n = config.n_total
     if innovations.state.shape != (n, 5) or innovations.eps.shape != (n, config.n_assets):
         raise ValueError("innovations do not match the config's dimensions")
-    if config.regime is not None:
-        return _simulate_regime(config, innovations, loadings)
+    if config.regime is not None or config.volfrag is not None:
+        return _simulate_v4(config, innovations, loadings)
     a_mat, b_mat = transition_matrices(config)
     state = np.empty((n, 5))
     # Z: AR(1) via lfilter; feeding x0 as the step-0 input yields state[0] = x0 exactly.
@@ -452,19 +501,27 @@ def simulate(
     )
 
 
-def _simulate_regime(
+def _simulate_v4(
     config: SyntheticMarketConfig,
     innovations: Innovations,
     loadings: RealizedLoadings,
 ) -> SimulatedPaths:
-    """``simulate`` for a v4 config: the same recursions plus the chain, the switching GARCH
-    intercepts and ``c(xi_t) beta_regime S_regime_{t-1}`` (see ``RegimeParams``)."""
-    regime = config.regime
-    assert regime is not None  # dispatched by simulate
-    if innovations.regime_u is None or innovations.s_regime is None:
-        raise ValueError("regime configured but its innovations are missing")
-    if loadings.beta_regime is None:
-        raise ValueError("regime configured but beta_regime is missing")
+    """``simulate`` for a v4 config: the v3 recursions plus the extra signal (index 5).
+
+    ``regime``: the chain, the switching GARCH intercepts and ``c(xi_t) beta S_regime_{t-1}``.
+    ``volfrag``: plain GARCH, and ``c(h_{M,t}) beta S_volfrag_{t-1}`` with ``c`` flipped when the
+    market's conditional variance exceeds ``volfrag_threshold``.
+    """
+    regime, volfrag = config.regime, config.volfrag
+    if regime is not None:
+        extra_innov, beta_extra = innovations.s_regime, loadings.beta_regime
+        if innovations.regime_u is None:
+            raise ValueError("regime configured but its innovations are missing")
+    else:
+        assert volfrag is not None  # dispatched by simulate
+        extra_innov, beta_extra = innovations.s_volfrag, loadings.beta_volfrag
+    if extra_innov is None or beta_extra is None:
+        raise ValueError("v4 signal configured but its innovations or loadings are missing")
     n = config.n_total
     a_mat, b_mat = transition_matrices(config)
     state = np.empty((n, 6))
@@ -476,34 +533,52 @@ def _simulate_regime(
         s_in[0] = innovations.x0[k]
         s_in[1:] = a_mat[k, _Z] * state[:-1, _Z] + b_mat[k, k] * innovations.state[1:, k]
         state[:, k] = signal.lfilter([1.0], [1.0, -a_mat[k, k]], s_in)
-    r_in = b_mat[_REGIME, _REGIME] * innovations.s_regime
-    r_in[0] = innovations.s_regime[0]
+    r_in = b_mat[_REGIME, _REGIME] * extra_innov
+    r_in[0] = extra_innov[0]
     state[:, _REGIME] = signal.lfilter([1.0], [1.0, -a_mat[_REGIME, _REGIME]], r_in)
 
-    xi = regime_path(regime, innovations.regime_u)
-    stress = xi == _STRESS
-    resid_scale = np.where(stress, regime.resid_vol_ratio, 1.0)
+    xi = None
+    resid_scale = market_scale = np.ones(n)
+    if regime is not None:
+        assert innovations.regime_u is not None
+        xi = regime_path(regime, innovations.regime_u)
+        stress = xi == _STRESS
+        resid_scale = np.where(stress, regime.resid_vol_ratio, 1.0)
+        market_scale = np.where(stress, regime.market_vol_ratio, 1.0)
     h = np.empty((n, config.n_assets))
     resid = np.empty((n, config.n_assets))
     for i in range(config.n_assets):
-        h[:, i], resid[:, i] = _ms_garch_path(innovations.eps[:, i], config.garch, resid_scale)
+        if regime is not None:
+            h[:, i], resid[:, i] = _ms_garch_path(innovations.eps[:, i], config.garch, resid_scale)
+        else:
+            h[:, i], resid[:, i] = _garch_path(innovations.eps[:, i], config.garch)
     market = np.zeros(n)
     h_market = np.zeros(n)
     if config.market is not None:
         if innovations.eps_market is None or innovations.eps_market.shape != (n,):
             raise ValueError("market factor configured but eps_market missing or misshapen")
-        market_scale = np.where(stress, regime.market_vol_ratio, 1.0)
-        h_market, market = _ms_garch_path(innovations.eps_market, config.market.garch, market_scale)
+        if regime is not None:
+            h_market, market = _ms_garch_path(
+                innovations.eps_market, config.market.garch, market_scale
+            )
+        else:
+            h_market, market = _garch_path(innovations.eps_market, config.market.garch)
 
+    if regime is not None:
+        assert xi is not None
+        c_path = np.where(xi == _STRESS, regime.signal.stress_ratio, 1.0)
+    else:
+        assert volfrag is not None and config.market is not None
+        tau, _, _ = volfrag_threshold(config.market.garch, volfrag.h_quantile)
+        c_path = np.where(h_market > tau, volfrag.stress_ratio, 1.0)
     mult = decay_multiplier(config)
-    c_path = np.where(stress, regime.signal.stress_ratio, 1.0)
     lagged = state[:-1]
     mean = np.zeros((n, config.n_assets))
     mean[1:] = (
         lagged[:, [_Z]] * np.array(loadings.beta_z)
         + lagged[:, [_REAL]] * np.array(loadings.beta_real)
         + (lagged[:, _DECAY] * mult[:-1])[:, None] * np.array(loadings.beta_decay_initial)
-        + (lagged[:, _REGIME] * c_path[1:])[:, None] * np.array(loadings.beta_regime)
+        + (lagged[:, _REGIME] * c_path[1:])[:, None] * np.array(beta_extra)
     )
     returns = config.mu + market[:, None] * np.array(loadings.market_beta) + mean + resid
     return SimulatedPaths(
@@ -539,6 +614,8 @@ def _observed_parents(config: SyntheticMarketConfig) -> list[int]:
     if config.decay.ic > 0:
         parents.append(_DECAY)
     if config.regime is not None and config.regime.signal.ic > 0:
+        parents.append(_REGIME)
+    if config.volfrag is not None and config.volfrag.ic > 0:
         parents.append(_REGIME)
     return parents
 
@@ -618,12 +695,30 @@ def hybrid_oracle_set(config: SyntheticMarketConfig, k: int) -> list[int]:
     return cond
 
 
-def _mean_multiplier(regime: RegimeParams) -> tuple[float, float]:
-    """``(E[c(xi)], Var(c(xi)))`` under the stationary chain."""
-    pi = np.array(regime.stationary)
-    c = np.array(regime.loading_multipliers)
+def _mean_multiplier(spec: RegimeParams | VolFragParams) -> tuple[float, float]:
+    """``(E[c], Var(c))``: under the stationary chain, or over the volatility state."""
+    if isinstance(spec, RegimeParams):
+        pi = np.array(spec.stationary)
+    else:
+        pi = np.array([spec.h_quantile, spec.high_share])
+    c = np.array(spec.loading_multipliers)
     mean = float(pi @ c)
     return mean, float(pi @ (c - mean) ** 2)
+
+
+def _extra_loading(
+    config: SyntheticMarketConfig,
+    loadings: RealizedLoadings,
+    asset: int,
+) -> tuple[float, RegimeParams | VolFragParams] | None:
+    """The v4 signal's calm/low-volatility loading on ``asset`` and its multiplier spec."""
+    if config.regime is not None:
+        assert loadings.beta_regime is not None  # drawn whenever regime is set
+        return loadings.beta_regime[asset], config.regime
+    if config.volfrag is not None:
+        assert loadings.beta_volfrag is not None
+        return loadings.beta_volfrag[asset], config.volfrag
+    return None
 
 
 def population_moments(
@@ -648,7 +743,6 @@ def population_moments(
     mult = decay_multiplier(config)[config.burn_in : config.burn_in + config.n_obs - 1]
     decay_scale = float(mult.mean())
     parents = _observed_parents(config)
-    regime = config.regime
     out = []
     for i in range(config.n_assets):
         coef = np.zeros(d)
@@ -657,11 +751,12 @@ def population_moments(
         coef[_DECAY] = loadings.beta_decay_initial[i]
         mb = loadings.market_beta[i]
         var_resid = _noise_var(config, mb)
-        if regime is not None:
-            assert loadings.beta_regime is not None  # drawn whenever regime is set
-            mean_c, var_c = _mean_multiplier(regime)
-            coef[_REGIME] = loadings.beta_regime[i] * mean_c
-            var_resid += var_c * loadings.beta_regime[i] ** 2
+        extra = _extra_loading(config, loadings, i)
+        if extra is not None:
+            beta_x, spec = extra
+            mean_c, var_c = _mean_multiplier(spec)
+            coef[_REGIME] = beta_x * mean_c
+            var_resid += var_c * beta_x**2
         coef_eff = coef.copy()
         coef_eff[_DECAY] *= decay_scale
         joint = _joint_cov(sigma, coef, var_resid)
@@ -705,6 +800,12 @@ def population_return_acf(
     coef[_REAL] = loadings.beta_real[asset]
     coef[_DECAY] = loadings.beta_decay_initial[asset] * float(mult.mean())
     var_noise = _noise_var(config, loadings.market_beta[asset])
+    if config.volfrag is not None:
+        # rho = 0: S_volfrag's term is serially uncorrelated and adds only E[c^2] beta^2.
+        assert loadings.beta_volfrag is not None
+        pi_v = np.array([config.volfrag.h_quantile, config.volfrag.high_share])
+        c_v = np.array(config.volfrag.loading_multipliers)
+        var_noise += float(pi_v @ c_v**2) * loadings.beta_volfrag[asset] ** 2
     regime = config.regime
     if regime is not None:
         assert loadings.beta_regime is not None
@@ -780,6 +881,52 @@ def regime_truth(config: SyntheticMarketConfig, loadings: RealizedLoadings) -> R
     )
 
 
+def volfrag_truth(config: SyntheticMarketConfig, loadings: RealizedLoadings) -> VolFragTruth:
+    """The ``VolFragTruth`` of a v4.1 config, with per-state ICs of s_real and s_volfrag.
+
+    ``Corr(S_{t-1}, R_t | state_t)``: the state (h_M vs tau) is independent of the signals, so the
+    covariance is ``(Sigma coef_k)_S`` and ``Var(R_t | state) = coef_k' Sigma coef_k +
+    sigma_bar^2 + b^2 E[h_M | state]`` (the residual GARCH is independent of the market's).
+    """
+    volfrag = config.volfrag
+    if volfrag is None or config.market is None or loadings.beta_volfrag is None:
+        raise ValueError("volfrag_truth needs a config with a volfrag block")
+    tau, h_low, h_high = volfrag_threshold(config.market.garch, volfrag.h_quantile)
+    sigma = stationary_covariance(config)
+    d = sigma.shape[0]
+    mult = decay_multiplier(config)[config.burn_in : config.burn_in + config.n_obs - 1]
+    decay_scale = float(mult.mean())
+    ics: dict[str, tuple[list[float], list[float]]] = {"s_real": ([], []), VOLFRAG_SIGNAL: ([], [])}
+    for i in range(config.n_assets):
+        pairs = zip(volfrag.loading_multipliers, (h_low, h_high), strict=True)
+        for k, (c_k, h_m) in enumerate(pairs):
+            coef = np.zeros(d)
+            coef[_Z] = loadings.beta_z[i]
+            coef[_REAL] = loadings.beta_real[i]
+            coef[_DECAY] = loadings.beta_decay_initial[i] * decay_scale
+            coef[_REGIME] = loadings.beta_volfrag[i] * c_k
+            var_r = (
+                float(coef @ sigma @ coef)
+                + config.garch.sigma_bar**2
+                + loadings.market_beta[i] ** 2 * h_m
+            )
+            cov = sigma @ coef
+            for sid, idx in (("s_real", _REAL), (VOLFRAG_SIGNAL, _REGIME)):
+                ics[sid][k].append(float(cov[idx]) / math.sqrt(sigma[idx, idx] * var_r))
+    return VolFragTruth(
+        h_quantile=volfrag.h_quantile,
+        tau=tau,
+        n_mc=VOLFRAG_N_MC,
+        mc_seed=VOLFRAG_MC_SEED,
+        loading_multipliers=volfrag.loading_multipliers,
+        market_variance=(h_low, h_high),
+        state_ic=tuple(
+            RegimeIC(signal_id=sid, calm=tuple(low), stress=tuple(high))
+            for sid, (low, high) in ics.items()
+        ),
+    )
+
+
 def _edges(config: SyntheticMarketConfig, loadings: RealizedLoadings) -> list[CausalEdge]:
     a_mat, _ = transition_matrices(config)
     lin, tv, var = Mechanism.LINEAR, Mechanism.LINEAR_TIME_VARYING, Mechanism.VARIANCE
@@ -838,6 +985,21 @@ def _edges(config: SyntheticMarketConfig, loadings: RealizedLoadings) -> list[Ca
         )
     if config.regime is not None:
         edges += _regime_edges(config, loadings)
+    if config.volfrag is not None:
+        assert loadings.beta_volfrag is not None
+        # c(h_{M,t}) also depends on the market's past shocks, through h_M; the market's lag-1
+        # variance edge and its lag-0 edge to every asset already cover that support.
+        edges += [
+            CausalEdge(
+                source=VOLFRAG_SIGNAL,
+                target=asset,
+                lag=1,
+                mechanism=Mechanism.LINEAR_VOL_SWITCHING,
+                coefficient=loadings.beta_volfrag[i],
+            )
+            for i, asset in enumerate(asset_names(config.n_assets))
+            if loadings.beta_volfrag[i] != 0.0
+        ]
     return edges
 
 
@@ -917,6 +1079,7 @@ def _signal_truths(
         "s_decay": config.decay.ic > 0,
         "s_noise": False,
         REGIME_SIGNAL: config.regime is not None and config.regime.signal.ic > 0,
+        VOLFRAG_SIGNAL: config.volfrag is not None and config.volfrag.ic > 0,
     }
     confounded = config.factor.ic > 0 and config.conf.z_corr != 0.0
     notes = {
@@ -927,14 +1090,22 @@ def _signal_truths(
         REGIME_SIGNAL: (
             "True lag-1 cause whose loading depends on the latent regime: calm value in calm, "
             "times stress_ratio in stress (reversed when negative). Its stationary-average edge "
-            "is what Stages 1-3 see; Stage 4 should kill a portfolio built on it alone."
+            "is what Stages 1-3 see. Reported only: at this strength the latent regime is not "
+            "identifiable from returns (ADR 0016), so no observable-state Stage 4 can recover it."
+        ),
+        VOLFRAG_SIGNAL: (
+            "True lag-1 cause whose loading reverses when the market's conditional variance "
+            "exceeds its h_quantile (momentum-crash pattern). Stage 4 should kill a portfolio "
+            "built on it alone."
         ),
     }
     out = []
     for k, sid in enumerate(signal_nodes(config), start=1):
         identifiable = not (sid == "s_conf" and confounded and not config.observe_confounder)
+        if sid == REGIME_SIGNAL and has_edge[sid]:
+            identifiable = False  # ADR 0016: invisible in observable volatility states
         note = notes[sid]
-        if not identifiable:
+        if not identifiable and sid == "s_conf":
             note += (
                 " Z is hidden: no observed adjustment set exists, so this non-edge cannot be "
                 "distinguished from a direct effect (causal sufficiency violated)."
@@ -943,7 +1114,7 @@ def _signal_truths(
             verdict, stage = Verdict.KILL, StageName.CAUSAL
         elif sid == "s_decay":
             verdict, stage = Verdict.KILL, StageName.DECAY
-        elif sid == REGIME_SIGNAL:
+        elif sid in (REGIME_SIGNAL, VOLFRAG_SIGNAL):
             verdict, stage = Verdict.KILL, StageName.ADVERSARIAL
         else:
             verdict, stage = Verdict.PASS, None
@@ -1006,6 +1177,7 @@ def build_ground_truth(
         last_date=index[-1].date(),
         dataset_sha256=dataset_sha256,
         regime=regime_truth(config, loadings) if config.regime is not None else None,
+        volfrag=volfrag_truth(config, loadings) if config.volfrag is not None else None,
     )
 
 

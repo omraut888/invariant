@@ -10,6 +10,7 @@ import math
 import numpy as np
 import pytest
 from pydantic import ValidationError
+from tests.fixtures.paired_facts import failed_checks, mcnemar_worse
 
 from invariant.benchmark.config import (
     GarchParams,
@@ -205,18 +206,9 @@ def test_stylized_facts_hold_on_every_regime_asset_seed_0() -> None:
         assert report.passed, (asset, [c for c in report.checks if not c.passed])
 
 
-def _failed_checks(preset: str, seeds: range) -> int:
-    failed = 0
-    for seed in seeds:
-        d = generate_market(load_benchmark_config(preset), seed)
-        for asset in d.returns.columns:
-            failed += sum(not c.passed for c in check_stylized_facts(d.returns[asset]).checks)
-    return failed
-
-
-def test_regime_preset_is_no_less_realistic_than_multi_asset() -> None:
-    # Paired over seeds 0-4 (same market betas and residual draws): the regime preset fails no
-    # more stylized-fact checks than the accepted multi_asset preset. Neither passes every check
-    # on every seed: at T = 6000 the checker is borderline on some assets (ADR 0015 records the
-    # counts: multi_asset 6 of 75, regime 1 of 75).
-    assert _failed_checks("regime", range(5)) <= _failed_checks("multi_asset", range(5))
+def test_regime_preset_is_not_significantly_worse_than_multi_asset() -> None:
+    # Exact one-sided McNemar on the paired (seed, asset, check) outcomes, alpha = .05
+    # (tests/fixtures/paired_facts.py). ADR 0015 records the counts.
+    ours, ref = failed_checks("regime"), failed_checks("multi_asset")
+    only_ours, only_ref, p = mcnemar_worse(ours, ref)
+    assert p >= 0.05, (only_ours, only_ref, p)
