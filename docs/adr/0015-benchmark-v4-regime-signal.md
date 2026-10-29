@@ -206,3 +206,68 @@ every seed. No Stage 1–3 result depends on this claim. ADR 0003 carries a poin
   questions to the *benchmark* with no benefit to the Stage 4 test. Only the intercept switches.
 - **Making every preset regime-aware by default**: it would move every pinned output.
   Opt-in instead.
+
+## Amendment (2026-10-29): s_volfrag, a signal fragile to an observable volatility state
+
+### The sequence, stated plainly
+1. **Latent regimes proved unidentifiable.**
+   - A Markov-switching GARCH-t labeller chose one regime on all 20 `regime` dev seeds (ADR 0016,
+     Result): two regimes gained a median 6.1 log-likelihood units against BIC's 21.75 penalty.
+   - The observable volatility state fixed afterwards (vol21, q = .70) contains only 39% true
+     stress days.
+   - The regime-blind oracle's s_regime Sharpe in that state is −0.01 (stress regime: −1.35). At
+     this benchmark's strength, s_regime's fragility is invisible in anything computed from returns.
+2. **Stage 4's claim was narrowed** to fragility to high-*volatility states* observable in the
+   data (ADR 0016, Decision). It no longer claims fragility to latent regimes.
+3. **The ground truth was changed to match the narrowed claim.** s_volfrag's edge reverses when
+   the market's conditional volatility is high. This mirrors the documented pattern of momentum
+   crashes concentrating in high-volatility states (Daniel & Moskowitz 2016, "Momentum crashes",
+   Journal of Financial Economics 122; Barroso & Santa-Clara 2015, "Momentum has its moments",
+   Journal of Financial Economics 116).
+
+s_regime stays as a **reported-only, unidentifiable case**, like `hidden_confounder`'s s_conf:
+`identifiable = false`, so `score_run` excludes it from the kill counts. Its Stage 4 outcome is
+measured, not gated.
+
+### Model
+`SyntheticMarketConfig.volfrag` is opt-in, excluded when unset, and mutually exclusive with
+`regime`. It requires the market factor. s_volfrag is a unit-variance AR(1) with ρ = 0, appended
+to the state, and independent of everything. Its term in R_t is c_t·β_i·S_{t−1}, where:
+- c_t = 1 if h_{M,t} ≤ τ;
+- c_t = κ (`stress_ratio` < 0) if h_{M,t} > τ;
+- τ = the population `h_quantile`-quantile of the market's conditional variance.
+
+h_{M,t} is determined at t−1 (GARCH), so c_t is a state of the market, not an outcome, and it is
+independent of S_{t−1}. Population ICs therefore follow exactly as for s_regime (E[c] linear part,
+Var(c)β² noise), with P(h_M > τ) = 1 − h_quantile by definition. τ itself has no closed form. It
+is the quantile of h_M on a fixed-seed 2·10⁶-step simulation of the market GARCH, a Monte Carlo
+value recorded in the GroundTruth, so E[c] is exact up to the error in τ.
+
+### Calibration criteria (fixed before any calibration run, and before Stage 4 code runs on s_volfrag)
+These use population and oracle quantities only (`benchmark/regime_oracle.py`), with the same
+draws as above (root seed 20261031, 5 loading and path draws, 10⁶-day paths).
+
+**Held fixed:**
+- the `multi_asset` market;
+- ρ = 0 (C3);
+- the **Stage 4 volatility state, unchanged: vol21, q = .70**. It is computed on the oracle's
+  test path with `stages/adversarial/state.py`, and never re-tuned to the signal.
+
+**Candidates:** ic ∈ {.10, .12, .15, .20} × κ ∈ {−1, −1.5, −2} × h_quantile ∈ {.70, .80, .90}.
+The median split is excluded because with κ ≤ −1 its average edge is ≤ 0, which Stage 1 cannot
+see.
+
+**Criteria:**
+- **C1:** s_volfrag's stationary-average `expected_t_hybrid` ≥ 4 on every asset of every draw.
+- **C2′:** s_real's oracle Sharpe in the high-volatility state ≥ +0.3 (the robust control stays
+  robust).
+- **C3:** max population |ACF(R)| over lags 1–20 ≤ `multi_asset`'s, paired.
+- **C4:** s_volfrag's oracle Sharpe in the high-volatility state **≤ −1.0** (mean over draws).
+  "Clearly negative": the state's Sharpe SE on the benchmark is ≈ .42 (4739 × .30 days; ADR
+  0016), so −1.0 is about 2.4 SEs below zero. An oracle at −1.0 would have a one-sided 95% upper
+  bound of about −1.0 + 1.645 × .42 = −.31 < 0. Stage 3's Ridge-CV, learning the average slope
+  with error, will be less extreme; the pilot measures by how much.
+
+**Rule:** the passing candidate with the smallest ic, then the smallest |κ|, then the highest
+h_quantile (a rarer reversal is a weaker signal). If no candidate passes, the calibration stops
+for review (half-day time-box).
