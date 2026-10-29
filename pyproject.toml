@@ -70,6 +70,7 @@ module = [
   "yfinance.*", "exchange_calendars.*", "pyarrow.*", "scipy.*", "statsmodels.*",
   "tigramite.*",  # untyped; contained in stages/causal/{ci_tests,pcmci}.py
   "joblib.*",     # untyped
+  "numba.*",      # untyped; njit is cast to a typed decorator in stages/adversarial/regimes.py
 ]
 ignore_missing_imports = true
 
