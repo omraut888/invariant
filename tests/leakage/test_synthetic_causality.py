@@ -25,7 +25,11 @@ from invariant.core.run_hash import RngFactory
 
 pytestmark = pytest.mark.leakage
 
-CFG = load_benchmark_config("multi_asset").model_copy(update={"n_obs": 120, "burn_in": 5})
+CFGS = {
+    preset: load_benchmark_config(preset).model_copy(update={"n_obs": 120, "burn_in": 5})
+    for preset in ("multi_asset", "regime")
+}
+N_TOTAL = CFGS["multi_asset"].n_total
 
 
 def _redraw_after(innov: Innovations, cut: int, seed: int) -> Innovations:
@@ -37,19 +41,31 @@ def _redraw_after(innov: Innovations, cut: int, seed: int) -> Innovations:
     assert innov.eps_market is not None
     eps_m = innov.eps_market.copy()
     eps_m[cut + 1 :] = gen.standard_t(6, eps_m[cut + 1 :].shape)
-    return replace(innov, state=state, eps=eps, eps_market=eps_m)
+    regime: dict[str, np.ndarray] = {}
+    if innov.regime_u is not None and innov.s_regime is not None:
+        u = innov.regime_u.copy()
+        u[cut + 1 :] = gen.random(u[cut + 1 :].shape)
+        s_reg = innov.s_regime.copy()
+        s_reg[cut + 1 :] = gen.standard_normal(s_reg[cut + 1 :].shape)
+        regime = {"regime_u": u, "s_regime": s_reg}
+    return replace(innov, state=state, eps=eps, eps_market=eps_m, **regime)
 
 
+@pytest.mark.parametrize("preset", sorted(CFGS))
 @settings(max_examples=40, deadline=None)
-@given(cut=st.integers(0, CFG.n_total - 2), seed=st.integers(0, 2**32 - 1))
-def test_paths_up_to_t_ignore_innovations_after_t(cut: int, seed: int) -> None:
+@given(cut=st.integers(0, N_TOTAL - 2), seed=st.integers(0, 2**32 - 1))
+def test_paths_up_to_t_ignore_innovations_after_t(preset: str, cut: int, seed: int) -> None:
+    cfg = CFGS[preset]
     rng = RngFactory(17)
-    loadings = draw_loadings(CFG, rng)
-    innov = draw_innovations(CFG, rng)
-    a = simulate(CFG, innov, loadings)
-    b = simulate(CFG, _redraw_after(innov, cut, seed), loadings)
+    loadings = draw_loadings(cfg, rng)
+    innov = draw_innovations(cfg, rng)
+    a = simulate(cfg, innov, loadings)
+    b = simulate(cfg, _redraw_after(innov, cut, seed), loadings)
     for f in fields(SimulatedPaths):
         before, after = getattr(a, f.name), getattr(b, f.name)
+        if before is None:  # v4 fields are unset without a regime block
+            assert after is None, f.name
+            continue
         np.testing.assert_array_equal(before[: cut + 1], after[: cut + 1], err_msg=f.name)
     # The redraw actually changed the future (otherwise the test is vacuous).
     assert not np.array_equal(a.returns[cut + 1 :], b.returns[cut + 1 :])

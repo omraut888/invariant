@@ -43,6 +43,8 @@ __all__ = [
     "MarketParams",
     "NoiseSignalParams",
     "RealSignalParams",
+    "RegimeParams",
+    "RegimeSignalParams",
     "SyntheticMarketConfig",
     "list_benchmark_presets",
     "load_benchmark_config",
@@ -191,6 +193,73 @@ class MarketParams(_Frozen):
         return self
 
 
+class RegimeSignalParams(_Frozen):
+    """``S_regime``: unit-variance AR(1), independent of everything; its edge depends on the regime.
+
+    The loading on ``R_t`` is ``c(xi_t) * beta``, with ``c = 1`` in calm and ``c = stress_ratio``
+    in stress (negative: the edge reverses). ``ic`` is the nominal calm-regime IC.
+    """
+
+    rho: float = Field(ge=0.0, lt=1.0)
+    ic: float = Field(ge=0.0, lt=1.0)
+    stress_ratio: float = Field(ge=-5.0, le=5.0)
+
+
+class RegimeParams(_Frozen):
+    """Latent two-state Markov chain ``xi_t`` in {calm, stress} (benchmark v4, ADR 0015).
+
+    Parameterised by the stationary stress share ``pi_s`` and the expected stress spell ``d_s``
+    (days): ``P(stress -> calm) = 1 / d_s`` and ``P(calm -> stress) = (1 / d_s) pi_s / (1 - pi_s)``.
+    In stress, the GARCH intercepts of the residuals and of the market factor are scaled so that
+    their unconditional sds are ``resid_vol_ratio`` and ``market_vol_ratio`` times the calm values
+    (``sigma_bar`` is the calm level). A larger market ratio raises cross-asset correlation in
+    stress.
+    """
+
+    stress_share: float = Field(gt=0.0, lt=1.0)
+    stress_duration: float = Field(ge=1.0)
+    resid_vol_ratio: float = Field(gt=0.0)
+    market_vol_ratio: float = Field(gt=0.0)
+    signal: RegimeSignalParams
+
+    @model_validator(mode="after")
+    def _check_chain(self) -> Self:
+        if self.calm_to_stress > 1.0:
+            raise ValueError(
+                f"stress_share {self.stress_share} with stress_duration {self.stress_duration} "
+                f"needs P(calm -> stress) = {self.calm_to_stress:.3g} > 1; no such chain exists",
+            )
+        return self
+
+    @property
+    def stress_to_calm(self) -> float:
+        return 1.0 / self.stress_duration
+
+    @property
+    def calm_to_stress(self) -> float:
+        pi = self.stress_share
+        return self.stress_to_calm * pi / (1.0 - pi)
+
+    @property
+    def calm_duration(self) -> float:
+        return 1.0 / self.calm_to_stress
+
+    @property
+    def transition_matrix(self) -> tuple[tuple[float, float], tuple[float, float]]:
+        """Row-stochastic ``P[i][j] = P(xi_t = j | xi_{t-1} = i)``, states (calm, stress)."""
+        q, p = self.calm_to_stress, self.stress_to_calm
+        return ((1.0 - q, q), (p, 1.0 - p))
+
+    @property
+    def stationary(self) -> tuple[float, float]:
+        return (1.0 - self.stress_share, self.stress_share)
+
+    @property
+    def loading_multipliers(self) -> tuple[float, float]:
+        """``c`` by state (calm, stress)."""
+        return (1.0, self.signal.stress_ratio)
+
+
 class SyntheticMarketConfig(_Frozen):
     """All generation parameters of the planted-signal market. Hashed into ``GroundTruth``.
 
@@ -198,7 +267,8 @@ class SyntheticMarketConfig(_Frozen):
     discarded. The state starts at its stationary distribution, so ``burn_in`` is a safety margin,
     not a requirement; it must be >= 1 because the first simulated return has no lagged state.
     ``loading_dispersion`` (delta) scales per-asset loadings by ``exp(delta xi - delta^2 / 2)``,
-    ``xi ~ N(0, 1)``: mean-one, sign-preserving, exactly 1 when ``delta = 0``.
+    ``xi ~ N(0, 1)``: mean-one, sign-preserving, exactly 1 when ``delta = 0``. ``regime`` (v4)
+    adds the Markov-switching volatility and ``S_regime``; when it is unset nothing changes.
     """
 
     n_obs: StrictInt = Field(ge=50)
@@ -215,6 +285,8 @@ class SyntheticMarketConfig(_Frozen):
     garch: GarchParams
     market: MarketParams | None = None
     loading_dispersion: float = Field(default=0.0, ge=0.0, le=1.0)
+    # Excluded from dumps when unset, so every pre-v4 config hashes exactly as before.
+    regime: RegimeParams | None = Field(default=None, exclude_if=lambda v: v is None)
 
     @model_validator(mode="after")
     def _check_structure(self) -> Self:

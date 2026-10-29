@@ -219,7 +219,7 @@ def test_expected_t_hybrid_nulls_and_identifiability_limit() -> None:
     for sid in ("s_real", "s_decay"):
         s = gt.signal(sid)
         assert 0 < s.expected_t_hybrid[0] <= s.expected_t[0] + 1e-9
-    assert gt.schema_version == 3
+    assert gt.schema_version == 4  # v4: optional regime block (ADR 0015)
 
 
 def test_hybrid_oracle_sets() -> None:

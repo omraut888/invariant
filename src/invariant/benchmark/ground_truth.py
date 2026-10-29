@@ -16,7 +16,11 @@ structural equation of ``target_t``. ``mechanism`` says how:
 - ``variance``: ``source`` enters only the conditional variance of ``target`` (GARCH: the
   residual ``a_{t-1}`` enters ``h_t`` with loading ``coefficient = alpha``). It has zero linear
   effect on the conditional mean, so a linear (partial-correlation) test should *not* find it;
-  a nonlinear CI test may. Stages must be scored with that in mind.
+  a nonlinear CI test may. Stages must be scored with that in mind. The latent ``regime`` node
+  (v4) enters each target's variance at lag 0 with ``coefficient`` = the stress vol ratio.
+- ``linear_regime_switching`` (v4): as linear, but the coefficient is ``coefficient * c(xi_t)``
+  with ``c`` from ``RegimeTruth.loading_multipliers``; ``coefficient`` is the calm value.
+- ``markov`` (v4): the regime's own lag-1 transition; ``coefficient`` is P(stress -> stress).
 
 Expected outcomes
 -----------------
@@ -61,11 +65,13 @@ __all__ = [
     "Node",
     "NodeRole",
     "RealizedLoadings",
+    "RegimeIC",
+    "RegimeTruth",
     "SignalTruth",
     "TargetTimingMismatchError",
 ]
 
-GROUND_TRUTH_SCHEMA_VERSION = 3  # 2: added target_timing; 3: added expected_t_hybrid
+GROUND_TRUTH_SCHEMA_VERSION = 4  # 2: target_timing; 3: expected_t_hybrid; 4: regime (ADR 0015)
 
 TIMING_CONVENTION = (
     "A value dated t is known at the close of trading day t. returns[t] is the log return from "
@@ -96,6 +102,8 @@ class Mechanism(StrEnum):
     LINEAR = "linear"
     LINEAR_TIME_VARYING = "linear_time_varying"
     VARIANCE = "variance"
+    LINEAR_REGIME_SWITCHING = "linear_regime_switching"
+    MARKOV = "markov"
 
 
 class Node(_Frozen):
@@ -121,6 +129,8 @@ class RealizedLoadings(_Frozen):
     beta_real: tuple[float, ...]
     beta_decay_initial: tuple[float, ...]
     market_beta: tuple[float, ...]
+    # Calm-regime loading on S_regime (v4); excluded when unset so pre-v4 dumps are unchanged.
+    beta_regime: tuple[float, ...] | None = Field(default=None, exclude_if=lambda v: v is None)
 
     @model_validator(mode="after")
     def _same_length(self) -> Self:
@@ -130,6 +140,8 @@ class RealizedLoadings(_Frozen):
             len(self.beta_decay_initial),
             len(self.market_beta),
         }
+        if self.beta_regime is not None:
+            lengths.add(len(self.beta_regime))
         if len(lengths) != 1:
             raise ValueError("all loading vectors must have one entry per asset")
         return self
@@ -192,6 +204,33 @@ class SignalTruth(_Frozen):
         return self
 
 
+class RegimeIC(_Frozen):
+    """Population ``Corr(S_{t-1}, R_t | xi_t = k)`` per asset, for calm and stress."""
+
+    signal_id: str
+    calm: tuple[float, ...]
+    stress: tuple[float, ...]
+
+
+class RegimeTruth(_Frozen):
+    """The latent regime chain of a v4 benchmark (ADR 0015). States are (calm, stress).
+
+    ``resid_variance`` / ``market_variance``: exact ``E[h_t | xi_t = k]`` of the asset residual
+    and of the market factor. They are not ``sigma_bar_k^2``: ``h`` remembers the previous
+    regime, so a stress day just after calm has a lower variance than a long-run stress day.
+    """
+
+    transition_matrix: tuple[tuple[float, float], tuple[float, float]]
+    stationary: tuple[float, float]
+    expected_durations: tuple[float, float]
+    resid_vol_ratio: float
+    market_vol_ratio: float
+    loading_multipliers: tuple[float, float]
+    resid_variance: tuple[float, float]
+    market_variance: tuple[float, float]
+    regime_ic: tuple[RegimeIC, ...]
+
+
 class GroundTruth(_Frozen):
     """The answer key exported with a synthetic dataset (see module docstring)."""
 
@@ -210,6 +249,7 @@ class GroundTruth(_Frozen):
     first_date: date
     last_date: date
     dataset_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    regime: RegimeTruth | None = Field(default=None, exclude_if=lambda v: v is None)
 
     @model_validator(mode="after")
     def _check_graph(self) -> Self:

@@ -28,6 +28,7 @@ from invariant.benchmark.synthetic import (
     generate_market,
     population_moments,
     simulate,
+    state_nodes,
     stationary_covariance,
 )
 from invariant.core.run_hash import RngFactory
@@ -60,7 +61,7 @@ def _predictive_regression(
 
 
 def _node_values(paths: SimulatedPaths, cfg: SyntheticMarketConfig) -> dict[str, np.ndarray]:
-    values = {name: paths.state[:, k] for k, name in enumerate(STATE_NODES)}
+    values = {name: paths.state[:, k] for k, name in enumerate(state_nodes(cfg))}
     for i, a in enumerate(asset_names(cfg.n_assets)):
         values[a] = paths.returns[:, i]
     if cfg.market is not None:
@@ -69,6 +70,11 @@ def _node_values(paths: SimulatedPaths, cfg: SyntheticMarketConfig) -> dict[str,
 
 
 def _shock(innov: Innovations, cfg: SyntheticMarketConfig, node: str, s: int) -> Innovations:
+    if node == "s_regime":
+        assert innov.s_regime is not None
+        s_reg = innov.s_regime.copy()
+        s_reg[s] += 1.0
+        return replace(innov, s_regime=s_reg)
     if node in STATE_NODES:
         state = innov.state.copy()
         state[s, STATE_NODES.index(node)] += 1.0
@@ -96,7 +102,7 @@ def _lag0_closure(gt: GroundTruth, nodes: set[str]) -> set[str]:
         out = grown
 
 
-@pytest.mark.parametrize("preset", [None, "multi_asset"])
+@pytest.mark.parametrize("preset", [None, "multi_asset", "regime"])
 def test_intervention_support_matches_ground_truth_graph(preset: str | None) -> None:
     """Shock each node's innovation at step s; what moves at s and s+1 must be what GT predicts.
 

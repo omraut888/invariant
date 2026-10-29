@@ -70,3 +70,43 @@ presets:
       beta_low: 0.7
       beta_high: 1.3
     loading_dispersion: 0.25
+
+  # v4 (ADR 0015): multi_asset plus a latent calm/stress Markov chain. In stress the GARCH
+  # intercepts rise (residual and market vol x resid/market_vol_ratio) and S_regime's loading is
+  # multiplied by stress_ratio (negative: its edge reverses). Values fixed by the population
+  # calibration in ADR 0015 (scripts/regime_calibration.py), before any Stage 4 code ran.
+  regime:
+    n_assets: 5
+    garch: {sigma_bar: 0.008}
+    market:
+      garch: {nu: 6, alpha: 0.06, beta: 0.92, sigma_bar: 0.01}
+      beta_low: 0.7
+      beta_high: 1.3
+    loading_dispersion: 0.25
+    regime:
+      stress_share: 0.2
+      stress_duration: 120
+      resid_vol_ratio: 2.0
+      market_vol_ratio: 2.5
+      signal: {rho: 0.0, ic: 0.15, stress_ratio: -1.0}
+
+  # The `regime` market with no drift and no edge anywhere: every strategy's population Sharpe
+  # is 0 in every regime (Stage 4 size scenario).
+  regime_null:
+    n_assets: 5
+    mu: 0.0
+    factor: {ic: 0.0}
+    real: {ic: 0.0}
+    decay: {ic: 0.0}
+    garch: {sigma_bar: 0.008}
+    market:
+      garch: {nu: 6, alpha: 0.06, beta: 0.92, sigma_bar: 0.01}
+      beta_low: 0.7
+      beta_high: 1.3
+    loading_dispersion: 0.25
+    regime:
+      stress_share: 0.2
+      stress_duration: 120
+      resid_vol_ratio: 2.0
+      market_vol_ratio: 2.5
+      signal: {rho: 0.0, ic: 0.0, stress_ratio: -1.0}

@@ -95,6 +95,8 @@ null with expected kill at Stage 1.
   regression cannot test this. That is why the test uses a high-SNR config.
 - **Stylized facts.** All three hold on 5 seeds in single-asset mode and on every asset in
   multi-asset mode.
+  *Correction (ADR 0015):* the multi-asset claim holds on seed 0, the seed the test uses. On
+  seeds 0–4, 6 of 75 asset-checks fail, all close to their thresholds.
 - **The S_conf trap.** At T = 20000, S_conf's marginal HAC t-stat is 7.6–11.2. Its partial
   |t| given {Z, S_real, S_decay, 5 R lags} is ≤ 1.6. With Z hidden, its partial t stays at
   5.0–8.7, matching the ground-truth bias.
