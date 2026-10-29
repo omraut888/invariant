@@ -1,0 +1,29 @@
+# Stage 4 validation study on the planted-signal benchmark (docs/adr/0016, "Pre-registration").
+# Read by scripts/adversarial_study.py. The rule, the gates, M and the pilot threshold rule were
+# fixed and pushed before the pilot; the pilot's thresholds are recorded below before the full run.
+
+root_seed: 20261029        # the study's (fresh)
+pilot_root_seed: 20261030  # the pilot's (fresh): sets the S2/S4/S5 thresholds only
+n_seeds: 1273              # required_seeds(.05, .075, 2 size-type gates (S1, S3), .90)
+n_report_seeds: 200        # the reported tasks (regime, pipeline)
+n_pilot: 50
+confidence: 0.95
+size_upper_max: 0.075      # S1 (region misses the population chain) and S3 (null kill)
+pilot_margin: 0.05         # threshold = floor_.01(pilot Wilson lower - margin)
+s2_floor: 0.50             # below this the study is not run (design returns to review)
+pass_floor: 0.80           # the same for S4 and S5
+population_n_obs: 1000000  # the vol21/q=.70 state's population (pi_s, d_s) on `volfrag`
+population_seed: 20261103
+causal_n_boot: null        # Stage 1's own bootstrap (999) in the pipeline task
+certification:
+  horizon: 252
+  region_level: 0.95
+  n_region_boot: 999
+  n_grid: 25
+  n_boot: 999
+  upper_level: 0.95
+  block_length: null       # Politis-White rule
+  gpd_tail: 0.95
+  es_level: 0.99
+  gpd_n_boot: 199
+thresholds: null           # set from the pilot (ADR 0016, Pilot) before the full run
