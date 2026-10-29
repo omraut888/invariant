@@ -34,6 +34,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "arch>=8.0.0",
     "cvxpy>=1.9.3",
     "hypothesis>=6.168.4",
     "ipykernel>=7.4.0",
