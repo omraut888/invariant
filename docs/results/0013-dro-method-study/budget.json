@@ -1,0 +1,10 @@
+{
+  "budget_hours": 24.0,
+  "workers": 8,
+  "n_gate_seeds": 1683,
+  "n_select_seeds": 200,
+  "n_report_seeds": 200,
+  "core_hours": 15.001488904336853,
+  "projected_hours": 20.860794462394505,
+  "feasible": true
+}

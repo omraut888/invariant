@@ -9,7 +9,7 @@ An autonomous quant research pipeline. Five stages, each capable of killing a ca
 4. Adversarial regime certification: worst plausible market path, with a realism constraint
 5. Research memo: citation-backed investment memo arguing for or against the strategy
 
-Full spec: docs/invariant-spec.html
+Design overview: docs/design.md (the ADRs in docs/adr/ are authoritative)
 
 ## The bar
 Every claim this system makes must be measured, reproducible, and able to survive a hostile

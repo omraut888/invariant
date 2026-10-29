@@ -1,0 +1,24 @@
+{
+  "n_seeds": 20,
+  "workers": 8,
+  "pair_sd": {
+    "markowitz-dro_fc": 0.23226979785428456,
+    "markowitz-ridge_cv": 0.10512791283993965,
+    "markowitz-dro_cv": 0.12456624468726298,
+    "dro_fc-ridge_cv": 0.20122243840370618,
+    "dro_fc-dro_cv": 0.22628642607959226,
+    "ridge_cv-dro_cv": 0.0675875792073288
+  },
+  "sigma_hat": 0.23226979785428456,
+  "n_select_seeds": 200,
+  "seconds": {
+    "d1_base/c_sens": 203.64574895830302,
+    "d1_base/loso": 211.40622140204943,
+    "d1_base/main": 148.50842210620175,
+    "d1_base/pipeline": 126.17398227914819,
+    "d2_realistic/main": 167.67059488125088,
+    "d3_null/main": 119.78167074579979,
+    "d4_heavy/main": 134.84345283955045,
+    "d5_null_heavy/main": 119.28024014169932
+  }
+}

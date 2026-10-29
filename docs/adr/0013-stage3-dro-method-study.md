@@ -319,6 +319,10 @@ tiny seed (n_obs 2500, window 300):
 The pilot ran from a worktree at 5b5c19e: 20 seeds from root 20261024, every scenario and task
 kind, on 8 workers. Only the quantities below were printed. Its rates and means were not looked
 at or used.
+Outputs: `runs/dro_study/dec9fc9c48f69a63/`; the budget decision and the pilot summary (SDs, M_sel
+and timings; no rates) are archived at
+[`docs/results/0013-dro-method-study/budget.json`](../results/0013-dro-method-study/budget.json) and
+[`pilot.json`](../results/0013-dro-method-study/pilot.json).
 
 - **σ̂ by candidate pair** (SD of the per-seed difference in annualised Sharpe, d1_base):
 
