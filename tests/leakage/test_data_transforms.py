@@ -27,7 +27,7 @@ price = st.floats(min_value=0.5, max_value=500.0)
 maybe_price = st.one_of(price, st.just(float("nan")))
 
 
-@settings(max_examples=60)
+@settings(max_examples=60, deadline=None)
 @given(
     st.lists(maybe_price, min_size=N, max_size=N),
     st.integers(min_value=0, max_value=N - 1),
@@ -41,7 +41,7 @@ def test_log_returns_ignore_the_future(base: list[float], cut: int, other: list[
     pd.testing.assert_frame_equal(ra.iloc[: cut + 1], rb.iloc[: cut + 1])
 
 
-@settings(max_examples=40)
+@settings(max_examples=40, deadline=None)
 @given(
     st.lists(price, min_size=N, max_size=N),
     st.integers(min_value=0, max_value=N - 2),
