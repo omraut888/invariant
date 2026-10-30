@@ -48,10 +48,11 @@ def _verify(case: str, memo_json: str, md: str) -> verify_mod.VerificationReport
 
 
 def _entries() -> list[dict[str, Any]]:
-    out: list[dict[str, Any]] = []
-    for path in sorted((FIXTURES / "memo_adversarial").glob("set_*.yaml")):
-        out.extend(yaml.safe_load(path.read_text())["entries"])
-    return out
+    """Set (a) only. Set (b), written independently, is verified only by the pre-registered
+    validation (gate G3, docs/adr/0017), so its results are not seen before that run."""
+    path = FIXTURES / "memo_adversarial" / "set_a.yaml"
+    entries: list[dict[str, Any]] = yaml.safe_load(path.read_text())["entries"]
+    return entries
 
 
 @pytest.mark.parametrize("case", CASES)

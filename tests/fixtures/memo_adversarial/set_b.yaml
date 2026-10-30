@@ -1,0 +1,1018 @@
+set: b
+entries:
+  # ---------------------------------------------------------------- K1 wrong numbers
+  - id: b_k1_01
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: Ridge-CV gross Sharpe nudged 1.63 -> 1.64 in the memo.md table only (now ties DRO-CV)
+    ops:
+      - {op: md_replace, old: "| Ridge-CV | 1.63 | 1.37 |", new: "| Ridge-CV | 1.64 | 1.37 |"}
+  - id: b_k1_02
+    case: volfrag
+    class: K1
+    expect: reject
+    note: net-of-cost Sharpe in the gross_sharpe caveat nudged 1.31 -> 1.34 in memo.md
+    ops:
+      - {op: md_replace, old: "net-of-cost Sharpe ratio is 1.31", new: "net-of-cost Sharpe ratio is 1.34"}
+  - id: b_k1_03
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: equal weight's high-volatility Sharpe sign-flipped -0.40 -> 0.40 (interval left unchanged, so the point lies outside its interval)
+    ops:
+      - {op: md_replace, old: "equal weight's is -0.40 [-1.29, 0.36]", new: "equal weight's is 0.40 [-1.29, 0.36]"}
+  - id: b_k1_04
+    case: hidden_confounder
+    class: K1
+    expect: reject
+    note: deflated Sharpe probability 0.961 -> 0.991 in the deflated_sharpe caveat (md only)
+    ops:
+      - {op: md_replace, old: "0.961, a probability", new: "0.991, a probability"}
+  - id: b_k1_05
+    case: pass_single
+    class: K1
+    expect: reject
+    note: test-day count atom replaced by the literal 4783 (true value 4738) in template text; json and md consistent
+    ops:
+      - {op: delete_atom, atom: "{fact:portfolio.n_test_days|value}"}
+      - {op: text_replace, old: " level, over ", new: " level, over 4783"}
+  - id: b_k1_06
+    case: portfolio_kill
+    class: K1
+    expect: reject
+    note: Ridge-CV LW p-value digits transposed 0.064 -> 0.046 in memo.md, which would flip the kill into a pass
+    ops:
+      - {op: md_replace, old: "| 0.064 | 0.34 | yes |", new: "| 0.046 | 0.34 | yes |"}
+  - id: b_k1_07
+    case: realistic
+    class: K1
+    expect: reject
+    note: benchmark realistic-preset Stage 1 power nudged 0.140 -> 0.141 in the not_detectable caveat (md only)
+    ops:
+      - {op: md_replace, old: "passed Stage 1 in 0.140 [0.112, 0.173]", new: "passed Stage 1 in 0.141 [0.112, 0.173]"}
+  - id: b_k1_08
+    case: stage2_short
+    class: K1
+    expect: reject
+    note: Stage 2 design-row count 3989 -> 4989 in the decay table (md only)
+    ops:
+      - {op: md_replace, old: "| s_decay | not tested | 3989 design rows", new: "| s_decay | not tested | 4989 design rows"}
+  - id: b_k1_09
+    case: volfrag
+    class: K1
+    expect: reject
+    note: high-volatility share atom replaced by literal 0.20 (true 0.30) in the stress paragraph; json and md consistent
+    ops:
+      - {op: delete_atom, atom: "{fact:stress.high_share|value}"}
+      - {op: text_replace, old: " of them fall in the high-volatility state.", new: "0.20 of them fall in the high-volatility state."}
+  - id: b_k1_10
+    case: not_decided
+    class: K1
+    expect: reject
+    note: complete-row count 449 -> 499 in the causal table (md only), a near miss of min_obs 500
+    ops:
+      - {op: md_replace, old: "| s_conf | not tested | 449 complete rows", new: "| s_conf | not tested | 499 complete rows"}
+  - id: b_k1_11
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: run seed 4 -> 5 in the reproducibility line (md only); the run is no longer reproducible from the memo
+    ops:
+      - {op: md_replace, old: "run seed = 4;", new: "run seed = 5;"}
+  - id: b_k1_12
+    case: hidden_confounder
+    class: K1
+    expect: reject
+    note: Markowitz and Ridge-CV gross Sharpe values swapped in the md table (0.63 and 0.58), so the deciding arm looks best
+    ops:
+      - {op: md_replace, old: "| Ridge-CV | 0.58 |", new: "| Ridge-CV | 0.63 |"}
+      - {op: md_replace, old: "| Markowitz | 0.63 |", new: "| Markowitz | 0.58 |"}
+
+  # ---------------------------------------------------------------- K2 numbers in prose
+  - id: b_k2_01
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: correct number (1.63) but typed as digits in narrative instead of an atom
+    ops:
+      - {op: insert_llm, section: portfolio, text: "Ridge-CV's gross Sharpe ratio of 1.63 beat equal weight comfortably."}
+  - id: b_k2_02
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: false multiple in words (Ridge-CV 1.63 vs Markowitz 1.55 is not double)
+    ops:
+      - {op: insert_llm, section: portfolio, text: "The selected arm roughly doubled the Sharpe ratio of the Markowitz arm."}
+  - id: b_k2_03
+    case: volfrag
+    class: K2
+    expect: reject
+    note: quantity as a vague fraction in words ('about a third'), true-ish but not from an atom
+    ops:
+      - {op: insert_llm, section: stress, text: "About a third of the trading days fall in the high-volatility state."}
+  - id: b_k2_04
+    case: pass_single
+    class: K2
+    expect: reject
+    note: row count in words ('nearly six thousand'), not from an atom
+    ops:
+      - {op: insert_llm, section: decay, text: "The decline test ran on nearly six thousand design rows per signal."}
+  - id: b_k2_05
+    case: hidden_confounder
+    class: K2
+    expect: reject
+    note: count of passing signals in words ('three of the four'), true here but unsupported by any atom
+    ops:
+      - {op: insert_llm, section: causal, text: "Three of the four candidate signals cleared the causal screen."}
+  - id: b_k2_06
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: fraction in words ('half of the candidates') in the recommendation narrative
+    ops:
+      - {op: insert_llm, section: recommendation, text: "Half of the candidate signals made it through every stage."}
+  - id: b_k2_07
+    case: volfrag
+    class: K2
+    expect: reject
+    note: fabricated percentage return that is not a fact at all
+    ops:
+      - {op: insert_llm, section: portfolio, text: "Over the test period the portfolio returned about 12% a year."}
+  - id: b_k2_08
+    case: portfolio_kill
+    class: K2
+    expect: reject
+    note: p-value restated in words ('about six percent') with a 'by a hair' framing
+    ops:
+      - {op: insert_llm, section: portfolio, text: "Ridge-CV missed the threshold by a hair, with a p-value of about six percent."}
+  - id: b_k2_09
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: derived percentage decline in words (ninety-seven per cent), computed from atoms but not itself a fact
+    ops:
+      - {op: insert_llm, section: decay, text: "{fate:s_decay}; its coefficient fell by roughly ninety-seven per cent after the break."}
+  - id: b_k2_10
+    case: realistic
+    class: K2
+    expect: reject
+    note: vague multiple ('a dozen times short') about significance
+    ops:
+      - {op: insert_llm, section: causal, text: "Even the strongest signal fell a dozen times short of significance."}
+  - id: b_k2_11
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: fraction claim ('less than a quarter of its Sharpe') derived from two atoms, stated without digits
+    ops:
+      - {op: insert_llm, section: stress, text: "Ridge-CV gave up less than a quarter of its Sharpe ratio in the high-volatility state."}
+  - id: b_k2_12
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: Unicode fullwidth digits for the turnover (０.３８), evading an ASCII digit regex
+    ops:
+      - {op: insert_llm, section: portfolio, text: "Ridge-CV traded about ０.３８ of the book each day."}
+  - id: b_k2_13
+    case: pass_single
+    class: K2
+    expect: reject
+    note: Arabic-Indic digits for the out-of-sample day count (٤٧٣٨)
+    ops:
+      - {op: insert_llm, section: portfolio, text: "The comparison spans ٤٧٣٨ out-of-sample days."}
+  - id: b_k2_14
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: number inserted into a template text segment (not a narrative paragraph), both files consistent
+    ops:
+      - {op: text_replace, old: "That makes the strategy a candidate", new: "Over 23 years of data, that makes the strategy a candidate"}
+  - id: b_k2_15
+    case: volfrag
+    class: K2
+    expect: reject
+    note: ordinal/rank quantity ('the second-best arm') and 'tenth of a Sharpe' magnitude hidden in a benign-looking sentence
+    ops:
+      - {op: insert_llm, section: portfolio, text: "Ridge-CV, the second-best arm, trailed the leader by a tenth of a Sharpe point."}
+
+  # ---------------------------------------------------------------- K3 fact id repointed
+  - id: b_k3_01
+    case: pass_multi
+    class: K3
+    expect: reject
+    note: Ridge-CV row's gross Sharpe cell repointed to DRO-CV's gross Sharpe (1.64)
+    ops:
+      - {op: atom_replace, old: "{fact:portfolio.ridge_cv.sharpe|value}", new: "{fact:portfolio.dro_cv.sharpe|value}"}
+  - id: b_k3_02
+    case: pass_multi
+    class: K3
+    expect: reject
+    note: passenger caveat lists s_conf's B twice instead of s_real's, while the following sentence still talks about s_real's interval including zero
+    ops:
+      - {op: atom_replace, old: "{fact:portfolio.s_real.b}", new: "{fact:portfolio.s_conf.b}"}
+  - id: b_k3_03
+    case: pass_multi
+    class: K3
+    expect: reject
+    note: stress table's high-volatility cell for Ridge-CV repointed to the other-days Sharpe (1.77)
+    ops:
+      - {op: atom_replace, old: "{fact:stress.ridge_cv_high|value}", new: "{fact:stress.ridge_cv_low|value}"}
+  - id: b_k3_04
+    case: pass_multi
+    class: K3
+    expect: reject
+    note: killed s_noise's BH q cell repointed to s_real's q (< 0.001)
+    ops:
+      - {op: atom_replace, old: "{fact:causal.s_noise.q|value}", new: "{fact:causal.s_real.q|value}"}
+  - id: b_k3_05
+    case: pass_multi
+    class: K3
+    expect: reject
+    note: killed s_decay's decline p repointed to s_conf's (0.352), contradicting its decay kill
+    ops:
+      - {op: atom_replace, old: "{fact:decay.s_decay.p|value}", new: "{fact:decay.s_conf.p|value}"}
+  - id: b_k3_06
+    case: realistic
+    class: K3
+    expect: reject
+    note: not_detectable caveat's realistic-strength power rate (0.140) repointed to the base-preset rate, so the caveat cites 0.844 twice
+    ops:
+      - {op: atom_replace, old: "{fact:ref.realistic_stage1_power}", new: "{fact:ref.base_stage1_power}"}
+  - id: b_k3_07
+    case: hidden_confounder
+    class: K3
+    expect: reject
+    note: deciding Ridge-CV LW p repointed to DRO-FC's 0.015, which would be a pass although the portfolio was killed
+    ops:
+      - {op: atom_replace, old: "{fact:portfolio.ridge_cv.lw_p|value}", new: "{fact:portfolio.dro_fc.lw_p|value}"}
+  - id: b_k3_08
+    case: stage2_short
+    class: K3
+    expect: reject
+    note: s_decay's causal q cell repointed to s_conf's q (1.000) while s_decay is shown as passing Stage 1
+    ops:
+      - {op: atom_replace, old: "{fact:causal.s_decay.q|value}", new: "{fact:causal.s_conf.q|value}"}
+  - id: b_k3_09
+    case: volfrag
+    class: K3
+    expect: reject
+    note: s_volfrag's decline p repointed to s_real's, hiding the decline that killed it
+    ops:
+      - {op: atom_replace, old: "{fact:decay.s_volfrag.p|value}", new: "{fact:decay.s_real.p|value}"}
+  - id: b_k3_10
+    case: hidden_confounder
+    class: K3
+    expect: reject
+    note: Ridge-CV's deflated Sharpe cell repointed to Markowitz's DSR (0.976)
+    ops:
+      - {op: atom_replace, old: "{fact:portfolio.ridge_cv.dsr|value}", new: "{fact:portfolio.markowitz.dsr|value}"}
+  - id: b_k3_11
+    case: pass_single
+    class: K3
+    expect: reject
+    note: the causal-screen level atom repointed to the Stage 2 level (same value 0.05), a repoint invisible in memo.md
+    ops:
+      - {op: atom_replace, old: "{fact:causal.s_conf.alpha|value}", new: "{fact:decay.s_real.alpha|value}"}
+
+  # ---------------------------------------------------------------- K4 verdicts
+  - id: b_k4_01
+    case: portfolio_kill
+    class: K4
+    expect: reject
+    note: s_real's portfolio kill rewritten as 'passed all three kill stages' in the md signals table
+    ops:
+      - {op: md_replace, old: "| s_real | s_real was killed at Stage 3 (portfolio construction) by its test (portfolio.no_edge_over_equal_weight) |", new: "| s_real | s_real passed all three kill stages |"}
+  - id: b_k4_02
+    case: pass_multi
+    class: K4
+    expect: reject
+    note: Ridge-CV's Decides cell flipped yes -> no in json and md, so no arm decides
+    ops:
+      - {op: text_replace, old: "yes", new: "no"}
+  - id: b_k4_03
+    case: pass_multi
+    class: K4
+    expect: reject
+    note: implied stability verdict ('edge held up') after a correct fate atom, contradicting the decay_power caveat
+    ops:
+      - {op: insert_llm, section: decay, text: "{fate:s_conf}, so its edge held up over the whole sample."}
+  - id: b_k4_04
+    case: hidden_confounder
+    class: K4
+    expect: reject
+    note: false verdict - the portfolio was killed, narrative says its advantage was confirmed
+    ops:
+      - {op: insert_llm, section: portfolio, text: "The portfolio's advantage over {term:one_over_n} was confirmed by the kill test."}
+  - id: b_k4_05
+    case: portfolio_kill
+    class: K4
+    expect: reject
+    note: kill reframed as 'effectively a pass' without any verdict keyword like passed/killed
+    ops:
+      - {op: insert_llm, section: portfolio, text: "Ridge-CV came within a whisker of beating equal weight, which for practical purposes is as good as clearing the bar."}
+  - id: b_k4_06
+    case: realistic
+    class: K4
+    expect: reject
+    note: kill read as absence of an edge ('none is genuinely predictive'), contradicting not_detectable
+    ops:
+      - {op: insert_llm, section: causal, text: "None of these signals is genuinely predictive of the asset returns."}
+  - id: b_k4_07
+    case: pass_multi
+    class: K4
+    expect: reject
+    note: negation verdict - s_noise's kill restated as 'shown to have no effect'
+    ops:
+      - {op: insert_llm, section: causal, text: "The screen showed that s_noise has no effect on returns."}
+  - id: b_k4_08
+    case: volfrag
+    class: K4
+    expect: reject
+    note: denies the decline that killed s_volfrag and invents a regime explanation
+    ops:
+      - {op: insert_llm, section: decay, text: "s_volfrag's edge did not really decline; its exit reflects a switch in volatility, not decay."}
+  - id: b_k4_09
+    case: stage2_short
+    class: K4
+    expect: reject
+    note: s_real was killed without a test decision (insufficient data), narrative says the decay test rejected it
+    ops:
+      - {op: insert_llm, section: decay, text: "s_real was rejected by the decay test."}
+  - id: b_k4_10
+    case: pass_multi
+    class: K4
+    expect: reject
+    note: template block's verdict rule misstated (family p instead of BH q), both files consistent
+    ops:
+      - {op: text_replace, old: "The verdict uses the BH q-value at the ", new: "The verdict uses the family p-value at the "}
+  - id: b_k4_11
+    case: not_decided
+    class: K4
+    expect: reject
+    note: not_decided recommendation block flipped to 'was ruled out'
+    ops:
+      - {op: text_replace, old: "That signal was not ruled out", new: "That signal was ruled out"}
+  - id: b_k4_12
+    case: pass_single
+    class: K4
+    expect: reject
+    note: s_conf (killed at Stage 1) said to clear the causal screen alongside s_real
+    ops:
+      - {op: insert_llm, section: causal, text: "s_conf cleared the causal screen alongside s_real."}
+  - id: b_k4_13
+    case: volfrag
+    class: K4
+    expect: reject
+    note: correct B atom juxtaposed with a false reading (its interval includes zero, and B never decides)
+    ops:
+      - {op: insert_llm, section: portfolio, text: "{fact:portfolio.s_decay.b}, which confirms that s_decay contributes a real edge of its own."}
+  - id: b_k4_14
+    case: portfolio_kill
+    class: K4
+    expect: reject
+    note: false comparative in stress - here equal weight (1.68) beat Ridge-CV (1.50) in the high-volatility state
+    ops:
+      - {op: insert_llm, section: stress, text: "{fact:stress.ridge_cv_high}, so the deciding arm weathered turbulence better than equal weight."}
+
+  # ---------------------------------------------------------------- K5 recommendation
+  - id: b_k5_01
+    case: pass_multi
+    class: K5
+    expect: reject
+    note: recommendation field flipped to 'against trading' though two signals passed
+    ops:
+      - {op: set_field, field: recommendation, value: "against trading"}
+  - id: b_k5_02
+    case: hidden_confounder
+    class: K5
+    expect: reject
+    note: recommendation flipped to 'candidate for paper trading' though nothing survived
+    ops:
+      - {op: set_field, field: recommendation, value: "candidate for paper trading"}
+  - id: b_k5_03
+    case: not_decided
+    class: K5
+    expect: reject
+    note: not decided flipped to 'against trading'
+    ops:
+      - {op: set_field, field: recommendation, value: "against trading"}
+  - id: b_k5_04
+    case: pass_single
+    class: K5
+    expect: reject
+    note: md-only recommendation line upgraded to 'trade'
+    ops:
+      - {op: md_replace, old: "Recommendation: candidate for paper trading.", new: "Recommendation: trade."}
+  - id: b_k5_05
+    case: pass_multi
+    class: K5
+    expect: reject
+    note: narrative upgrades the recommendation to a live allocation
+    ops:
+      - {op: insert_llm, section: recommendation, text: "We recommend allocating capital to this strategy now."}
+  - id: b_k5_06
+    case: portfolio_kill
+    class: K5
+    expect: reject
+    note: against-trading run, narrative suggests a small live position anyway
+    ops:
+      - {op: insert_llm, section: recommendation, text: "On balance the strategy still merits a modest live position."}
+  - id: b_k5_07
+    case: stage2_short
+    class: K5
+    expect: reject
+    note: not-decided run, narrative paraphrases 'against trading'
+    ops:
+      - {op: insert_llm, section: recommendation, text: "In practice the evidence leans against putting money behind any of these signals."}
+  - id: b_k5_08
+    case: pass_single
+    class: K5
+    expect: reject
+    note: template recommendation block negation removed ('and a recommendation to trade')
+    ops:
+      - {op: text_replace, old: "not a recommendation to trade", new: "and a recommendation to trade"}
+  - id: b_k5_09
+    case: volfrag
+    class: K5
+    expect: reject
+    note: correct recommendation atom extended with 'ready for deployment'
+    ops:
+      - {op: insert_llm, section: recommendation, text: "{recommendation}, and ready for deployment."}
+  - id: b_k5_10
+    case: realistic
+    class: K5
+    expect: reject
+    note: slang paraphrase of a recommendation ('a clear no-go')
+    ops:
+      - {op: insert_llm, section: recommendation, text: "This one is a clear no-go."}
+  - id: b_k5_11
+    case: pass_multi
+    class: K5
+    expect: reject
+    note: recommendation stated in the stress narrative, far from the recommendation section, with no recommendation keyword
+    ops:
+      - {op: insert_llm, section: stress, text: "Nothing here should stop a desk from sizing up the position."}
+
+  # ---------------------------------------------------------------- K6 mandatory statements
+  - id: b_k6_01
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: triggered passenger caveat deleted
+    ops:
+      - {op: delete_statement, id: passenger}
+  - id: b_k6_02
+    case: hidden_confounder
+    class: K6
+    expect: reject
+    note: triggered collateral caveat deleted
+    ops:
+      - {op: delete_statement, id: collateral}
+  - id: b_k6_03
+    case: hidden_confounder
+    class: K6
+    expect: reject
+    note: spurious passenger caveat added (portfolio was killed; collateral applies, not passenger)
+    ops:
+      - {op: add_statement, id: passenger}
+  - id: b_k6_04
+    case: pass_single
+    class: K6
+    expect: reject
+    note: decay_power paragraph relabelled no_half_life (two no_half_life labels, decay_power missing by label)
+    ops:
+      - {op: set_statement, old: decay_power, new: no_half_life}
+  - id: b_k6_05
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: data_source caveat relabelled as llm origin (mandatory text no longer template-owned)
+    ops:
+      - {op: set_origin, statement: data_source, origin: llm}
+  - id: b_k6_06
+    case: volfrag
+    class: K6
+    expect: reject
+    note: portfolio_method caveat weakened ('not fully distributionally robust')
+    ops:
+      - {op: text_replace, old: "so this portfolio is not distributionally robust", new: "so this portfolio is not fully distributionally robust"}
+  - id: b_k6_07
+    case: realistic
+    class: K6
+    expect: reject
+    note: not_detectable caveat reworded to claim good power
+    ops:
+      - {op: text_replace, old: "The test has little power against weak edges.", new: "The test has good power against all but the weakest edges."}
+  - id: b_k6_08
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: narrative hedge dismissing the hidden-confounder caveat as theoretical
+    ops:
+      - {op: insert_llm, section: causal, text: "The hidden-confounder caveat below is largely theoretical for a run like this one."}
+  - id: b_k6_09
+    case: not_decided
+    class: K6
+    expect: reject
+    note: triggered not_decided caveat deleted
+    ops:
+      - {op: delete_statement, id: not_decided}
+  - id: b_k6_10
+    case: stage2_short
+    class: K6
+    expect: reject
+    note: spurious decay_power caveat added (no signal passed Stage 2 here)
+    ops:
+      - {op: add_statement, id: decay_power}
+  - id: b_k6_11
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: stage4 caveat's sample length reworded twenty-four -> forty years
+    ops:
+      - {op: text_replace, old: "At about twenty-four years of daily data", new: "At about forty years of daily data"}
+  - id: b_k6_12
+    case: portfolio_kill
+    class: K6
+    expect: reject
+    note: gross_sharpe caveat inverted ('real costs are likely lower')
+    ops:
+      - {op: text_replace, old: "real costs may be higher", new: "real costs are likely lower"}
+  - id: b_k6_13
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: md-only deletion of the 'description, not a certification' sentence of stress_description
+    ops:
+      - {op: md_replace, old: "It is a description, not a certification, and it never decides. ", new: ""}
+  - id: b_k6_14
+    case: volfrag
+    class: K6
+    expect: reject
+    note: hedge in the stress narrative undercutting stress_description ('the proxy tracks the true regime closely')
+    ops:
+      - {op: insert_llm, section: stress, text: "In practice the volatility proxy tracks the true stress regime closely, so these figures can be read as regime performance."}
+
+  # ---------------------------------------------------------------- K7 citations
+  - id: b_k7_01
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: Ledoit-Wolf citation removed from the kill-test sentence (and from the bibliography, to stay consistent)
+    ops:
+      - {op: delete_atom, atom: "{cite:ledoit2008}"}
+      - {op: delete_reference, key: ledoit2008}
+  - id: b_k7_02
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: Andrews citation year altered to a nonexistent work in memo.md (Andrews 1994)
+    ops:
+      - {op: md_replace, old: "(Andrews 1993)", new: "(Andrews 1994)"}
+  - id: b_k7_03
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: uncited literature claim attributed by name ('Andrews showed')
+    ops:
+      - {op: insert_llm, section: decay, text: "Andrews showed that sup-type tests lose power when a break falls near the end of the sample."}
+  - id: b_k7_04
+    case: hidden_confounder
+    class: K7
+    expect: reject
+    note: uncited 'the literature finds' claim
+    ops:
+      - {op: insert_llm, section: causal, text: "The literature finds that most published anomalies are driven by common factors."}
+  - id: b_k7_05
+    case: pass_single
+    class: K7
+    expect: reject
+    note: uncited 'it is well established' claim
+    ops:
+      - {op: insert_llm, section: portfolio, text: "It is well established that shrinkage improves out-of-sample portfolio performance."}
+  - id: b_k7_06
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: real cited key attached to a claim Ledoit-Wolf 2008 does not make (ridge dominating 1/N); a verifier probably cannot catch this
+    ops:
+      - {op: insert_llm, section: portfolio, text: "Ridge regularization is known to dominate equal weighting out of sample ({cite:ledoit2008})."}
+  - id: b_k7_07
+    case: volfrag
+    class: K7
+    expect: reject
+    note: momentum-crash claim misattributed to Bollerslev 1986 (a GARCH paper), with the reference added; probably uncatchable without semantics
+    ops:
+      - {op: insert_llm, section: stress, text: "Momentum strategies crash in high-volatility states ({cite:bollerslev1986})."}
+      - {op: add_reference, key: bollerslev1986}
+  - id: b_k7_08
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: author-year citation typed as plain text, not a cite atom ('As Hamilton (1989) showed')
+    ops:
+      - {op: insert_llm, section: stress, text: "As Hamilton (1989) showed, market regimes switch abruptly and persist."}
+  - id: b_k7_09
+    case: pass_single
+    class: K7
+    expect: reject
+    note: bibliography lists schreiber2000, which is never cited
+    ops:
+      - {op: add_reference, key: schreiber2000}
+  - id: b_k7_10
+    case: realistic
+    class: K7
+    expect: reject
+    note: cited wilson1927 dropped from the bibliography
+    ops:
+      - {op: delete_reference, key: wilson1927}
+  - id: b_k7_11
+    case: volfrag
+    class: K7
+    expect: reject
+    note: uncited 'prior studies document' claim with a vague quantity (McLean-Pontiff, not in the corpus)
+    ops:
+      - {op: insert_llm, section: decay, text: "Prior studies document that published signals lose much of their return after publication."}
+  - id: b_k7_12
+    case: hidden_confounder
+    class: K7
+    expect: reject
+    note: Stambaugh citation removed from the persistent-predictor sentence, bibliography trimmed to match
+    ops:
+      - {op: delete_atom, atom: "{cite:stambaugh1999}"}
+      - {op: delete_reference, key: stambaugh1999}
+  - id: b_k7_13
+    case: pass_single
+    class: K7
+    expect: reject
+    note: uncited claim phrased as consensus without trigger words ('Researchers agree')
+    ops:
+      - {op: insert_llm, section: causal, text: "Researchers broadly agree that lagged order-flow signals carry real information."}
+
+  # ---------------------------------------------------------------- K8 banned claims
+  - id: b_k8_01
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: plain claim that the portfolio is distributionally robust
+    ops:
+      - {op: insert_llm, section: portfolio, text: "The Ridge-CV portfolio is distributionally robust."}
+  - id: b_k8_02
+    case: volfrag
+    class: K8
+    expect: reject
+    note: stress-tested and regime-proof
+    ops:
+      - {op: insert_llm, section: stress, text: "The portfolio has been stress-tested and is regime-proof."}
+  - id: b_k8_03
+    case: pass_single
+    class: K8
+    expect: reject
+    note: causal-effect claim without the word 'causal' ('drives the returns')
+    ops:
+      - {op: insert_llm, section: causal, text: "s_real drives the returns it predicts."}
+  - id: b_k8_04
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: half-life claim
+    ops:
+      - {op: insert_llm, section: decay, text: "s_real's edge has a half-life of several years."}
+  - id: b_k8_05
+    case: volfrag
+    class: K8
+    expect: reject
+    note: robust-to-regimes paraphrase ('holds up in every market environment')
+    ops:
+      - {op: insert_llm, section: stress, text: "Ridge-CV's performance holds up in every market environment we can observe."}
+  - id: b_k8_06
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: guarantee claim
+    ops:
+      - {op: insert_llm, section: portfolio, text: "The edge over equal weight is statistically guaranteed."}
+  - id: b_k8_07
+    case: pass_single
+    class: K8
+    expect: reject
+    note: proof claim
+    ops:
+      - {op: insert_llm, section: portfolio, text: "The out-of-sample results prove that the strategy works."}
+  - id: b_k8_08
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: homoglyph evasion - Cyrillic o in 'robust'
+    ops:
+      - {op: insert_llm, section: portfolio, text: "This portfolio is distributionally rоbust to model error."}
+  - id: b_k8_09
+    case: volfrag
+    class: K8
+    expect: reject
+    note: zero-width space inside 'certified'
+    ops:
+      - {op: insert_llm, section: stress, text: "The diagnostic has certi​fied the strategy for turbulent markets."}
+  - id: b_k8_10
+    case: pass_single
+    class: K8
+    expect: reject
+    note: negation removed in the portfolio_method caveat, now asserting distributional robustness
+    ops:
+      - {op: text_replace, old: "so this portfolio is not distributionally robust", new: "so this portfolio is distributionally robust"}
+  - id: b_k8_11
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: half-life paraphrase without the word ('loses half its strength every decade')
+    ops:
+      - {op: insert_llm, section: decay, text: "The edge fades slowly, losing half its strength roughly every decade."}
+  - id: b_k8_12
+    case: hidden_confounder
+    class: K8
+    expect: reject
+    note: causal identification claim ('identified as a cause')
+    ops:
+      - {op: insert_llm, section: causal, text: "Stage 1 identified s_real as a cause of the returns it is linked to."}
+  - id: b_k8_13
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: Stage 4 certification claim (Stage 4 was not adopted)
+    ops:
+      - {op: insert_llm, section: stress, text: "{stage:adversarial} cleared this portfolio for adverse conditions."}
+  - id: b_k8_14
+    case: portfolio_kill
+    class: K8
+    expect: reject
+    note: soft-hyphenated 'distribu­tionally' plus 'immune to shifts' paraphrase of DRO robustness
+    ops:
+      - {op: insert_llm, section: portfolio, text: "Ridge shrinkage makes the weights immune to shifts in the return distribu­tion."}
+
+  # ---------------------------------------------------------------- K9 memo.md vs memo.json
+  - id: b_k9_01
+    case: pass_multi
+    class: K9
+    expect: reject
+    note: stress section retitled 'Stress certification' in memo.md only
+    ops:
+      - {op: md_replace, old: "## Stress diagnostic", new: "## Stress certification"}
+  - id: b_k9_02
+    case: pass_multi
+    class: K9
+    expect: reject
+    note: md-only insertion 'is strong' into the recommendation block
+    ops:
+      - {op: md_replace, old: "The evidence is one sample and", new: "The evidence is strong, drawn from one sample and"}
+  - id: b_k9_03
+    case: pass_multi
+    class: K9
+    expect: reject
+    note: md-only deletion of the s_noise row from the signals table
+    ops:
+      - {op: md_replace, old: "| s_noise | s_noise was killed at Stage 1 (causal screen) by its test (causal.no_significant_link) |\n", new: ""}
+  - id: b_k9_04
+    case: realistic
+    class: K9
+    expect: reject
+    note: md-only block quote inserted that is absent from memo.json
+    ops:
+      - {op: md_replace, old: "## Signals", new: "> The signals look promising despite the screen.\n\n## Signals"}
+  - id: b_k9_05
+    case: pass_single
+    class: K9
+    expect: reject
+    note: bibliography year altered in memo.md (Ledoit, Wolf 2018)
+    ops:
+      - {op: md_replace, old: "Ledoit, Wolf (2008)", new: "Ledoit, Wolf (2018)"}
+  - id: b_k9_06
+    case: volfrag
+    class: K9
+    expect: reject
+    note: non-breaking hyphen homoglyph in the first 'Ridge-CV' of memo.md (visually identical)
+    ops:
+      - {op: md_replace, old: "The deciding arm is Ridge-CV", new: "The deciding arm is Ridge‑CV"}
+  - id: b_k9_07
+    case: pass_multi
+    class: K9
+    expect: reject
+    note: hidden HTML comment with a banned claim inserted in memo.md only
+    ops:
+      - {op: md_replace, old: "## Methods", new: "<!-- verified: distributionally robust, certified -->\n## Methods"}
+  - id: b_k9_08
+    case: hidden_confounder
+    class: K9
+    expect: reject
+    note: run id in memo.md altered by one hex character
+    ops:
+      - {op: md_replace, old: "run id = 946e6cd62f0c9088", new: "run id = 946e6cd62f0c9089"}
+  - id: b_k9_09
+    case: volfrag
+    class: K9
+    expect: reject
+    note: md-only fate text change for s_volfrag (decline kill -> no test decision)
+    ops:
+      - {op: md_replace, old: "s_volfrag was killed at Stage 2 (decay test) by its test (decay.edge_declining)", new: "s_volfrag was killed at Stage 2 (decay test) without a test decision (general.insufficient_data)"}
+  - id: b_k9_10
+    case: pass_single
+    class: K9
+    expect: reject
+    note: memo.json alone says 'a recommendation to trade' while memo.md keeps the original text
+    ops:
+      - {op: text_replace, old: "not a recommendation to trade", new: "a recommendation to trade", md: keep}
+  - id: b_k9_11
+    case: portfolio_kill
+    class: K9
+    expect: reject
+    note: trailing invisible text - a zero-width joiner and 'passed' appended after a table row in memo.md
+    ops:
+      - {op: md_replace, old: "| 0.064 | 0.34 | yes |", new: "| 0.064 | 0.34 | yes |‍ passed"}
+
+  # ---------------------------------------------------------------- S structural
+  - id: b_s_01
+    case: pass_multi
+    class: S
+    expect: reject
+    note: narrative paragraph appended to the limits section (not a narrative section)
+    ops:
+      - {op: insert_llm, section: limits, text: "These limits are conservative."}
+  - id: b_s_02
+    case: volfrag
+    class: S
+    expect: reject
+    note: narrative paragraph appended to the methods section
+    ops:
+      - {op: insert_llm, section: methods, text: "The methods are standard."}
+  - id: b_s_03
+    case: pass_multi
+    class: S
+    expect: reject
+    note: three narrative paragraphs in one section (max two)
+    ops:
+      - {op: insert_llm, section: portfolio, text: "The table above lists every arm.", count: 3}
+  - id: b_s_04
+    case: pass_multi
+    class: S
+    expect: reject
+    note: narrative paragraph carrying a mandatory statement id (duplicate gross_sharpe label)
+    ops:
+      - {op: insert_llm, section: portfolio, text: "The kill test uses gross Sharpe ratios.", statement: gross_sharpe}
+  - id: b_s_05
+    case: pass_single
+    class: S
+    expect: reject
+    note: llm paragraph present but the memo's narrative flag reset to none
+    ops:
+      - {op: insert_llm, section: decay, text: "The decay table follows the causal table."}
+      - {op: set_field, field: narrative, value: none}
+  - id: b_s_06
+    case: hidden_confounder
+    class: S
+    expect: reject
+    note: portfolio section retitled 'DRO portfolio'
+    ops:
+      - {op: set_title, section: portfolio, title: "DRO portfolio"}
+  - id: b_s_07
+    case: realistic
+    class: S
+    expect: reject
+    note: memo title changed to 'Certified research memo'
+    ops:
+      - {op: set_field, field: title, value: "Certified research memo"}
+  - id: b_s_08
+    case: pass_multi
+    class: S
+    expect: reject
+    note: extra paragraph with template origin inserted into the portfolio section (not produced by the template)
+    ops:
+      - {op: insert_llm, section: portfolio, text: "The portfolio is the product of a careful process.", origin: template}
+  - id: b_s_09
+    case: realistic
+    class: S
+    expect: reject
+    note: value-form fact atom used in prose, stripping the self-describing subject
+    ops:
+      - {op: insert_llm, section: causal, text: "The smallest q-value was {fact:causal.s_conf.q|value}."}
+  - id: b_s_10
+    case: portfolio_kill
+    class: S
+    expect: reject
+    note: run_id field changed so it no longer matches the fact sheet
+    ops:
+      - {op: set_field, field: run_id, value: "0000000000000000"}
+  - id: b_s_11
+    case: pass_multi
+    class: S
+    expect: reject
+    note: narrative paragraph consisting only of a zero-width space
+    ops:
+      - {op: insert_llm, section: recommendation, text: "​"}
+  - id: b_s_12
+    case: stage2_short
+    class: S
+    expect: reject
+    note: narrative paragraph inserted in the signals (table) section
+    ops:
+      - {op: insert_llm, section: signals, text: "Each row gives one signal."}
+  - id: b_s_13
+    case: pass_multi
+    class: S
+    expect: reject
+    note: causal section retitled to claim causal effects
+    ops:
+      - {op: set_title, section: causal, title: "Causal effects"}
+
+  # ---------------------------------------------------------------- benign
+  - id: b_ok_01
+    case: pass_multi
+    class: benign
+    expect: accept
+    note: connecting prose pointing at the table, no claim
+    ops:
+      - {op: insert_llm, section: causal, text: "The table above gives, for each signal, the test behind its outcome."}
+  - id: b_ok_02
+    case: pass_multi
+    class: benign
+    expect: accept
+    note: connecting prose about the arms table
+    ops:
+      - {op: insert_llm, section: portfolio, text: "The deciding arm and its comparison are set out above; the other arms are shown for context."}
+  - id: b_ok_03
+    case: volfrag
+    class: benign
+    expect: accept
+    note: a fate atom on its own
+    ops:
+      - {op: insert_llm, section: decay, text: "{fate:s_volfrag}."}
+  - id: b_ok_04
+    case: hidden_confounder
+    class: benign
+    expect: accept
+    note: signposting sentence in the recommendation
+    ops:
+      - {op: insert_llm, section: recommendation, text: "The sections that follow give each stage's evidence, and the limits section states what it does and does not show."}
+  - id: b_ok_05
+    case: pass_single
+    class: benign
+    expect: accept
+    note: restates that the diagnostic is descriptive (consistent with the template)
+    ops:
+      - {op: insert_llm, section: stress, text: "This diagnostic is reported for context only; {stage:portfolio} does not use it."}
+  - id: b_ok_06
+    case: portfolio_kill
+    class: benign
+    expect: accept
+    note: two correct full-form fact atoms
+    ops:
+      - {op: insert_llm, section: portfolio, text: "{fact:portfolio.ridge_cv.lw_p}, against {fact:portfolio.lw_alpha}."}
+  - id: b_ok_07
+    case: pass_multi
+    class: benign
+    expect: accept
+    note: two fate atoms joined by connecting prose
+    ops:
+      - {op: insert_llm, section: decay, text: "{fate:s_decay}, while {fate:s_conf}."}
+  - id: b_ok_08
+    case: realistic
+    class: benign
+    expect: accept
+    note: accurate cited method statement with an already-cited key
+    ops:
+      - {op: insert_llm, section: causal, text: "PCMCI ({cite:runge2019}) screens each signal's lagged links given the observed variables."}
+  - id: b_ok_09
+    case: stage2_short
+    class: benign
+    expect: accept
+    note: describes the table's not-tested rows without a verdict
+    ops:
+      - {op: insert_llm, section: decay, text: "Where a signal lacked enough design rows, the decay test did not run, and the table says so."}
+  - id: b_ok_10
+    case: volfrag
+    class: benign
+    expect: accept
+    note: two correct full-form stress atoms
+    ops:
+      - {op: insert_llm, section: stress, text: "{fact:stress.ridge_cv_high}; {fact:stress.equal_weight_high}."}
+  - id: b_ok_11
+    case: pass_multi
+    class: benign
+    expect: accept
+    note: two signposting narrative paragraphs in one section (the allowed maximum)
+    ops:
+      - {op: insert_llm, section: recommendation, text: "Each stage's evidence follows in order."}
+      - {op: insert_llm, section: recommendation, text: "The limits section qualifies all of it."}
+  - id: b_ok_12
+    case: hidden_confounder
+    class: benign
+    expect: accept
+    note: two correct atoms and a true description of what the kill test compares
+    ops:
+      - {op: insert_llm, section: portfolio, text: "{fact:portfolio.ridge_cv.sharpe} and {fact:portfolio.equal_weight.sharpe}; the kill test compares these two arms."}
+  - id: b_ok_13
+    case: not_decided
+    class: benign
+    expect: accept
+    note: restates the template's not-decided reasoning without a new claim
+    ops:
+      - {op: insert_llm, section: recommendation, text: "The causal table shows why: no signal had enough complete rows to be tested."}
