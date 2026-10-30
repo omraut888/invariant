@@ -22,8 +22,12 @@ until every category is covered or those presets reach ``max_seeds``. Seeds are 
 hand, and the rule reads pipeline outcomes only, never a verification result.
 
 **Hand-written sets** (G3) are applied to the fixture memos (``tests/fixtures/memo_runs``) by
-``corruption.apply_ops`` and verified; every corruption entry must be rejected. Benign entries
-are reported (false rejections), not gated.
+``corruption.apply_ops`` and verified; every gated corruption entry must be rejected. Benign
+entries are reported (false rejections), not gated. **Entailment entries** are reported, not
+gated (``entailment_only``): a real corpus key attached to a claim the paper does not make. V7
+checks that a literature claim is cited, not that the paper supports it, so such an entry tests
+a check the verifier states it does not make. The class is defined by the entry's operations,
+never by its id.
 
 GroundTruth is read here only to write it into the run directory for the G4 check and to report
 how the recommendation relates to the planted truth; no memo or verifier code reads it.
@@ -34,6 +38,7 @@ Reference: Clopper & Pearson (1934) for the zero-miss bound, (1 - p)^n.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import tempfile
 import time
@@ -57,6 +62,7 @@ from invariant.stages.memo.benchmark import run_benchmark_pipeline
 from invariant.stages.memo.corruption import CLASSES, CorruptionError, apply_ops, generate
 from invariant.stages.memo.document import render
 from invariant.stages.memo.facts import FactSheet, build_fact_sheet
+from invariant.stages.memo.literature import load_corpus
 from invariant.stages.memo.template import build_template_memo
 from invariant.stages.memo.verify import verify
 
@@ -66,6 +72,7 @@ __all__ = [
     "MemoValidationConfig",
     "RunPreset",
     "RunRecord",
+    "entailment_only",
     "load_memo_validation_config",
     "run_hand_sets",
     "run_task",
@@ -327,12 +334,51 @@ class HandEntryResult(_Frozen):
     expect: str
     accepted: bool
     checks: tuple[str, ...]
+    gated: bool = True
+    """False for an entailment entry (``entailment_only``): reported, not gated."""
+
+
+_CITE_ATOM: Final = re.compile(r"\{cite:([^}|]+)\}")
+_SENTENCE_END: Final = re.compile(r"(?<=[.!?])\s+")
+
+
+def entailment_only(entry: Mapping[str, object], corpus_keys: frozenset[str]) -> bool:
+    """Whether a hand-set entry only attaches real corpus keys to narrative claims.
+
+    True when the entry is a K7 corruption whose operations are narrative insertions in which
+    every sentence carries a cite atom of a corpus key, plus bibliography additions of keys
+    those insertions cite. Its only defect can then be that the paper does not make the claim
+    (entailment), which V7 does not check (docs/adr/0017). An entry that also drops a citation,
+    uses a non-corpus key, leaves a sentence uncited or does anything else stays gated.
+    """
+    ops = entry.get("ops")
+    if entry.get("class") != "K7" or entry.get("expect") != "reject" or not isinstance(ops, list):
+        return False
+    cited: set[str] = set()
+    added: set[str] = set()
+    inserts = 0
+    for op in ops:
+        if not isinstance(op, Mapping):
+            return False
+        if op.get("op") == "insert_llm" and set(op) <= {"op", "section", "text"}:
+            inserts += 1
+            for sentence in _SENTENCE_END.split(str(op.get("text", "")).strip()):
+                keys = set(_CITE_ATOM.findall(sentence))
+                if not keys or not keys <= corpus_keys:
+                    return False
+                cited |= keys
+        elif op.get("op") == "add_reference" and set(op) == {"op", "key"}:
+            added.add(str(op["key"]))
+        else:
+            return False
+    return inserts > 0 and added <= cited
 
 
 def run_hand_sets(cfg: MemoValidationConfig, fixtures: Path | None = None) -> list[HandEntryResult]:
     """Every entry of the hand-written sets, verified against its fixture run."""
     root = find_project_root()
     runs = fixtures if fixtures is not None else root / "tests" / "fixtures" / "memo_runs"
+    corpus_keys = frozenset(load_corpus())
     out: list[HandEntryResult] = []
     for rel in cfg.hand_sets:
         doc = yaml.safe_load((root / rel).read_text(encoding="utf-8"))
@@ -352,6 +398,7 @@ def run_hand_sets(cfg: MemoValidationConfig, fixtures: Path | None = None) -> li
                     expect=str(e["expect"]),
                     accepted=r.accepted,
                     checks=r.checks_failed(),
+                    gated=not entailment_only(e, corpus_keys),
                 )
             )
     return out
@@ -381,9 +428,13 @@ class ClassSummary(_Frozen):
 class HandSetSummary(_Frozen):
     set: str
     n_corruptions: int
+    """Gated corruption entries."""
     missed: tuple[str, ...]
     n_benign: int
     benign_rejected: tuple[str, ...]
+    entailment: tuple[str, ...] = ()
+    """Entailment entries (reported, not gated)."""
+    entailment_missed: tuple[str, ...] = ()
 
 
 class MemoValidationReport(_Frozen):
@@ -443,7 +494,8 @@ def summarize_validation(
     sets = []
     for name in sorted({h.set for h in hand}):
         hs = [h for h in hand if h.set == name]
-        bad = [h for h in hs if h.expect == "reject"]
+        bad = [h for h in hs if h.expect == "reject" and h.gated]
+        ent = [h for h in hs if h.expect == "reject" and not h.gated]
         ok = [h for h in hs if h.expect == "accept"]
         sets.append(
             HandSetSummary(
@@ -452,6 +504,8 @@ def summarize_validation(
                 missed=tuple(h.id for h in bad if h.accepted),
                 n_benign=len(ok),
                 benign_rejected=tuple(h.id for h in ok if not h.accepted),
+                entailment=tuple(h.id for h in ent),
+                entailment_missed=tuple(h.id for h in ent if h.accepted),
             )
         )
     false_rej = [f"{r.preset}/{r.index}" for r in records if not r.template_accepted]
@@ -477,7 +531,9 @@ def summarize_validation(
             name="G3",
             passed=not g3_bad and len(sets) == len(cfg.hand_sets),
             detail="; ".join(
-                f"set {s.set}: {len(s.missed)}/{s.n_corruptions} missed" for s in sets
+                f"set {s.set}: {len(s.missed)}/{s.n_corruptions} missed"
+                f" (entailment, not gated: {len(s.entailment_missed)}/{len(s.entailment)})"
+                for s in sets
             ),
         ),
         GateResult(

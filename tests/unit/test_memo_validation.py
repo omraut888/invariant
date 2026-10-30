@@ -111,3 +111,62 @@ def test_gates() -> None:
     assert not summarize_validation(one, hand, cfg, git_sha="x", git_dirty=False).gates[1].passed
     bad = [*recs[:-1], recs[-1].model_copy(update={"deterministic": False})]
     assert not summarize_validation(bad, hand, cfg, git_sha="x", git_dirty=False).gates[3].passed
+
+
+KEYS = frozenset({"ledoit2008", "bollerslev1986"})
+
+
+def _k7(*ops: dict[str, str]) -> dict[str, object]:
+    return {"class": "K7", "expect": "reject", "ops": list(ops)}
+
+
+def test_entailment_entries_are_defined_by_their_operations() -> None:
+    claim = {"op": "insert_llm", "section": "stress", "text": "A claim ({cite:bollerslev1986})."}
+    assert v.entailment_only(_k7(claim), KEYS)
+    assert v.entailment_only(_k7(claim, {"op": "add_reference", "key": "bollerslev1986"}), KEYS)
+    assert not v.entailment_only({**_k7(claim), "class": "K8"}, KEYS)
+    assert not v.entailment_only({**_k7(claim), "expect": "accept"}, KEYS)
+    assert not v.entailment_only(_k7(claim, {"op": "add_reference", "key": "ledoit2008"}), KEYS)
+    assert not v.entailment_only(_k7(claim, {"op": "delete_reference", "key": "x"}), KEYS)
+    assert not v.entailment_only(_k7({"op": "add_reference", "key": "ledoit2008"}), KEYS)
+    for text in (
+        "A claim ({cite:nobody2020}).",  # not a corpus key
+        "A claim.",  # uncited
+        "A claim ({cite:ledoit2008}). Studies agree.",  # a second, uncited sentence
+    ):
+        assert not v.entailment_only(_k7({**claim, "text": text}), KEYS)
+    assert not v.entailment_only(_k7({**claim, "origin": "template"}), KEYS)
+
+
+def test_the_entailment_class_in_the_hand_sets() -> None:
+    """Classification only: the verifier is not run on set (b) here."""
+    import yaml
+
+    from invariant.stages.memo.literature import load_corpus
+
+    keys = frozenset(load_corpus())
+    root = Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "memo_adversarial"
+    found = {
+        e["id"]
+        for name in ("set_a.yaml", "set_b.yaml")
+        for e in yaml.safe_load((root / name).read_text(encoding="utf-8"))["entries"]
+        if v.entailment_only(e, keys)
+    }
+    assert found == {"b_k7_06", "b_k7_07"}
+
+
+def test_an_entailment_miss_is_reported_not_gated() -> None:
+    cfg = load_memo_validation_config()
+    recs = [_rec("base", i, ("against",)) for i in range(48)]
+    hand = [
+        HandEntryResult(set="a", id="a1", cls="K1", expect="reject", accepted=False, checks=()),
+        HandEntryResult(
+            set="b", id="b1", cls="K7", expect="reject", accepted=True, checks=(), gated=False
+        ),
+    ]
+    rep = summarize_validation(recs, hand, cfg, git_sha="x", git_dirty=False)
+    assert rep.accepted
+    assert rep.hand_sets[1].n_corruptions == 0
+    assert rep.hand_sets[1].entailment_missed == ("b1",)
+    gated = [hand[0], hand[1].model_copy(update={"gated": True})]
+    assert not summarize_validation(recs, gated, cfg, git_sha="x", git_dirty=False).accepted
