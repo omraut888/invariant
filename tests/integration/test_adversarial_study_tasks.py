@@ -1,5 +1,8 @@
-"""Every Stage 4 study task kind on one tiny seed (ADR 0016: no arm or task may first run in the
-full study). n_obs 2500, Stage 3 window 300, small bootstraps. Not a statistical check."""
+"""Every Stage 4 study task kind on one tiny seed. n_obs 2500, Stage 3 window 300, small
+bootstraps. Not a statistical check.
+
+Slow-marked: ADR 0016 rejected Stage 4 as a kill stage, so its study will not run and these
+smokes no longer guard a launch. They keep the evaluated harness runnable in the full suite."""
 
 from functools import cache
 
@@ -19,6 +22,8 @@ from invariant.stages.adversarial.study import (
     run_task,
     summarize_study,
 )
+
+pytestmark = pytest.mark.slow
 
 ROOT = 7  # a smoke root seed: not the study's, the pilot's or any earlier study's
 
