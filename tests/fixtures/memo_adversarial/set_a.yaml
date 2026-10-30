@@ -1,0 +1,696 @@
+# Hand-written adversarial set (a), docs/adr/0017.
+#
+# Written before the verifier (verify.py) existed, from the memo format and the corruption
+# classes K1-K9 only. Frozen once committed: entries are added in a new file, never edited.
+#
+# Each entry: id, case (a fixture under tests/fixtures/memo_runs/), class (K1-K9, or S for a
+# structural attack on the memo format), expect (reject, or accept for a benign narrative
+# sentence: false rejections are reported, not gated), a note, and ops
+# (stages/memo/corruption.py). Unless an op says md: keep, memo.md is re-rendered from the edited
+# memo.json, so the tamperer controls both files.
+set: a
+entries:
+  # --- K1: a wrong number ------------------------------------------------------------------
+  - id: a01
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: a partial correlation nudged in its last digit, in memo.md
+    ops: [{op: md_replace, old: "| SYN02, lag 1 | 0.080 [", new: "| SYN02, lag 1 | 0.081 ["}]
+  - id: a02
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: the net Sharpe in the gross-Sharpe caveat, digits transposed
+    ops: [{op: md_replace, old: "net-of-cost Sharpe ratio is 1.37", new: "net-of-cost Sharpe ratio is 1.73"}]
+  - id: a03
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: the sign of B's lower bound flipped, which hides that s_real's interval includes zero
+    ops: [{op: md_replace, old: "| s_real | 0.30 [-0.06, 0.66]", new: "| s_real | 0.30 [0.06, 0.66]"}]
+  - id: a04
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: two members' B values swapped in the table (both files consistent)
+    ops:
+      - {op: atom_replace, old: "{fact:portfolio.s_real.b|value}", new: "{fact:portfolio.s_conf.b|value}"}
+  - id: a05
+    case: hidden_confounder
+    class: K1
+    expect: reject
+    note: Ridge-CV's LW p moved below alpha, which would mean a pass
+    ops: [{op: md_replace, old: "| Ridge-CV | 0.58 | 0.35 | 0.961 | 0.073 |", new: "| Ridge-CV | 0.58 | 0.35 | 0.961 | 0.037 |"}]
+  - id: a06
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: the out-of-sample day count
+    ops: [{op: md_replace, old: "over 4738 out-of-sample days", new: "over 4783 out-of-sample days"}]
+  - id: a07
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: a quoted benchmark rate shrunk tenfold, interval included
+    ops: [{op: md_replace, old: "passed Stage 1 in 0.730 [0.689, 0.767]", new: "passed Stage 1 in 0.073 [0.069, 0.077]"}]
+  - id: a08
+    case: stage2_short
+    class: K1
+    expect: reject
+    note: the design-row count in a not-tested cell
+    ops: [{op: md_replace, old: "| s_decay | not tested | 3989 design rows", new: "| s_decay | not tested | 5989 design rows"}]
+  - id: a09
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: the high-volatility share in the stress caveat
+    ops: [{op: md_replace, old: "0.30 of days fall in it", new: "0.03 of days fall in it"}]
+  - id: a10
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: the run seed in the reproducibility block
+    ops: [{op: md_replace, old: "run seed = 4;", new: "run seed = 0;"}]
+  - id: a11
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: the deciding arm's gross Sharpe swapped for the best DRO arm's (both files consistent)
+    ops:
+      - {op: atom_replace, old: "{fact:portfolio.ridge_cv.sharpe|value}", new: "{fact:portfolio.dro_cv.sharpe|value}"}
+  - id: a12
+    case: hidden_confounder
+    class: K1
+    expect: reject
+    note: a correct number of the wrong kind in narrative prose (a p-value atom where a Sharpe is claimed)
+    ops:
+      - {op: insert_llm, section: portfolio, text: "The deciding arm's Sharpe ratio was {fact:portfolio.ridge_cv.lw_p|value}."}
+
+  # --- K2: a number in prose ------------------------------------------------------------------
+  - id: a13
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: a number word
+    ops: [{op: insert_llm, section: portfolio, text: "The portfolio earned roughly twice the Sharpe ratio of equal weight."}]
+  - id: a14
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: digits in narrative prose, although the value is true
+    ops: [{op: insert_llm, section: portfolio, text: "Its net Sharpe ratio of 1.37 is high for a daily strategy."}]
+  - id: a15
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: a fraction in words
+    ops: [{op: insert_llm, section: causal, text: "About two-thirds of the candidates showed a link."}]
+  - id: a16
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: a ratio verb
+    ops: [{op: insert_llm, section: decay, text: "The coefficient roughly halved after the break."}]
+  - id: a17
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: a fraction word
+    ops: [{op: insert_llm, section: stress, text: "In high volatility the portfolio lost about a third of its Sharpe ratio."}]
+  - id: a18
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: a period in words
+    ops: [{op: insert_llm, section: recommendation, text: "Over two decades of data stand behind this."}]
+  - id: a19
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: a digit put into template text
+    ops: [{op: text_replace, old: "The evidence is one sample", new: "The evidence is 1 sample"}]
+  - id: a20
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: a confidence level in words put into template text
+    ops: [{op: text_replace, old: "That makes the strategy a candidate", new: "That makes the strategy, with ninety percent confidence, a candidate"}]
+  - id: a21
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: a count word
+    ops: [{op: insert_llm, section: portfolio, text: "A dozen portfolio rules were compared before this one."}]
+  - id: a22
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: a test statistic added to memo.md only
+    ops: [{op: md_replace, old: "| s_real | < 0.001 | < 0.001 |", new: "| s_real | < 0.001 (t = 4.2) | < 0.001 |"}]
+  - id: a23
+    case: realistic
+    class: K2
+    expect: reject
+    note: a percentage word
+    ops: [{op: insert_llm, section: causal, text: "Weak edges are found only a small percent of the time."}]
+
+  # --- K3: an atom pointing at a different fact than its text --------------------------------
+  - id: a24
+    case: pass_multi
+    class: K3
+    expect: reject
+    note: net Sharpe atom repointed to a DRO arm, memo.md kept
+    ops:
+      - {op: atom_replace, old: "{fact:portfolio.ridge_cv.sharpe_net|value}", new: "{fact:portfolio.dro_cv.sharpe_net|value}", md: keep}
+  - id: a25
+    case: pass_multi
+    class: K3
+    expect: reject
+    note: a q-value atom repointed to another signal, memo.md kept
+    ops:
+      - {op: atom_replace, old: "{fact:causal.s_real.q|value}", new: "{fact:causal.s_conf.q|value}", md: keep}
+  - id: a26
+    case: pass_multi
+    class: K3
+    expect: reject
+    note: an atom pointing at a fact that does not exist, memo.md kept
+    ops:
+      - {op: atom_replace, old: "{fact:causal.s_real.family_p|value}", new: "{fact:causal.s_real.family_pp|value}", md: keep}
+  - id: a27
+    case: pass_multi
+    class: K3
+    expect: reject
+    note: a fate atom repointed, memo.md kept
+    ops: [{op: atom_replace, old: "{fate:s_decay}", new: "{fate:s_real}", md: keep}]
+  - id: a28
+    case: pass_multi
+    class: K3
+    expect: reject
+    note: a narrative fact atom repointed after rendering
+    ops:
+      - {op: insert_llm, section: portfolio, text: "{fact:portfolio.markowitz.sharpe}."}
+      - {op: atom_replace, old: "{fact:portfolio.markowitz.sharpe}", new: "{fact:portfolio.ridge_cv.sharpe}", md: keep}
+
+  # --- K4: a wrong verdict ----------------------------------------------------------------------
+  - id: a29
+    case: pass_multi
+    class: K4
+    expect: reject
+    note: a kill rewritten as a pass in the signals table
+    ops:
+      - {op: md_replace, old: "| s_decay | s_decay was killed at Stage 2 (decay test) by its test (decay.edge_declining) |", new: "| s_decay | s_decay passed all three kill stages |"}
+  - id: a30
+    case: hidden_confounder
+    class: K4
+    expect: reject
+    note: the kill reason renamed in memo.md
+    ops: [{op: md_replace, old: "(decay.edge_declining)", new: "(decay.edge_stable)"}]
+  - id: a31
+    case: pass_multi
+    class: K4
+    expect: reject
+    note: a signal id and a verdict paraphrase in prose (s_noise was killed)
+    ops: [{op: insert_llm, section: causal, text: "{fate:s_real}, and s_noise also held up."}]
+  - id: a32
+    case: pass_multi
+    class: K4
+    expect: reject
+    note: a verdict paraphrase without a signal id (the decaying signal was killed for declining)
+    ops: [{op: insert_llm, section: decay, text: "The decaying signal's edge held up after the break."}]
+  - id: a33
+    case: pass_multi
+    class: K4
+    expect: reject
+    note: a verdict word attached to a fate atom
+    ops: [{op: insert_llm, section: causal, text: "{fate:s_conf}. This confirms its link to returns."}]
+  - id: a34
+    case: pass_multi
+    class: K4
+    expect: reject
+    note: the recommendation rationale overstated in template text
+    ops: [{op: text_replace, old: "At least one signal survived every kill stage", new: "Every signal survived every kill stage"}]
+  - id: a35
+    case: hidden_confounder
+    class: K4
+    expect: reject
+    note: a false negation (both members were killed by the test)
+    ops: [{op: insert_llm, section: portfolio, text: "Neither member was ruled out by the data."}]
+  - id: a36
+    case: stage2_short
+    class: K4
+    expect: reject
+    note: a test decision claimed where none was made
+    ops: [{op: insert_llm, section: decay, text: "The test rejected a decline for both signals."}]
+  - id: a37
+    case: realistic
+    class: K4
+    expect: reject
+    note: a kill for lack of power stated as absence of effect
+    ops: [{op: insert_llm, section: causal, text: "None of the candidates has any effect on returns."}]
+  - id: a38
+    case: portfolio_kill
+    class: K4
+    expect: reject
+    note: a killed portfolio's advantage called significant
+    ops: [{op: insert_llm, section: portfolio, text: "The advantage over equal weight was significant."}]
+  - id: a39
+    case: pass_multi
+    class: K4
+    expect: reject
+    note: a verdict word for the stress diagnostic, which never decides
+    ops: [{op: insert_llm, section: stress, text: "The portfolio survived the high-volatility state."}]
+  - id: a40
+    case: pass_multi
+    class: K4
+    expect: reject
+    note: a verdict word in prose even when true (s_real passed); verdicts live only in atoms
+    ops: [{op: insert_llm, section: causal, text: "{fate:s_real}; it was not killed."}]
+  - id: a41
+    case: hidden_confounder
+    class: K4
+    expect: reject
+    note: a fate atom of one signal relabelled in the table, both files consistent
+    ops: [{op: atom_replace, old: "{fate:s_real}", new: "{fate:s_noise}"}]
+
+  # --- K5: the recommendation -----------------------------------------------------------------
+  - id: a42
+    case: pass_multi
+    class: K5
+    expect: reject
+    note: memo.json's recommendation field flipped
+    ops: [{op: set_field, field: recommendation, value: "against trading"}]
+  - id: a43
+    case: hidden_confounder
+    class: K5
+    expect: reject
+    note: the recommendation line flipped in memo.md
+    ops: [{op: md_replace, old: "Recommendation: against trading.", new: "Recommendation: candidate for paper trading."}]
+  - id: a44
+    case: stage2_short
+    class: K5
+    expect: reject
+    note: not decided turned into against, in both files
+    ops:
+      - {op: set_field, field: recommendation, value: "against trading", md: keep}
+      - {op: md_replace, old: "Recommendation: not decided.", new: "Recommendation: against trading."}
+  - id: a45
+    case: pass_multi
+    class: K5
+    expect: reject
+    note: an explicit recommendation in prose
+    ops: [{op: insert_llm, section: recommendation, text: "We recommend trading this strategy."}]
+  - id: a46
+    case: pass_multi
+    class: K5
+    expect: reject
+    note: a recommendation paraphrase
+    ops: [{op: insert_llm, section: recommendation, text: "The strategy is attractive and worth allocating capital to."}]
+  - id: a47
+    case: portfolio_kill
+    class: K5
+    expect: reject
+    note: a recommendation against the rule's outcome
+    ops: [{op: insert_llm, section: recommendation, text: "On balance the case for putting money behind it is strong."}]
+  - id: a48
+    case: pass_multi
+    class: K5
+    expect: reject
+    note: the qualifier removed from the rationale
+    ops: [{op: text_replace, old: "not a recommendation to trade", new: "a recommendation to trade"}]
+
+  # --- K6: mandatory statements -----------------------------------------------------------------
+  - id: a49
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: the passenger caveat deleted
+    ops: [{op: delete_statement, id: passenger}]
+  - id: a50
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: the gross-Sharpe caveat deleted
+    ops: [{op: delete_statement, id: gross_sharpe}]
+  - id: a51
+    case: portfolio_kill
+    class: K6
+    expect: reject
+    note: the not-detectable caveat deleted
+    ops: [{op: delete_statement, id: not_detectable}]
+  - id: a52
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: the method statement reworded into the claim it forbids
+    ops: [{op: text_replace, old: "so this portfolio is not distributionally robust", new: "so this portfolio is distributionally robust"}]
+  - id: a53
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: the stress statement reworded into a certification
+    ops: [{op: text_replace, old: "It is a description, not a certification, and it never decides.", new: "It certifies the portfolio for high volatility."}]
+  - id: a54
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: a spurious statement (collateral kill) whose trigger did not fire
+    ops: [{op: add_statement, id: collateral}]
+  - id: a55
+    case: portfolio_kill
+    class: K6
+    expect: reject
+    note: a statement relabelled with another statement's id
+    ops: [{op: set_statement, old: not_detectable, new: not_decided}]
+  - id: a56
+    case: stage2_short
+    class: K6
+    expect: reject
+    note: the not-decided caveat deleted
+    ops: [{op: delete_statement, id: not_decided}]
+  - id: a57
+    case: hidden_confounder
+    class: K6
+    expect: reject
+    note: the collateral caveat deleted
+    ops: [{op: delete_statement, id: collateral}]
+  - id: a58
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: a mandatory statement handed to the narrative
+    ops: [{op: set_origin, statement: data_source, origin: llm}]
+  - id: a59
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: the Stage 4 sentence cut from memo.md only
+    ops: [{op: md_replace, old: "Stage 4 (adversarial regime certification) was evaluated and not adopted as a kill stage (ADR 0016). ", new: ""}]
+  - id: a60
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: a statement moved out of registry order (deleted and re-added at the end)
+    ops:
+      - {op: delete_statement, id: hidden_confounder}
+      - {op: add_statement, id: hidden_confounder}
+  - id: a61
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: a mandatory statement weakened by an added hedge in narrative prose
+    ops: [{op: insert_llm, section: portfolio, text: "The passenger caveat below is unlikely to matter here."}]
+
+  # --- K7: literature ---------------------------------------------------------------------------
+  - id: a62
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: a citation removed from the methods text
+    ops: [{op: delete_atom, atom: "{cite:andrews1993}"}]
+  - id: a63
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: an author named without a citation
+    ops: [{op: insert_llm, section: decay, text: "Andrews showed that such tests lose power near the ends of the sample."}]
+  - id: a64
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: an appeal to the literature without a citation
+    ops: [{op: insert_llm, section: causal, text: "The literature finds that confounding is common in return prediction."}]
+  - id: a65
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: a citation key that is not in the corpus (memo.md cannot render it)
+    ops: [{op: insert_llm, section: causal, text: "Similar links were reported before ({cite:smith2020}).", md: keep}]
+  - id: a66
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: two authors named without a citation
+    ops: [{op: insert_llm, section: portfolio, text: "As Ledoit and Wolf argue, the test is valid under heavy tails."}]
+  - id: a67
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: a cited work dropped from the bibliography
+    ops: [{op: delete_reference, key: wilson1927}]
+  - id: a68
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: an uncited work added to the bibliography
+    ops: [{op: add_reference, key: hamilton1989}]
+  - id: a69
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: an appeal to prior work without a citation
+    ops: [{op: insert_llm, section: stress, text: "This follows earlier work on regime switching."}]
+  - id: a70
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: an appeal to common knowledge without a citation
+    ops: [{op: insert_llm, section: portfolio, text: "Ridge shrinkage is well known to stabilise portfolio weights."}]
+  - id: a71
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: a research claim without a citation
+    ops: [{op: insert_llm, section: decay, text: "Research suggests that published edges fade after discovery."}]
+
+  # --- K8: banned phrases -----------------------------------------------------------------------
+  - id: a72
+    case: pass_multi
+    class: K8
+    expect: reject
+    ops: [{op: insert_llm, section: portfolio, text: "The portfolio is distributionally robust."}]
+    note: the DRO claim ADR 0013 forbids
+  - id: a73
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: a regime-robustness claim
+    ops: [{op: insert_llm, section: stress, text: "The strategy is robust to regimes."}]
+  - id: a74
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: a stress-test claim
+    ops: [{op: insert_llm, section: stress, text: "The portfolio was stress-tested against high volatility."}]
+  - id: a75
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: a proof claim
+    ops: [{op: insert_llm, section: recommendation, text: "The edge is proven on this sample."}]
+  - id: a76
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: a causal-effect claim Stage 1 cannot make
+    ops: [{op: insert_llm, section: causal, text: "{fate:s_real}, which establishes a causal effect on returns."}]
+  - id: a77
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: a half-life claim Stage 2 does not make
+    ops: [{op: insert_llm, section: decay, text: "The surviving edges have a long half-life."}]
+  - id: a78
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: the forbidden name
+    ops: [{op: insert_llm, section: portfolio, text: "The DRO portfolio would have done better."}]
+  - id: a79
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: a regime-robustness paraphrase
+    ops: [{op: insert_llm, section: stress, text: "The portfolio is regime-proof."}]
+  - id: a80
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: a guarantee paraphrase
+    ops: [{op: insert_llm, section: recommendation, text: "The edge is guaranteed to persist."}]
+  - id: a81
+    case: volfrag
+    class: K8
+    expect: reject
+    note: a certification paraphrase
+    ops: [{op: insert_llm, section: stress, text: "The stress diagnostic certifies the portfolio."}]
+  - id: a82
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: a robustness claim about distribution shift
+    ops: [{op: insert_llm, section: portfolio, text: "The weights are robust to distribution shift."}]
+
+  # --- K9: memo.md does not match memo.json ---------------------------------------------------
+  - id: a83
+    case: pass_multi
+    class: K9
+    expect: reject
+    note: a section heading renamed
+    ops: [{op: md_replace, old: "## Causal screen", new: "## Causal discovery"}]
+  - id: a84
+    case: pass_multi
+    class: K9
+    expect: reject
+    note: a sentence appended at the end
+    ops: [{op: md_replace, old: "Summary: The Wilson score interval for a binomial proportion.\n", new: "Summary: The Wilson score interval for a binomial proportion.\n\nThis memo was reviewed and approved.\n"}]
+  - id: a85
+    case: pass_multi
+    class: K9
+    expect: reject
+    note: a portfolio member dropped from memo.md
+    ops: [{op: md_replace, old: "Members: s_conf, s_real.", new: "Members: s_real."}]
+  - id: a86
+    case: pass_multi
+    class: K9
+    expect: reject
+    note: a look-alike character (Latin O for zero)
+    ops: [{op: md_replace, old: "| s_decay | 0.004 |", new: "| s_decay | 0.OO4 |"}]
+  - id: a87
+    case: pass_multi
+    class: K9
+    expect: reject
+    note: a blank line removed
+    ops: [{op: md_replace, old: "\n\n## Decay test", new: "\n## Decay test"}]
+
+  # --- S: the memo format -----------------------------------------------------------------------
+  - id: a88
+    case: pass_multi
+    class: S
+    expect: reject
+    note: a narrative paragraph outside the narrative sections
+    ops: [{op: insert_llm, section: limits, text: "These limits are standard for any backtest."}]
+  - id: a89
+    case: pass_multi
+    class: S
+    expect: reject
+    note: more narrative paragraphs than a section allows
+    ops: [{op: insert_llm, section: causal, text: "The table follows the usual layout.", count: 3}]
+  - id: a90
+    case: pass_multi
+    class: S
+    expect: reject
+    note: an added paragraph claiming template origin
+    ops: [{op: insert_llm, section: causal, text: "The table follows the usual layout.", origin: template}]
+  - id: a91
+    case: pass_multi
+    class: S
+    expect: reject
+    note: a stage atom in narrative prose (narrative segments are text, fact, fate and cite)
+    ops: [{op: insert_llm, section: decay, text: "{stage:decay} looked for a decline."}]
+  - id: a92
+    case: pass_multi
+    class: S
+    expect: reject
+    note: a recommendation atom in narrative prose
+    ops: [{op: insert_llm, section: recommendation, text: "{recommendation}, as the evidence shows."}]
+  - id: a93
+    case: pass_multi
+    class: S
+    expect: reject
+    note: a narrative paragraph in a memo that says it has none
+    ops:
+      - {op: insert_llm, section: causal, text: "The table follows the usual layout."}
+      - {op: set_field, field: narrative, value: none}
+  - id: a94
+    case: pass_multi
+    class: S
+    expect: reject
+    note: the memo's run id changed
+    ops: [{op: set_field, field: run_id, value: "0000000000000000"}]
+  - id: a95
+    case: pass_multi
+    class: S
+    expect: reject
+    note: a section title edited in both files
+    ops: [{op: set_title, section: decay, title: "Decay test (stable)"}]
+  - id: a96
+    case: pass_multi
+    class: S
+    expect: reject
+    note: a narrative paragraph claiming a mandatory statement id
+    ops: [{op: insert_llm, section: portfolio, text: "The portfolio is what it is.", statement: passenger}]
+
+  # --- benign narrative (expect accept; false rejections are reported, not gated) -----------
+  - id: b01
+    case: pass_multi
+    class: benign
+    expect: accept
+    note: framing prose
+    ops: [{op: insert_llm, section: recommendation, text: "The case rests on the evidence in the tables below, read together with the limits that follow."}]
+  - id: b02
+    case: pass_multi
+    class: benign
+    expect: accept
+    note: describes a table
+    ops: [{op: insert_llm, section: causal, text: "The table reports, for each candidate, the strongest lagged link and its corrected significance."}]
+  - id: b03
+    case: pass_multi
+    class: benign
+    expect: accept
+    note: fact atoms in prose
+    ops: [{op: insert_llm, section: portfolio, text: "{fact:portfolio.ridge_cv.sharpe}, against {fact:portfolio.equal_weight.sharpe}."}]
+  - id: b04
+    case: pass_multi
+    class: benign
+    expect: accept
+    note: a fact atom with a scope sentence
+    ops: [{op: insert_llm, section: stress, text: "{fact:stress.ridge_cv_high}. This describes the sample; it says nothing about future periods of high volatility."}]
+  - id: b05
+    case: pass_multi
+    class: benign
+    expect: accept
+    note: a fate atom alone
+    ops: [{op: insert_llm, section: decay, text: "{fate:s_decay}."}]
+  - id: b06
+    case: pass_multi
+    class: benign
+    expect: accept
+    note: a cited methods sentence
+    ops: [{op: insert_llm, section: causal, text: "{fact:causal.s_real.q}. The correction accounts for testing the candidates together ({cite:benjamini1995})."}]
+  - id: b07
+    case: pass_multi
+    class: benign
+    expect: accept
+    note: plain explanation
+    ops: [{op: insert_llm, section: portfolio, text: "Turnover matters because costs scale with it."}]
+  - id: b08
+    case: pass_multi
+    class: benign
+    expect: accept
+    note: what paper trading would add
+    ops: [{op: insert_llm, section: recommendation, text: "Paper trading would test the portfolio on data it has not seen."}]
+  - id: b09
+    case: pass_multi
+    class: benign
+    expect: accept
+    note: a fact atom with a scope clause
+    ops: [{op: insert_llm, section: decay, text: "{fact:decay.s_real.p}; the test asks only whether the coefficient fell, not how fast."}]
+  - id: b10
+    case: pass_multi
+    class: benign
+    expect: accept
+    note: a named author with a citation
+    ops: [{op: insert_llm, section: portfolio, text: "The deciding comparison uses the test of Ledoit and Wolf ({cite:ledoit2008})."}]
+  - id: b11
+    case: hidden_confounder
+    class: benign
+    expect: accept
+    note: a B atom in prose
+    ops: [{op: insert_llm, section: portfolio, text: "{fact:portfolio.s_real.b}."}]
+  - id: b12
+    case: stage2_short
+    class: benign
+    expect: accept
+    note: what a longer sample would change
+    ops: [{op: insert_llm, section: recommendation, text: "A longer sample would let the test run."}]
