@@ -1,0 +1,461 @@
+{
+  "seed": 20261104,
+  "n_obs": 60000,
+  "window_days": 4739,
+  "s_volfrag": {
+    "n_days": 58739,
+    "per_state_sharpe": [
+      2.8958805741712634,
+      -0.8709749605401137
+    ],
+    "per_state_mu": [
+      0.001912714995829019,
+      -0.0008280069136888491
+    ],
+    "per_state_sd": [
+      0.010485035024669314,
+      0.015091366411527899
+    ],
+    "stationary_sharpe": 1.4284906229285577,
+    "sr_h_star_median": 0.9007694102744089,
+    "sr_h_star_range": [
+      0.8151718405131027,
+      0.984929848544996
+    ],
+    "horizon_high_share_median": 0.43366453151132744,
+    "windows": [
+      {
+        "window": 0,
+        "block_length": 155,
+        "region_share": [
+          0.186787674124103,
+          0.4096665259603208
+        ],
+        "region_duration": [
+          13.108433734939757,
+          31.67241379310344
+        ],
+        "sr_h_star_population": 0.8474065769078764,
+        "worst_share": 0.4096665259603208,
+        "worst_duration": 29.42751791478344,
+        "worst_start": "high",
+        "horizon_high_share": 0.4480195630868858
+      },
+      {
+        "window": 1,
+        "block_length": 150,
+        "region_share": [
+          0.19206416209371044,
+          0.410510764035458
+        ],
+        "region_duration": [
+          13.102564102564104,
+          26.078125
+        ],
+        "sr_h_star_population": 0.8728027580625664,
+        "worst_share": 0.410510764035458,
+        "worst_duration": 23.928272946960707,
+        "worst_start": "high",
+        "horizon_high_share": 0.44116761777580793
+      },
+      {
+        "window": 2,
+        "block_length": 163,
+        "region_share": [
+          0.20768256648374842,
+          0.39383706205149854
+        ],
+        "region_duration": [
+          13.707070707070706,
+          23.333333333333336
+        ],
+        "sr_h_star_population": 0.9449985293588494,
+        "worst_share": 0.39383706205149854,
+        "worst_duration": 20.885510306813764,
+        "worst_start": "high",
+        "horizon_high_share": 0.42188417855838933
+      },
+      {
+        "window": 3,
+        "block_length": 120,
+        "region_share": [
+          0.21084845926551288,
+          0.3875052764879696
+        ],
+        "region_duration": [
+          10.749999999999998,
+          18.457446808510635
+        ],
+        "sr_h_star_population": 0.984929848544996,
+        "worst_share": 0.3875052764879696,
+        "worst_duration": 17.644446073721333,
+        "worst_start": "high",
+        "horizon_high_share": 0.41134184573723526
+      },
+      {
+        "window": 4,
+        "block_length": 153,
+        "region_share": [
+          0.20852680455888561,
+          0.3959476572393415
+        ],
+        "region_duration": [
+          11.266666666666667,
+          21.20731707317073
+        ],
+        "sr_h_star_population": 0.9448515174000639,
+        "worst_share": 0.3959476572393415,
+        "worst_duration": 19.595188431908475,
+        "worst_start": "high",
+        "horizon_high_share": 0.42192315318104395
+      },
+      {
+        "window": 5,
+        "block_length": 160,
+        "region_share": [
+          0.19185310257492613,
+          0.4088222878851836
+        ],
+        "region_duration": [
+          10.232323232323232,
+          24.628571428571426
+        ],
+        "sr_h_star_population": 0.8837609796606731,
+        "worst_share": 0.4088222878851836,
+        "worst_duration": 22.89024673160486,
+        "worst_start": "high",
+        "horizon_high_share": 0.43822212708100167
+      },
+      {
+        "window": 6,
+        "block_length": 149,
+        "region_share": [
+          0.1956521739130435,
+          0.40692275221612495
+        ],
+        "region_duration": [
+          12.620689655172413,
+          24.55882352941176
+        ],
+        "sr_h_star_population": 0.8948496892216272,
+        "worst_share": 0.40692275221612495,
+        "worst_duration": 21.97961832330832,
+        "worst_start": "high",
+        "horizon_high_share": 0.4352483369617728
+      },
+      {
+        "window": 7,
+        "block_length": 167,
+        "region_share": [
+          0.19776276910088644,
+          0.39341494301392993
+        ],
+        "region_duration": [
+          13.445945945945946,
+          29.047619047619044
+        ],
+        "sr_h_star_population": 0.9066891313271906,
+        "worst_share": 0.39341494301392993,
+        "worst_duration": 28.13016251113928,
+        "worst_start": "high",
+        "horizon_high_share": 0.4320807260608821
+      },
+      {
+        "window": 8,
+        "block_length": 168,
+        "region_share": [
+          0.18847615027437736,
+          0.4092444069227522
+        ],
+        "region_duration": [
+          11.954022988505749,
+          25.563380281690137
+        ],
+        "sr_h_star_population": 0.8766612999490453,
+        "worst_share": 0.4092444069227522,
+        "worst_duration": 23.994383608345153,
+        "worst_start": "high",
+        "horizon_high_share": 0.4401297099054016
+      },
+      {
+        "window": 9,
+        "block_length": 155,
+        "region_share": [
+          0.21211481637821866,
+          0.3879273955255382
+        ],
+        "region_duration": [
+          10.163461538461537,
+          19.393258426966295
+        ],
+        "sr_h_star_population": 0.9764873560040435,
+        "worst_share": 0.3879273955255382,
+        "worst_duration": 18.87811978209325,
+        "worst_start": "high",
+        "horizon_high_share": 0.41356347349508277
+      },
+      {
+        "window": 10,
+        "block_length": 155,
+        "region_share": [
+          0.18425495989869142,
+          0.4235964542000844
+        ],
+        "region_duration": [
+          10.928571428571429,
+          27.969230769230766
+        ],
+        "sr_h_star_population": 0.8151718405131027,
+        "worst_share": 0.4235964542000844,
+        "worst_duration": 26.89525349299453,
+        "worst_start": "high",
+        "horizon_high_share": 0.4567682924112488
+      },
+      {
+        "window": 11,
+        "block_length": 143,
+        "region_share": [
+          0.20726044744617983,
+          0.4014352047277332
+        ],
+        "region_duration": [
+          10.693693693693692,
+          21.743589743589748
+        ],
+        "sr_h_star_population": 0.9212388481077496,
+        "worst_share": 0.4014352047277332,
+        "worst_duration": 20.494985708340295,
+        "worst_start": "high",
+        "horizon_high_share": 0.42819859707600855
+      }
+    ]
+  },
+  "s_real": {
+    "n_days": 58739,
+    "per_state_sharpe": [
+      1.425975831157097,
+      1.1195954771652685
+    ],
+    "per_state_mu": [
+      0.0009046955667693911,
+      0.0010364852625490192
+    ],
+    "per_state_sd": [
+      0.010071416764275053,
+      0.01469610568219575
+    ],
+    "stationary_sharpe": 1.2862630203992598,
+    "sr_h_star_median": 1.2424976035032618,
+    "sr_h_star_range": [
+      1.235270383249698,
+      1.2482128763537994
+    ],
+    "horizon_high_share_median": 0.43237032392266905,
+    "windows": [
+      {
+        "window": 0,
+        "block_length": 160,
+        "region_share": [
+          0.18995356690586745,
+          0.41388771633600674
+        ],
+        "region_duration": [
+          13.188235294117645,
+          31.385964912280702
+        ],
+        "sr_h_star_population": 1.2368505761418285,
+        "worst_share": 0.41388771633600674,
+        "worst_duration": 29.198222814837543,
+        "worst_start": "high",
+        "horizon_high_share": 0.45136502172793763
+      },
+      {
+        "window": 1,
+        "block_length": 148,
+        "region_share": [
+          0.19079780498100465,
+          0.4092444069227522
+        ],
+        "region_duration": [
+          12.954022988505745,
+          26.3030303030303
+        ],
+        "sr_h_star_population": 1.2398428741668395,
+        "worst_share": 0.4092444069227522,
+        "worst_duration": 24.79547078139962,
+        "worst_start": "high",
+        "horizon_high_share": 0.4412391268933511
+      },
+      {
+        "window": 2,
+        "block_length": 121,
+        "region_share": [
+          0.20937104263402279,
+          0.3929928239763613
+        ],
+        "region_duration": [
+          13.666666666666664,
+          23.194029850746265
+        ],
+        "sr_h_star_population": 1.2463612270546844,
+        "worst_share": 0.3929928239763613,
+        "worst_duration": 19.878170389377534,
+        "worst_start": "high",
+        "horizon_high_share": 0.41964860967883016
+      },
+      {
+        "window": 3,
+        "block_length": 148,
+        "region_share": [
+          0.21063739974672857,
+          0.3900379907133812
+        ],
+        "region_duration": [
+          10.943925233644858,
+          18.39772727272727
+        ],
+        "sr_h_star_population": 1.2482128763537994,
+        "worst_share": 0.3900379907133812,
+        "worst_duration": 17.618337358681508,
+        "worst_start": "high",
+        "horizon_high_share": 0.4136292794462192
+      },
+      {
+        "window": 4,
+        "block_length": 151,
+        "region_share": [
+          0.2030392570704939,
+          0.39953566905867455
+        ],
+        "region_duration": [
+          10.913043478260871,
+          21.918918918918916
+        ],
+        "sr_h_star_population": 1.2447056263230016,
+        "worst_share": 0.39953566905867455,
+        "worst_duration": 19.513728400977552,
+        "worst_start": "high",
+        "horizon_high_share": 0.42507279244349744
+      },
+      {
+        "window": 5,
+        "block_length": 155,
+        "region_share": [
+          0.2017728999577881,
+          0.40396791895314477
+        ],
+        "region_duration": [
+          10.5,
+          24.166666666666664
+        ],
+        "sr_h_star_population": 1.2421920479027009,
+        "worst_share": 0.40396791895314477,
+        "worst_duration": 22.54487322193939,
+        "worst_start": "high",
+        "horizon_high_share": 0.4333851004321958
+      },
+      {
+        "window": 6,
+        "block_length": 142,
+        "region_share": [
+          0.1933305192064162,
+          0.4016462642465175
+        ],
+        "region_duration": [
+          12.416666666666666,
+          24.596774193548395
+        ],
+        "sr_h_star_population": 1.2428031591038224,
+        "worst_share": 0.4016462642465175,
+        "worst_duration": 22.58234368390443,
+        "worst_start": "high",
+        "horizon_high_share": 0.43135554741314225
+      },
+      {
+        "window": 7,
+        "block_length": 152,
+        "region_share": [
+          0.19628535246939638,
+          0.400590966652596
+        ],
+        "region_duration": [
+          13.545454545454545,
+          28.389830508474578
+        ],
+        "sr_h_star_population": 1.240969990269124,
+        "worst_share": 0.400590966652596,
+        "worst_duration": 27.527857769376155,
+        "worst_start": "high",
+        "horizon_high_share": 0.4374604364386453
+      },
+      {
+        "window": 8,
+        "block_length": 157,
+        "region_share": [
+          0.19797382861967075,
+          0.40734487125369356
+        ],
+        "region_duration": [
+          12.056179775280901,
+          25.522388059701495
+        ],
+        "sr_h_star_population": 1.2406858533588474,
+        "worst_share": 0.40734487125369356,
+        "worst_duration": 23.976107380531378,
+        "worst_start": "high",
+        "horizon_high_share": 0.43841120134694495
+      },
+      {
+        "window": 9,
+        "block_length": 147,
+        "region_share": [
+          0.20789362600253272,
+          0.3940481215702828
+        ],
+        "region_duration": [
+          10.088235294117645,
+          19.666666666666664
+        ],
+        "sr_h_star_population": 1.2466371826751639,
+        "worst_share": 0.3940481215702828,
+        "worst_duration": 18.60249204230507,
+        "worst_start": "high",
+        "horizon_high_share": 0.4187483913018093
+      },
+      {
+        "window": 10,
+        "block_length": 155,
+        "region_share": [
+          0.18425495989869142,
+          0.4235964542000844
+        ],
+        "region_duration": [
+          10.928571428571429,
+          27.969230769230766
+        ],
+        "sr_h_star_population": 1.235270383249698,
+        "worst_share": 0.4235964542000844,
+        "worst_duration": 26.89525349299453,
+        "worst_start": "high",
+        "horizon_high_share": 0.4567682924112488
+      },
+      {
+        "window": 11,
+        "block_length": 143,
+        "region_share": [
+          0.20726044744617983,
+          0.4014352047277332
+        ],
+        "region_duration": [
+          10.693693693693692,
+          21.743589743589748
+        ],
+        "sr_h_star_population": 1.243757081490782,
+        "worst_share": 0.4014352047277332,
+        "worst_duration": 20.494985708340295,
+        "worst_start": "high",
+        "horizon_high_share": 0.42819859707600855
+      }
+    ]
+  }
+}
