@@ -191,6 +191,9 @@ def test_ledger_metrics_are_flat_finite_scalars() -> None:
     assert metrics["deciding_arm"] == "ridge_cv"
     assert metrics["method"] == "ridge_cv_selected_wasserstein_dro_evaluated"
     assert "ridge_cv_lw_p" in metrics and "dro_fc_sharpe" in metrics
+    # ADR 0016's reported-only stress diagnostic, never part of the verdict.
+    assert "stress_ridge_cv_sharpe_high" in metrics and "stress_equal_weight_ci_low" in metrics
+    assert res.evidence is not None and res.evidence.stress is not None
     for v in metrics.values():
         assert isinstance(v, (bool, int, float, str))
         if isinstance(v, float):

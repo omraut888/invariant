@@ -18,6 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from invariant.config.settings import DecayConfig, PortfolioConfig
 from invariant.core.types import KillReason, StageName, Verdict, make_signal_id
+from invariant.stages.adversarial.diagnostic import StressDiagnostic
 from invariant.stages.dro.walkforward import Arm
 
 __all__ = [
@@ -73,6 +74,8 @@ class PortfolioEvidence(_Frozen):
     """Ridge-CV's grid value at each CV date (in units of tr(S)/N)."""
     final_weights: tuple[tuple[str, float], ...]
     """Ridge-CV's weights at the last decision date, by return column."""
+    stress: StressDiagnostic | None = None
+    """Reported only, never decides: Sharpe in the high-volatility state (ADR 0016)."""
 
     def arm(self, arm: Arm) -> ArmReport:
         return next(a for a in self.arms if a.arm is arm)

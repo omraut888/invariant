@@ -69,6 +69,7 @@ from invariant.core.run_hash import RngFactory, canonical_json
 from invariant.core.types import KillReason, StageName, Verdict
 from invariant.data.pit import PitPanel
 from invariant.ledger.kill_ledger import KillLedger, LedgerEntry, MetricValue
+from invariant.stages.adversarial.diagnostic import stress_diagnostic
 from invariant.stages.causal.stage import RETURN_PREFIX, SYNTHETIC_PREFIX, select_inputs
 from invariant.stages.decay.result import DecayResult
 from invariant.stages.dro.metrics import (
@@ -220,6 +221,15 @@ def construct_portfolio(
                 confidence=config.confidence,
             )
         )
+    stress = stress_diagnostic(
+        ridge.returns,
+        base,
+        r,
+        ridge.dates,
+        n_boot=config.b_n_boot,
+        confidence=config.confidence,
+        gen=rng.generator("stress"),
+    )
     evidence = PortfolioEvidence(
         execution_lag=lag,
         n_rows=len(r),
@@ -231,6 +241,7 @@ def construct_portfolio(
         final_weights=tuple(
             (c, float(w)) for c, w in zip(return_columns, ridge.weights[-1], strict=True)
         ),
+        stress=stress,
     )
     return evidence, marginals
 
@@ -392,6 +403,20 @@ def ledger_metrics(member: MemberSignal, result: PortfolioResult) -> dict[str, M
             metrics[f"{key}_lw_delta"] = a.lw_delta
         if a.dsr is not None:
             metrics[f"{key}_dsr"] = a.dsr
+    if ev.stress is not None:  # reported only, never decides (ADR 0016)
+        st = ev.stress
+        stress_metrics: dict[str, MetricValue] = {
+            "stress_high_share": st.high_share,
+            "stress_block_length": st.block_length,
+            "stress_ridge_cv_sharpe_high": st.ridge_sharpe_high,
+            "stress_ridge_cv_ci_low": st.ridge_ci[0],
+            "stress_ridge_cv_ci_high": st.ridge_ci[1],
+            "stress_ridge_cv_sharpe_low": st.ridge_sharpe_low,
+            "stress_equal_weight_sharpe_high": st.equal_weight_sharpe_high,
+            "stress_equal_weight_ci_low": st.equal_weight_ci[0],
+            "stress_equal_weight_ci_high": st.equal_weight_ci[1],
+        }
+        metrics |= {k: v for k, v in stress_metrics.items() if math.isfinite(float(v))}
     if member.marginal_sharpe is not None:
         assert member.marginal_ci_low is not None and member.marginal_ci_high is not None
         assert member.baseline is not None
