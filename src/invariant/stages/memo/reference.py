@@ -43,6 +43,9 @@ class ReferenceFact:
     checks: tuple[tuple[str, str], ...] = field(default=())
     range_pointers: tuple[str, str] | None = None
     """A plain number with a reported range (low, high), not a confidence interval."""
+    sentence: str = ""
+    """How a memo states it (``Fact.sentence``): a natural sentence that names the benchmark,
+    the preset and the ADR."""
 
 
 _S1 = "0010-causal-stage-validation/report.json"
@@ -61,6 +64,11 @@ REFERENCE_FACTS: Final[tuple[ReferenceFact, ...]] = (
         "rate",
         True,
         (("/presets/2/preset", "hidden_confounder"), ("/presets/2/signals/1/signal_id", "s_conf")),
+        sentence=(
+            "On the planted-signal benchmark (hidden_confounder preset, ADR 0010), a confounded "
+            "signal whose common cause was unobserved passed Stage 1 in {value} {interval} of "
+            "runs ({confidence})"
+        ),
     ),
     ReferenceFact(
         "ref.realistic_stage1_power",
@@ -71,6 +79,10 @@ REFERENCE_FACTS: Final[tuple[ReferenceFact, ...]] = (
         "rate",
         True,
         (("/presets/1/preset", "realistic"), ("/presets/1/signals/0/signal_id", "s_real")),
+        sentence=(
+            "On the planted-signal benchmark (realistic preset, ADR 0010), a true edge of "
+            "realistic strength passed Stage 1 in {value} {interval} of runs ({confidence})"
+        ),
     ),
     ReferenceFact(
         "ref.base_stage1_power",
@@ -81,6 +93,10 @@ REFERENCE_FACTS: Final[tuple[ReferenceFact, ...]] = (
         "rate",
         True,
         (("/presets/0/preset", "base"), ("/presets/0/signals/0/signal_id", "s_real")),
+        sentence=(
+            "On the planted-signal benchmark (base preset, ADR 0010), a true edge of the default "
+            "strength passed Stage 1 in {value} {interval} of runs ({confidence})"
+        ),
     ),
     ReferenceFact(
         "ref.stage2_power",
@@ -91,6 +107,11 @@ REFERENCE_FACTS: Final[tuple[ReferenceFact, ...]] = (
         "rate",
         True,
         (("/presets/0/preset", "base"), ("/presets/0/signals/2/signal_id", "s_decay")),
+        sentence=(
+            "On the planted-signal benchmark (base preset, ADR 0012), Stage 2 detected a planted "
+            "decay in {value} {interval} of the runs in which the decaying signal passed Stage 1 "
+            "({confidence})"
+        ),
     ),
     ReferenceFact(
         "ref.stage3_power",
@@ -101,6 +122,11 @@ REFERENCE_FACTS: Final[tuple[ReferenceFact, ...]] = (
         "rate",
         True,
         (("/scenarios/2/scenario", "d1_base"), ("/scenarios/2/signals/3/signal_id", "s_real")),
+        sentence=(
+            "On the planted-signal benchmark (multi-asset pipeline, ADR 0014), a portfolio with a "
+            "true edge that reached Stage 3 passed it in {value} {interval} of runs "
+            "({confidence})"
+        ),
     ),
     ReferenceFact(
         "ref.stage3_size",
@@ -111,6 +137,11 @@ REFERENCE_FACTS: Final[tuple[ReferenceFact, ...]] = (
         "rate",
         True,
         (("/scenarios/0/scenario", "d3_null"),),
+        sentence=(
+            "On the planted-signal benchmark (no-edge market at the minimum sample, ADR 0014), "
+            "the Stage 3 kill test passed a portfolio with no edge in {value} {interval} of runs "
+            "({confidence})"
+        ),
     ),
     ReferenceFact(
         "ref.noise_passenger",
@@ -122,6 +153,11 @@ REFERENCE_FACTS: Final[tuple[ReferenceFact, ...]] = (
         "rate",
         True,
         (("/scenarios/2/scenario", "d1_base"), ("/scenarios/2/signals/2/signal_id", "s_noise")),
+        sentence=(
+            "On the planted-signal benchmark (multi-asset pipeline, ADR 0014), a signal with no "
+            "edge passed all three kill stages in {value} {interval} of runs ({confidence}), "
+            "almost always as a passenger of a true signal"
+        ),
     ),
     ReferenceFact(
         "ref.stage4_worst_case",
@@ -133,6 +169,12 @@ REFERENCE_FACTS: Final[tuple[ReferenceFact, ...]] = (
         "sharpe",
         False,
         range_pointers=("/s_volfrag/sr_h_star_range/0", "/s_volfrag/sr_h_star_range/1"),
+        sentence=(
+            "In the Stage 4 feasibility check on the planted-signal benchmark (volfrag preset, "
+            "population moments, ADR 0016), a signal whose edge reverses in high volatility still "
+            "had a worst plausible horizon Sharpe ratio of {value} (median over windows; "
+            "{confidence} {interval})"
+        ),
     ),
     ReferenceFact(
         "ref.stage4_state_precision",
@@ -142,6 +184,11 @@ REFERENCE_FACTS: Final[tuple[ReferenceFact, ...]] = (
         "high-volatility-state days that fell in the true stress regime, median over seeds",
         "fraction",
         False,
+        sentence=(
+            "In a Stage 4 development check on the planted-signal benchmark (regime preset, ADR "
+            "0016), the share of high-volatility-state days that fell in the true stress regime "
+            "had a median over seeds of {value}"
+        ),
     ),
 )
 
@@ -190,6 +237,7 @@ def load_reference_facts(results_root: Path | None = None) -> list[Fact]:
                     kind=FactKind(ref.kind),
                     subject=None,
                     label=ref.label,
+                    sentence=ref.sentence,
                     value=float(node["estimate"]),
                     ci=(float(node["ci_low"]), float(node["ci_high"])),
                     ci_confidence=float(node["confidence"]),
@@ -211,6 +259,7 @@ def load_reference_facts(results_root: Path | None = None) -> list[Fact]:
                     kind=FactKind(ref.kind),
                     subject=None,
                     label=ref.label,
+                    sentence=ref.sentence,
                     value=float(str(node)),
                     ci=(rng[0], rng[1]) if rng else None,
                     sources=(

@@ -86,16 +86,16 @@ def _undetectable(sheet: FactSheet) -> str:
     }:
         out.append(
             "A kill at {stage:causal} means the edge was not detectable at this sample size, "
-            "not that there is no effect. The test has little power against weak edges: "
-            "{fact:ref.realistic_stage1_power}, against {fact:ref.base_stage1_power} ({adr:10})."
+            "not that there is no effect. The test has little power against weak edges. "
+            "{fact:ref.realistic_stage1_power}. {fact:ref.base_stage1_power}."
         )
     if KillReason.PORTFOLIO_NO_EDGE_OVER_EQUAL_WEIGHT in reasons:
         out.append(
             "A kill at {stage:portfolio} means the portfolio's advantage over {term:one_over_n} "
             "was not detectable at this sample size, not that it has none. Even at the "
             "benchmark's default signal strength the kill test passes a portfolio with a true "
-            "edge only part of the time ({fact:ref.stage3_power}), and at realistic strength "
-            "its power is close to zero ({adr:13})."
+            "edge only part of the time. {fact:ref.stage3_power}. At realistic strength its "
+            "power is close to zero ({adr:13})."
         )
     return " ".join(out)
 
@@ -140,8 +140,8 @@ def _b_zero(sheet: FactSheet) -> list[str]:
 def _passenger(sheet: FactSheet) -> str:
     text = (
         "{stage:portfolio} decides once for the whole portfolio, so every member shares its "
-        "verdict, and a member with no edge can pass as a passenger of one that has it. On the "
-        "benchmark, {fact:ref.noise_passenger} ({adr:14}). Diagnostic B, each member's marginal "
+        "verdict, and a member with no edge can pass as a passenger of one that has it. "
+        "{fact:ref.noise_passenger}. Diagnostic B, each member's marginal "
         "contribution, is reported and never decides: " + _b_list(sheet) + "."
     )
     zero = _b_zero(sheet)
@@ -178,7 +178,7 @@ MANDATORY: Final[tuple[Mandatory, ...]] = (
         lambda s: (
             "{stage:causal} tests conditional dependence given the observed variables only. It "
             "cannot rule out a common cause missing from the data, and no observational "
-            "adjustment removes that bias ({adr:10}). The size of this risk on the benchmark: "
+            "adjustment removes that bias ({adr:10}). "
             "{fact:ref.hidden_confounder_stage1_pass}."
         ),
     ),
@@ -215,8 +215,8 @@ MANDATORY: Final[tuple[Mandatory, ...]] = (
         lambda s: _passed_stage(s, StageName.DECAY),
         lambda s: (
             "A pass at {stage:decay} does not show that an edge is stable. The test misses "
-            "many real declines and is weakest when the decline began recently: on the "
-            "benchmark, {fact:ref.stage2_power} ({adr:12})."
+            "many real declines and is weakest when the decline began recently. "
+            "{fact:ref.stage2_power}."
         ),
     ),
     Mandatory(
@@ -259,7 +259,7 @@ MANDATORY: Final[tuple[Mandatory, ...]] = (
             "about twenty-four years of daily data, the plausible variation in a strategy's "
             "exposure to high-volatility periods is too small to overturn a strategy that is "
             "profitable on average, and a rule that killed for losing money in stress would "
-            "penalise ordinary market exposure rather than fragility. The evidence: "
+            "penalise ordinary market exposure rather than fragility. "
             "{fact:ref.stage4_worst_case}."
         ),
     ),
@@ -272,8 +272,8 @@ MANDATORY: Final[tuple[Mandatory, ...]] = (
             "Sharpe ratio in that state is {fact:stress.ridge_cv_high|value} and equal "
             "weight's is {fact:stress.equal_weight_high|value}; "
             "{fact:stress.high_share|value} of days fall in it. The state is an observable "
-            "proxy built from trailing volatility, not a recovered regime "
-            "({fact:ref.stage4_state_precision})."
+            "proxy built from trailing volatility, not a recovered regime. "
+            "{fact:ref.stage4_state_precision}."
         ),
     ),
 )

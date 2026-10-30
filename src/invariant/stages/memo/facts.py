@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from collections.abc import Mapping
 from enum import StrEnum
 from pathlib import Path
@@ -127,11 +128,17 @@ class Fact(BaseModel):
     ci: tuple[float, float] | None = None
     ci_confidence: float | None = None
     sources: tuple[str, ...] = Field(min_length=1)
+    sentence: str | None = None
+    """For a quoted benchmark rate: the atom's text as a natural sentence (no final period),
+    with the placeholders ``{value}``, ``{interval}`` and ``{confidence}``. Its only other
+    digits are stage and ADR numbers ("Stage 1", "ADR 0014")."""
 
     @model_validator(mode="after")
     def _check(self) -> Fact:
         if any(ch.isdigit() for ch in self.label):
             raise ValueError(f"fact labels carry no digits: {self.label!r}")
+        if self.sentence is not None:
+            _check_sentence(self.id, self.sentence, has_ci=self.ci is not None)
         n = 1 + (2 if self.ci is not None else 0) + (1 if self.ci_confidence is not None else 0)
         if len(self.sources) != n:
             raise ValueError(f"{self.id}: {n} values need {n} sources, got {len(self.sources)}")
@@ -151,10 +158,40 @@ class Fact(BaseModel):
         return out
 
     def full_text(self) -> str:
-        """The self-describing atom: subject, label and value (docs/adr/0017, "atoms")."""
+        """The self-describing atom: subject, label and value (docs/adr/0017, "atoms"), or the
+        fact's sentence."""
+        if self.sentence is not None:
+            interval = confidence = ""
+            if self.ci is not None:
+                lo, hi = (format_value(self.kind, x) for x in self.ci)
+                interval = f"[{lo}, {hi}]"
+                confidence = (
+                    "range" if self.ci_confidence is None else f"{self.ci_confidence:.0%} interval"
+                )
+            return self.sentence.format(
+                value=format_value(self.kind, self.value), interval=interval, confidence=confidence
+            )
         head = f"{self.subject}'s {self.label}" if self.subject else self.label
         value = self.value_text()
         return f"{head} {value}" if value.startswith("<") else f"{head} = {value}"
+
+
+_PLACEHOLDER = re.compile(r"\{(\w*)\}")
+_SENTENCE_NUMBERS = re.compile(r"Stage \d\b|ADR \d{4}\b")
+
+
+def _check_sentence(fact_id: str, sentence: str, *, has_ci: bool) -> None:
+    names = _PLACEHOLDER.findall(sentence)
+    allowed = {"value", "interval", "confidence"} if has_ci else {"value"}
+    if names.count("value") != 1 or not set(names) <= allowed:
+        raise ValueError(f"{fact_id}: sentence placeholders {names} (allowed {sorted(allowed)})")
+    if has_ci and set(names) != allowed:
+        raise ValueError(f"{fact_id}: a sentence must state the interval and its confidence")
+    bare = _SENTENCE_NUMBERS.sub("", _PLACEHOLDER.sub("", sentence))
+    if any(ch.isdigit() for ch in bare) or "{" in bare or "}" in bare:
+        raise ValueError(f"{fact_id}: sentence digits only via placeholders, stages and ADRs")
+    if not sentence[0].isupper() or sentence.rstrip().endswith("."):
+        raise ValueError(f"{fact_id}: a sentence starts capitalised and has no final period")
 
 
 class DataKind(StrEnum):

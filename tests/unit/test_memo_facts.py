@@ -190,3 +190,43 @@ def test_a_drifted_report_row_is_refused(tmp_path: Path) -> None:
     path.write_text(json.dumps(doc))
     with pytest.raises(MemoInputError, match="hidden_confounder"):
         build_fact_sheet(FIXTURES / "pass_single", results_root=root)
+
+
+def test_a_benchmark_rate_renders_as_a_natural_sentence() -> None:
+    f = build_fact_sheet(FIXTURES / "pass_multi").fact("ref.noise_passenger")
+    assert f.ci is not None
+    lo, hi = (format_value(f.kind, x) for x in f.ci)
+    assert f.full_text() == (
+        "On the planted-signal benchmark (multi-asset pipeline, ADR 0014), a signal with no "
+        f"edge passed all three kill stages in {format_value(f.kind, f.value)} [{lo}, {hi}] of "
+        "runs (95% interval), almost always as a passenger of a true signal"
+    )
+    for g in build_fact_sheet(FIXTURES / "pass_multi").facts:
+        if g.id.startswith("ref."):
+            assert g.sentence is not None and "planted-signal benchmark" in g.sentence, g.id
+
+
+@pytest.mark.parametrize(
+    ("sentence", "match"),
+    [
+        ("Rate was high", "placeholders"),
+        ("Rate was {value} in Stage 1 of runs", "a sentence must state the interval"),
+        ("Rate {value} {interval} ({confidence}) in 12 runs", "digits"),
+        ("rate {value} {interval} ({confidence})", "capitalised"),
+        ("Rate {value} {interval} ({confidence}).", "final period"),
+        ("Rate {value} {interval} ({confidence}) {extra}", "placeholders"),
+    ],
+)
+def test_sentence_forms_are_checked(sentence: str, match: str) -> None:
+    with pytest.raises(ValidationError, match=match):
+        Fact(
+            id="ref.x",
+            kind=FactKind.RATE,
+            subject=None,
+            label="a",
+            value=0.5,
+            ci=(0.4, 0.6),
+            ci_confidence=0.95,
+            sources=("a", "b", "c", "d"),
+            sentence=sentence,
+        )
