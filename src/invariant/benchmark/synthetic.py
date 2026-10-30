@@ -1095,15 +1095,18 @@ def _signal_truths(
         ),
         VOLFRAG_SIGNAL: (
             "True lag-1 cause whose loading reverses when the market's conditional variance "
-            "exceeds its h_quantile (momentum-crash pattern). Stage 4 should kill a portfolio "
-            "built on it alone."
+            "exceeds its h_quantile (momentum-crash pattern). Reported only: Stage 4 was evaluated "
+            "and not adopted as a kill stage (ADR 0016); within Stages 1-3 its oracle verdict is "
+            "pass (a true, average-positive edge)."
         ),
     }
     out = []
     for k, sid in enumerate(signal_nodes(config), start=1):
         identifiable = not (sid == "s_conf" and confounded and not config.observe_confounder)
-        if sid == REGIME_SIGNAL and has_edge[sid]:
-            identifiable = False  # ADR 0016: invisible in observable volatility states
+        if sid in (REGIME_SIGNAL, VOLFRAG_SIGNAL) and has_edge[sid]:
+            # ADR 0016: Stage 4 was not adopted as a kill stage, so neither v4 signal's expected
+            # adversarial kill is gated; both are reported and excluded from the kill counts.
+            identifiable = False
         note = notes[sid]
         if not identifiable and sid == "s_conf":
             note += (

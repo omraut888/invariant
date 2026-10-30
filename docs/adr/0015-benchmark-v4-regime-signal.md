@@ -345,3 +345,11 @@ calibrated to it, not the reverse.
   variance.
 
 The `regime` preset's comparison uses the same McNemar test (0 against 5, p = 1.0).
+
+## Amendment (2026-10-29): both v4 signals are reported only
+Stage 4 was evaluated and not adopted as a kill stage (ADR 0016), so there is no stage whose
+expected kill of s_regime or s_volfrag could be gated. Both are now `identifiable = false` in
+`GroundTruth`, and `score_run` reports them and excludes them from the kill counts, as for
+`hidden_confounder`'s s_conf. Their `expected_kill_stage` stays `adversarial`, recording the
+planted truth. Within Stages 1–3 their expected verdict is pass (each is a true,
+average-positive edge). The presets stay as the evidence behind ADR 0016's conclusion.

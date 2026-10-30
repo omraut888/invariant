@@ -96,7 +96,7 @@ def test_volfrag_ground_truth() -> None:
         load_benchmark_config("volfrag").model_copy(update={"n_obs": 500}), 1
     ).ground_truth
     s = gt.signal(VOLFRAG_SIGNAL)
-    assert s.has_causal_edge and s.identifiable
+    assert s.has_causal_edge and not s.identifiable  # ADR 0016: reported only
     assert (s.expected_verdict, s.expected_kill_stage) == (Verdict.KILL, StageName.ADVERSARIAL)
     assert GroundTruth.model_validate_json(gt.model_dump_json()) == gt
     regime = generate_market(
