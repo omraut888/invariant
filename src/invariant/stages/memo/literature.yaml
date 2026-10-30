@@ -1,0 +1,220 @@
+# Curated literature corpus for Stage 5 memos (docs/adr/0017).
+# Bibliographic metadata plus a one-line summary written by us. No text from the papers is stored.
+# Every entry is cited by an ADR; `stages` lists where the memo cites it automatically.
+entries:
+  - key: runge2019
+    authors: [Runge, Nowack, Kretschmer, Flaxman, Sejdinovic]
+    year: 2019
+    title: Detecting and quantifying causal associations in large nonlinear time series datasets
+    venue: Science Advances 5(11)
+    doi: 10.1126/sciadv.aau4996
+    summary: Introduces PCMCI, a two-step causal discovery method for time series (PC1 parent selection, then momentary conditional independence tests).
+    stages: [causal]
+  - key: runge2018
+    authors: [Runge]
+    year: 2018
+    title: Causal network reconstruction from time series - From theoretical assumptions to practical estimation
+    venue: Chaos 28(7)
+    doi: 10.1063/1.5025050
+    summary: Reviews the assumptions of time-series causal discovery (causal sufficiency, faithfulness, stationarity) and when they fail.
+    stages: [causal]
+  - key: mackinnon1985
+    authors: [MacKinnon, White]
+    year: 1985
+    title: Some heteroskedasticity-consistent covariance matrix estimators with improved finite sample properties
+    venue: Journal of Econometrics 29(3)
+    doi: 10.1016/0304-4076(85)90158-7
+    summary: Proposes the HC2 and HC3 heteroskedasticity-consistent covariance estimators; HC3 has better small-sample size.
+    stages: [causal]
+  - key: white1980
+    authors: [White]
+    year: 1980
+    title: A heteroskedasticity-consistent covariance matrix estimator and a direct test for heteroskedasticity
+    venue: Econometrica 48(4)
+    doi: 10.2307/1912934
+    summary: The heteroskedasticity-consistent (sandwich) covariance estimator for least squares.
+    stages: []
+  - key: benjamini1995
+    authors: [Benjamini, Hochberg]
+    year: 1995
+    title: 'Controlling the false discovery rate: a practical and powerful approach to multiple testing'
+    venue: Journal of the Royal Statistical Society Series B 57(1)
+    doi: 10.1111/j.2517-6161.1995.tb02031.x
+    summary: The Benjamini-Hochberg step-up procedure, which controls the false discovery rate for independent or PRDS tests.
+    stages: [causal]
+  - key: benjamini2001
+    authors: [Benjamini, Yekutieli]
+    year: 2001
+    title: The control of the false discovery rate in multiple testing under dependency
+    venue: Annals of Statistics 29(4)
+    doi: 10.1214/aos/1013699998
+    summary: Shows BH controls the FDR under positive regression dependence and gives a variant (BY) valid under any dependence.
+    stages: []
+  - key: stambaugh1999
+    authors: [Stambaugh]
+    year: 1999
+    title: Predictive regressions
+    venue: Journal of Financial Economics 54(3)
+    doi: 10.1016/S0304-405X(99)00041-0
+    summary: Shows that persistent predictors bias predictive-regression slopes and distort their tests in finite samples.
+    stages: [causal]
+  - key: politis1992
+    authors: [Politis, Romano]
+    year: 1992
+    title: A circular block-resampling procedure for stationary data
+    venue: 'Exploring the Limits of Bootstrap (Wiley)'
+    doi: null
+    summary: The circular block bootstrap for dependent data.
+    stages: [causal, portfolio]
+  - key: kunsch1989
+    authors: [Kunsch]
+    year: 1989
+    title: The jackknife and the bootstrap for general stationary observations
+    venue: Annals of Statistics 17(3)
+    doi: 10.1214/aos/1176347265
+    summary: Introduces the moving-block bootstrap for weakly dependent stationary series.
+    stages: [portfolio]
+  - key: politis2004
+    authors: [Politis, White]
+    year: 2004
+    title: Automatic block-length selection for the dependent bootstrap
+    venue: Econometric Reviews 23(1)
+    doi: 10.1081/ETC-120028836
+    summary: A data-driven rule for the block length of block bootstraps.
+    stages: [portfolio]
+  - key: patton2009
+    authors: [Patton, Politis, White]
+    year: 2009
+    title: 'Correction to "Automatic block-length selection for the dependent bootstrap"'
+    venue: Econometric Reviews 28(4)
+    doi: 10.1080/07474930802459016
+    summary: Corrects the constant in the Politis-White block-length rule for the circular and stationary bootstraps.
+    stages: [portfolio]
+  - key: andrews1993
+    authors: [Andrews]
+    year: 1993
+    title: Tests for parameter instability and structural change with unknown change point
+    venue: Econometrica 61(4)
+    doi: 10.2307/2951764
+    summary: Sup-type tests for a structural break at an unknown date, with their asymptotic distributions.
+    stages: [decay]
+  - key: hansen2000
+    authors: [Hansen]
+    year: 2000
+    title: Testing for structural change in conditional models
+    venue: Journal of Econometrics 97(1)
+    doi: 10.1016/S0304-4076(99)00068-8
+    summary: A fixed-regressor bootstrap for structural-change tests that is valid when regressors change distribution.
+    stages: [decay]
+  - key: bai2003
+    authors: [Bai, Perron]
+    year: 2003
+    title: Computation and analysis of multiple structural change models
+    venue: Journal of Applied Econometrics 18(1)
+    doi: 10.1002/jae.659
+    summary: Methods for estimating and testing models with several structural breaks.
+    stages: []
+  - key: schreiber2000
+    authors: [Schreiber]
+    year: 2000
+    title: Measuring information transfer
+    venue: Physical Review Letters 85(2)
+    doi: 10.1103/PhysRevLett.85.461
+    summary: Defines transfer entropy, a directed measure of information flow between time series.
+    stages: [decay]
+  - key: ledoit2008
+    authors: [Ledoit, Wolf]
+    year: 2008
+    title: Robust performance hypothesis testing with the Sharpe ratio
+    venue: Journal of Empirical Finance 15(5)
+    doi: 10.1016/j.jempfin.2008.03.002
+    summary: A studentized block-bootstrap test of the difference between two Sharpe ratios that is valid under heavy tails and dependence.
+    stages: [portfolio]
+  - key: bailey2014
+    authors: [Bailey, Lopez de Prado]
+    year: 2014
+    title: 'The deflated Sharpe ratio: correcting for selection bias, backtest overfitting and non-normality'
+    venue: Journal of Portfolio Management 40(5)
+    doi: 10.3905/jpm.2014.40.5.094
+    summary: Adjusts a Sharpe ratio for the number of strategies tried and for non-normal returns.
+    stages: [portfolio]
+  - key: esfahani2018
+    authors: [Mohajerin Esfahani, Kuhn]
+    year: 2018
+    title: 'Data-driven distributionally robust optimization using the Wasserstein metric: performance guarantees and tractable reformulations'
+    venue: Mathematical Programming 171
+    doi: 10.1007/s10107-017-1172-1
+    summary: Wasserstein-ball distributionally robust optimization with finite-sample guarantees and convex reformulations.
+    stages: [portfolio]
+  - key: bollerslev1986
+    authors: [Bollerslev]
+    year: 1986
+    title: Generalized autoregressive conditional heteroskedasticity
+    venue: Journal of Econometrics 31(3)
+    doi: 10.1016/0304-4076(86)90063-1
+    summary: The GARCH model of time-varying conditional variance.
+    stages: []
+  - key: cont2001
+    authors: [Cont]
+    year: 2001
+    title: 'Empirical properties of asset returns: stylized facts and statistical issues'
+    venue: Quantitative Finance 1(2)
+    doi: 10.1080/713665670
+    summary: Catalogues the stylized facts of asset returns, such as heavy tails, volatility clustering and absent linear autocorrelation.
+    stages: []
+  - key: hamilton1989
+    authors: [Hamilton]
+    year: 1989
+    title: A new approach to the economic analysis of nonstationary time series and the business cycle
+    venue: Econometrica 57(2)
+    doi: 10.2307/1912559
+    summary: The Markov-switching regression model and its filter.
+    stages: [adversarial]
+  - key: haas2004
+    authors: [Haas, Mittnik, Paolella]
+    year: 2004
+    title: A new approach to Markov-switching GARCH models
+    venue: Journal of Financial Econometrics 2(4)
+    doi: 10.1093/jjfinec/nbh020
+    summary: A Markov-switching GARCH model whose regime variances follow separate recursions, avoiding path dependence.
+    stages: [adversarial]
+  - key: daniel2016
+    authors: [Daniel, Moskowitz]
+    year: 2016
+    title: Momentum crashes
+    venue: Journal of Financial Economics 122(2)
+    doi: 10.1016/j.jfineco.2015.12.002
+    summary: Documents that momentum strategies suffer large losses in high-volatility rebounds after market declines.
+    stages: [adversarial]
+  - key: barroso2015
+    authors: [Barroso, Santa-Clara]
+    year: 2015
+    title: 'Momentum has its moments'
+    venue: Journal of Financial Economics 116(1)
+    doi: 10.1016/j.jfineco.2014.11.010
+    summary: Shows momentum risk is predictable from recent volatility and that scaling by it reduces crash risk.
+    stages: [adversarial]
+  - key: wilson1927
+    authors: [Wilson]
+    year: 1927
+    title: Probable inference, the law of succession, and statistical inference
+    venue: Journal of the American Statistical Association 22(158)
+    doi: 10.1080/01621459.1927.10502953
+    summary: The Wilson score interval for a binomial proportion.
+    stages: [benchmark]
+  - key: newey1987
+    authors: [Newey, West]
+    year: 1987
+    title: A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix
+    venue: Econometrica 55(3)
+    doi: 10.2307/1913610
+    summary: The Newey-West HAC covariance estimator.
+    stages: []
+  - key: lo1989
+    authors: [Lo, MacKinlay]
+    year: 1989
+    title: The size and power of the variance ratio test in finite samples
+    venue: Journal of Econometrics 40(2)
+    doi: 10.1016/0304-4076(89)90083-3
+    summary: Monte Carlo evidence on the finite-sample size and power of variance-ratio tests.
+    stages: []

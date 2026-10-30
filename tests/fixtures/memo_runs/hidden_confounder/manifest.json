@@ -1,0 +1,139 @@
+{
+  "attempt": 1,
+  "completed_at": "2026-10-30T09:09:46.201299Z",
+  "created_at": "2026-10-30T09:09:28.393701Z",
+  "digest": "946e6cd62f0c90880b8a1053faae9614018b9b76dce057d16af246c2851337a9",
+  "environment": {
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "pyarrow": "25.0.1",
+    "pydantic": "2.13.5",
+    "python": "3.11.15",
+    "python_implementation": "CPython",
+    "pyyaml": "6.0.3",
+    "scipy": "1.17.1",
+    "structlog": "26.1.0"
+  },
+  "error": null,
+  "inputs": {
+    "config": {
+      "causal": {
+        "alpha": 0.05,
+        "bootstrap": {
+          "block_length": null,
+          "confidence": 0.95,
+          "n_boot": 999
+        },
+        "ci_test": "parcorr_hc3",
+        "decision": "hybrid",
+        "fdr": "bh",
+        "min_obs": 500,
+        "pc_alpha": 0.2,
+        "signals": [
+          "s_real",
+          "s_conf",
+          "s_decay",
+          "s_noise"
+        ],
+        "tau_max": 5
+      },
+      "data": {
+        "alfred": {
+          "page_size": 100000,
+          "series": [
+            "INDPRO",
+            "UNRATE",
+            "CPIAUCSL",
+            "PAYEMS"
+          ]
+        },
+        "calendar": "XNYS",
+        "french": {
+          "five_factor_url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Research_Data_5_Factors_2x3_daily_CSV.zip",
+          "momentum_url": "https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/ftp/F-F_Momentum_Factor_daily_CSV.zip"
+        },
+        "http": {
+          "backoff_s": 1.0,
+          "max_retries": 3,
+          "timeout_s": 60.0
+        }
+      },
+      "dates": {
+        "end": "2022-12-30",
+        "start": "2000-01-03"
+      },
+      "decay": {
+        "alpha": 0.05,
+        "break_step": 25,
+        "min_obs": 5000,
+        "n_boot": 999,
+        "trim": 0.15
+      },
+      "frequency": "daily",
+      "pit": {
+        "publication_lag_sessions": {
+          "french": 42
+        },
+        "targets": {
+          "execution_lag": 0,
+          "horizon": 1
+        }
+      },
+      "portfolio": {
+        "b_n_boot": 999,
+        "c_annual": 0.5,
+        "confidence": 0.95,
+        "cost_bp": 5.0,
+        "cv_every": 252,
+        "cv_valid": 252,
+        "eps_grid": [
+          0.0,
+          0.0025,
+          0.005,
+          0.01,
+          0.02,
+          0.05,
+          0.1,
+          0.2
+        ],
+        "fc_alpha": 0.05,
+        "fc_draws": 4000,
+        "lw_alpha": 0.05,
+        "lw_n_boot": 999,
+        "min_obs": 5000,
+        "refit_every": 21,
+        "ridge_grid": [
+          0.0,
+          0.01,
+          0.03,
+          0.1,
+          0.3,
+          1.0,
+          3.0,
+          10.0
+        ],
+        "window": 1260
+      },
+      "seed": 0,
+      "universe": {
+        "tickers": [
+          "SYN00"
+        ]
+      }
+    },
+    "git": {
+      "diff_sha256": "179a1ffa075373e3e7b6ad21fb7b0fbe9ff1a9d6692ed654bea9e9f8bc0722fa",
+      "dirty": true,
+      "sha": "3b6ecb11977b900d05206bf821f95b3bfce359d2"
+    },
+    "hash_schema": 1,
+    "package_version": "0.1.0",
+    "seed": 0,
+    "snapshot_id": "137837fdcbb622a2"
+  },
+  "manifest_schema": 1,
+  "reproducible_from_sha": false,
+  "run_id": "946e6cd62f0c9088",
+  "status": "completed"
+}
