@@ -48,6 +48,7 @@ def long_volfrag() -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, Grou
     )
 
 
+@pytest.mark.slow  # 400k-day path
 def test_tau_is_the_population_quantile(long_volfrag: tuple) -> None:  # type: ignore[type-arg]
     _, _, h, _, gt = long_volfrag
     assert gt.volfrag is not None
@@ -57,6 +58,7 @@ def test_tau_is_the_population_quantile(long_volfrag: tuple) -> None:  # type: i
     assert abs(share - (1 - gt.volfrag.h_quantile)) < 4 * se
 
 
+@pytest.mark.slow  # 400k-day path
 def test_marginal_and_per_state_ics_match_ground_truth(long_volfrag: tuple) -> None:  # type: ignore[type-arg]
     s, r, h, _, gt = long_volfrag
     assert gt.volfrag is not None
@@ -71,6 +73,7 @@ def test_marginal_and_per_state_ics_match_ground_truth(long_volfrag: tuple) -> N
     assert truth[VOLFRAG_SIGNAL].calm[0] > 0 > truth[VOLFRAG_SIGNAL].stress[0]
 
 
+@pytest.mark.slow  # 400k-day path
 def test_population_return_acf_matches_simulation(long_volfrag: tuple) -> None:  # type: ignore[type-arg]
     _, _, _, r0, gt = long_volfrag
     cfg = gt.config

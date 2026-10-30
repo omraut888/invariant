@@ -138,12 +138,14 @@ def _corr_and_se(x: np.ndarray, y: np.ndarray, w: np.ndarray | None = None) -> t
     return est, float(np.std(per, ddof=1) / math.sqrt(N_BATCH))
 
 
+@pytest.mark.slow  # 400k-day path
 def test_s_regime_marginal_ic_matches_ground_truth(long_regime: tuple) -> None:  # type: ignore[type-arg]
     s, r, _, gt = long_regime
     est, se = _corr_and_se(s, r)
     assert abs(est - gt.signal(REGIME_SIGNAL).marginal_ic[0]) < 4 * se
 
 
+@pytest.mark.slow  # 400k-day path
 def test_per_regime_ics_match_regime_truth(long_regime: tuple) -> None:  # type: ignore[type-arg]
     s, r, xi, gt = long_regime
     assert gt.regime is not None
@@ -187,6 +189,7 @@ def test_regime_streams_leave_shared_components_unchanged() -> None:
     assert not np.allclose(a.returns.to_numpy(), b.returns.to_numpy())
 
 
+@pytest.mark.slow  # 400k-day paths
 @pytest.mark.parametrize("preset", ["multi_asset", "regime"])
 def test_population_return_acf_matches_simulation(preset: str) -> None:
     cfg = load_benchmark_config(preset).model_copy(update={"n_obs": 400_000})
