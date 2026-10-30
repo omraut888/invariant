@@ -1,13 +1,14 @@
 # INVARIANT
 
 **Status:** Stages 1–3 (causal screen, decay test, portfolio construction) are complete and
-validated on a planted-signal benchmark. Stage 4 (adversarial stress) is targeted for early
-November 2026, and Stage 5 (research memo) and the first real-data run for mid-November 2026.
-No result below comes from real market data yet.
+validated on a planted-signal benchmark. Stage 4 (adversarial stress) was evaluated and **not
+adopted as a kill stage** ([ADR 0016](docs/adr/0016-stage4-adversarial-study.md)); a
+reported-only stress diagnostic replaces it. Stage 5 (research memo) is next, then the first
+real-data run. No result below comes from real market data yet.
 
 INVARIANT is a research pipeline for trading signals that tries to kill every candidate and
 reports what survives. Most backtests show the signals that worked. INVARIANT puts each
-candidate through five stages, each built to catch one specific way a signal can look good
+candidate through its stages, each built to catch one specific way a signal can look good
 and be worthless. Every pass and every kill is written to a tamper-evident ledger with the
 numbers behind it. Each stage was validated on synthetic markets with planted signals, where
 the right answer is known, and each method was chosen by a study whose rules were committed
@@ -42,7 +43,7 @@ before it ran. Where a method failed, or a stage has a blind spot, this README s
  3  Portfolio construction ── estimation error: weights that only work in sample
         │
         ▼
- 4  Adversarial stress ─────── regime fragility: an edge that holds in one regime only   (in progress)
+ 4  Adversarial stress ─────── regime fragility: evaluated, not adopted (diagnostic only)
         │
         ▼
  5  Research memo ─────────── unsupported claims: a case stronger than the evidence     (in progress)
@@ -213,12 +214,24 @@ fetch real ALFRED data. Working rules for contributors are in [CLAUDE.md](CLAUDE
 
 ## Roadmap
 
-- **Stage 4, adversarial stress** (early November 2026): search for the worst plausible market
-  path under a realism constraint. The method will be chosen by a pre-registered study.
-- **Stage 5, research memo** (mid-November 2026): a citation-backed memo for or against each
-  strategy, built from the ledger, that states each stage's limits.
-- **Real data** (mid-November 2026): ETFs, Fama-French factors and ALFRED macro vintages
-  through all five stages.
+- **Stage 4, adversarial stress: evaluated, not adopted** ([ADR 0016](docs/adr/0016-stage4-adversarial-study.md)).
+  - **What was tried.** Two regime-fragile signals were planted
+    ([ADR 0015](docs/adr/0015-benchmark-v4-regime-signal.md)), and the design was taken as far
+    as a population feasibility check.
+  - **Why it failed.**
+    - Latent regimes are not identifiable from returns at this sample size.
+    - Bootstrap path generators failed the stylized-facts check three times.
+    - The plausible set for high-volatility exposure is too narrow to overturn an
+      average-profitable strategy: the worst-case Sharpe stays at +0.90 even with perfectly
+      known moments.
+    - A plain "loses money in stress" rule would penalise ordinary market exposure, not
+      fragility.
+  - **What remains.** Stage 3 reports a stress diagnostic: each portfolio's Sharpe in
+    high-volatility periods, with an interval. It never decides.
+- **Stage 5, research memo** (next): a citation-backed memo for or against each strategy, built
+  from the ledger, that states each stage's limits, including Stage 4's non-adoption.
+- **Real data** (after Stage 5): ETFs, Fama-French factors and ALFRED macro vintages through
+  Stages 1–3 and the memo.
 
 **Backlog**, each to be decided by its own pre-registered study:
 - A net-of-cost confirmation of the Stage 3 method, at a cost level justified in advance

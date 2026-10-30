@@ -1,12 +1,15 @@
 # INVARIANT
 
 ## What this is
-An autonomous quant research pipeline. Five stages, each capable of killing a candidate signal:
+An autonomous quant research pipeline. Five stages; Stages 1–3 can kill a candidate signal:
 1. Causal discovery: is the signal structurally upstream of returns, or confounded?
 2. Decay validation: transfer-entropy half-life; is the edge being arbitraged away?
 3. Portfolio construction: Wasserstein DRO was implemented, verified and evaluated (ADR 0013);
    ridge regularization (Ridge-CV) was selected. The memo must say this, never "DRO portfolio".
-4. Adversarial regime certification: worst plausible market path, with a realism constraint
+4. Adversarial regime certification: evaluated and **not adopted as a kill stage** (ADR 0016).
+   At ~24 years of daily data, plausible variation in high-volatility exposure is too small to
+   overturn an average-profitable strategy. What remains is a reported-only stress diagnostic
+   in Stage 3's ledger metrics (high-volatility-state Sharpe with an interval); it never decides.
 5. Research memo: citation-backed investment memo arguing for or against the strategy
 
 Design overview: docs/design.md (the ADRs in docs/adr/ are authoritative)
@@ -41,7 +44,8 @@ say so instead of implementing it as written.
 - src/invariant/core/          typed contracts, run hashing/reproducibility, logging
 - src/invariant/data/          sources (ETF, French factors, ALFRED), snapshots, point-in-time assembly
 - src/invariant/benchmark/     synthetic planted-signal market + ground truth
-- src/invariant/stages/        causal/ decay/ dro/ (evaluated DRO code) portfolio/ adversarial/ memo/
+- src/invariant/stages/        causal/ decay/ dro/ (evaluated DRO code) portfolio/
+                               adversarial/ (evaluated Stage 4 design + stress diagnostic) memo/
 - src/invariant/ledger/        kill ledger
 - src/invariant/orchestration/ pipeline DAG (later)
 - src/invariant/api/           FastAPI service (later)
@@ -105,4 +109,8 @@ tree, so a failing check cannot be pushed. Never bypass it with `--no-verify`.
   pre-registered gross-Sharpe rule (DRO-FC is best net of 5 bp; a net-of-cost confirmation
   study is in the backlog).
 - Stage 3 stage (portfolio construction on Ridge-CV, kill rule A, diagnostic B; ADR 0014) is
-  accepted on the benchmark. Stage 4 (adversarial regime certification) is next.
+  accepted on the benchmark.
+- Stage 4 (ADRs 0015–0016) was evaluated and rejected as a kill stage. The benchmark gained
+  s_regime and s_volfrag (reported-only, `identifiable = false`); Stage 3 reports a stress
+  diagnostic. The memo must say Stage 4 was evaluated and not adopted, and why.
+- Stage 5 (research memo) is next.

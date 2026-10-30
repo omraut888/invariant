@@ -1,7 +1,8 @@
 # INVARIANT: design overview
 
 INVARIANT takes candidate trading signals and passes each one through five stages. Each stage
-targets one way a signal can look good and still be worthless, and each can kill the signal.
+targets one way a signal can look good and still be worthless. Stages 1–3 can kill the signal;
+Stage 4 was evaluated and not adopted as a kill stage (below), and Stage 5 writes the memo.
 Every decision, pass or kill, goes into a tamper-evident ledger with the numbers behind it.
 Every stage is validated on a planted-signal benchmark, whose ground truth is known, before it
 is used on real data.
@@ -17,7 +18,7 @@ superseded by the ADRs, and where they differ the ADRs are authoritative.
 | 1 | Causal screen | **Spurious signal**: the feature predicts returns only because a third variable drives both | built, accepted on the benchmark |
 | 2 | Decay test | **Silent decay**: a real edge that is being arbitraged away | built, accepted on the benchmark |
 | 3 | Portfolio construction | **Estimation error**: weights that look optimal in sample and fail out of sample | built, accepted on the benchmark |
-| 4 | Adversarial regime certification | **Regime fragility**: an edge that holds only in the regime it was found in | design |
+| 4 | Adversarial regime certification | **Regime fragility**: an edge that holds only in the regime it was found in | evaluated, **not adopted** as a kill stage; reported-only stress diagnostic |
 | 5 | Research memo | **Unsupported claims**: a recommendation stronger than the evidence | design |
 
 ### 1. Causal screen ([ADR 0009](adr/0009-stage1-ci-test-and-multiple-testing.md), [0010](adr/0010-stage1-causal-stage.md))
@@ -51,17 +52,30 @@ superseded by the ADRs, and where they differ the ADRs are authoritative.
 - **Cannot detect** a passenger: a worthless signal in a portfolio with a real one passes with
   it. The test is on gross Sharpe, so a pass does not imply a positive net return after costs.
 
-### 4. Adversarial regime certification (design)
-The intent is to search for the worst plausible market path for the surviving portfolio, under
-a realism constraint that stops the search from winning with implausible paths. The method
-(generator, adversary, realism test) will be chosen by a pre-registered study, as Stages 1–3
-were, and validated on the benchmark before it is used.
+### 4. Adversarial regime certification ([ADR 0015](adr/0015-benchmark-v4-regime-signal.md), [0016](adr/0016-stage4-adversarial-study.md)): evaluated, not adopted
+- **Intent.** Kill a strategy that is profitable on average but fails under the worst plausible
+  regime mix.
+- **Why it was not adopted.** The benchmark gained regime-fragile signals (ADR 0015), and the
+  design was taken as far as a population feasibility check (ADR 0016). Four findings ended it:
+  - latent regimes are not identifiable from returns at this sample size;
+  - an observable high-volatility state is only a noisy proxy for them;
+  - three bootstrap path generators failed to reproduce the stylized facts;
+  - the plausible set for the state chain is too narrow: even with perfectly known moments, the
+    worst case of a signal whose edge reverses in high volatility stays at Sharpe +0.90.
+
+  At ~24 years of daily data, plausible variation in high-volatility exposure is too small to
+  overturn an average-profitable strategy, and a plain "loses money in stress" rule would
+  penalise ordinary market exposure, not fragility.
+- **What remains.** A reported-only **stress diagnostic** in Stage 3's ledger metrics: Ridge-CV's
+  and 1/N's Sharpe in the vol21/q=.70 high-volatility state, with a block-bootstrap interval. It
+  never decides.
 
 ### 5. Research memo (design)
 A memo per strategy that argues for or against it, with citations, built only from the ledger
 and the stage results. It must state each stage's limits as they apply: for example, that
-Stage 1 cannot rule out an unobserved confounder, and that Stage 3 used ridge regularization
-(Wasserstein DRO was evaluated, not selected).
+Stage 1 cannot rule out an unobserved confounder, that Stage 3 used ridge regularization
+(Wasserstein DRO was evaluated, not selected), and that Stage 4 was evaluated and not adopted,
+so the stress diagnostic is a description, not a certification. This is the next stage.
 
 ## Foundations
 
@@ -75,13 +89,20 @@ Stage 1 cannot rule out an unobserved confounder, and that Stage 3 used ridge re
 | Point-in-time panel and forward-return targets | `data/pit.py` | [0006](adr/0006-point-in-time-panel.md) |
 | Kill ledger and benchmark scorer | `ledger/` | [0007](adr/0007-kill-ledger-and-benchmark-scoring.md) |
 | Synthetic feature source (observed signals, lag 0) | `data/sources/synthetic.py`, `benchmark/payload.py` | [0008](adr/0008-synthetic-feature-source.md) |
+| Benchmark v4: regime-switching GARCH, s_regime, s_volfrag | `benchmark/synthetic.py`, `benchmark/regime_oracle.py` | [0015](adr/0015-benchmark-v4-regime-signal.md) |
 
 Paths are under `src/invariant/`.
 
 **The benchmark.** A structural causal model with four candidate signals whose truth is
 known: `s_real` (a constant true edge), `s_decay` (a true edge that decays), `s_conf`
 (confounded by a common cause `z`, no edge) and `s_noise` (no edge). Presets vary the signal
-strength, the volatility model, whether `z` is observed, and the number of assets.
+strength, the volatility model, whether `z` is observed, and the number of assets. The opt-in
+v4 presets ([ADR 0015](adr/0015-benchmark-v4-regime-signal.md)) add a fifth signal:
+- `s_regime`, whose edge reverses in a latent stress regime;
+- or `s_volfrag`, whose edge reverses when market volatility is high.
+
+Both are reported only, the evidence behind Stage 4's rejection. Every pre-v4 preset is
+byte-identical (pinned by a test).
 
 **Guarantees enforced by tests.**
 - No look-ahead in any data transform (`tests/leakage/`). The leakage tests are themselves
