@@ -1,0 +1,113 @@
+"""The memo validation's coverage rule, bounds and gates (docs/adr/0017)."""
+
+from pathlib import Path
+
+import pytest
+
+from invariant.core.run_hash import GitState
+from invariant.stages.memo import validation as v
+from invariant.stages.memo.corruption import CLASSES
+from invariant.stages.memo.validation import (
+    ClassRecord,
+    HandEntryResult,
+    RunRecord,
+    load_memo_validation_config,
+    summarize_validation,
+)
+
+GIT = GitState(sha="0" * 40, dirty=False)
+
+
+def _rec(preset: str, i: int, cats: tuple[str, ...], *, misses: int = 0, n: int = 12) -> RunRecord:
+    return RunRecord(
+        preset=preset,
+        index=i,
+        run_id=f"{preset}{i}",
+        categories=cats,
+        recommendation="against trading",
+        members=(),
+        passed=(),
+        passed_with_true_edge=(),
+        template_accepted=True,
+        template_failures=(),
+        deterministic=True,
+        ground_truth_independent=True,
+        classes=tuple(
+            ClassRecord(cls=c, n=n, misses=misses, channels={}, checks={}, missed=())
+            for c in CLASSES
+        ),
+        seconds=1.0,
+    )
+
+
+def test_the_pre_registered_config_loads() -> None:
+    cfg = load_memo_validation_config()
+    assert cfg.root_seed == 20261105
+    assert [p.name for p in cfg.presets] == [
+        "base",
+        "realistic",
+        "hidden_confounder",
+        "multi_asset",
+        "volfrag",
+        "base_short",
+    ]
+    assert len(cfg.presets) * cfg.n_seeds * cfg.instances_per_class >= cfg.min_instances
+    assert set(v.COVERAGE_PRESETS) == set(v.CATEGORIES)
+    names = {p.name for p in cfg.presets}
+    assert all(set(ps) <= names for ps in v.COVERAGE_PRESETS.values())
+
+
+def test_the_coverage_rule_adds_seeds_to_the_mapped_presets(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    cfg = load_memo_validation_config().model_copy(
+        update={"n_seeds": 2, "max_seeds": 5, "coverage_min": 3}
+    )
+
+    def fake(preset: v.RunPreset, index: int, *a: object, **k: object) -> RunRecord:
+        cats = ["stage1_kill", "stage2_kill", "stage3_kill", "multi_member_pass", "candidate"]
+        cats += ["against"] if preset.name == "realistic" else []
+        cats += ["not_decided"] if preset.name == "base_short" and index >= 3 else []
+        return _rec(preset.name, index, tuple(cats))
+
+    monkeypatch.setattr(v, "run_task", fake)
+    recs = v.run_validation(cfg, git_state=GIT)
+    per = {p.name: sum(r.preset == p.name for r in recs) for p in cfg.presets}
+    # against: realistic gives 1 per seed -> realistic and hidden_confounder grow to 3;
+    # not_decided appears from base_short seed 3 on -> base_short grows to max_seeds 5.
+    assert per == {
+        "base": 2,
+        "realistic": 3,
+        "hidden_confounder": 3,
+        "multi_asset": 2,
+        "volfrag": 2,
+        "base_short": 5,
+    }
+
+
+def test_the_zero_miss_bound() -> None:
+    assert v._upper(500, 0) == pytest.approx(0.00597, abs=1e-5)
+    assert v._upper(576, 0) < v._upper(500, 0) < v._upper(500, 1)
+
+
+def test_gates() -> None:
+    cfg = load_memo_validation_config()
+    recs = [_rec("base", i, ("against",)) for i in range(48)]
+    hand = [
+        HandEntryResult(
+            set="a", id="a1", cls="K1", expect="reject", accepted=False, checks=("V9",)
+        ),
+        HandEntryResult(set="b", id="b1", cls="benign", expect="accept", accepted=False, checks=()),
+    ]
+    rep = summarize_validation(recs, hand, cfg, git_sha="x", git_dirty=False)
+    assert rep.accepted  # a benign rejection is reported, not gated
+    assert rep.hand_sets[1].benign_rejected == ("b1",)
+    missed = [h.model_copy(update={"accepted": True}) if h.id == "a1" else h for h in hand]
+    assert not summarize_validation(recs, missed, cfg, git_sha="x", git_dirty=False).accepted
+    few = [_rec("base", i, ("against",), n=10) for i in range(48)]
+    g2 = summarize_validation(few, hand, cfg, git_sha="x", git_dirty=False).gates[1]
+    assert not g2.passed  # 480 < 500 instances per class
+    one = [*recs[:-1], _rec("base", 47, ("against",), misses=1)]
+    assert not summarize_validation(one, hand, cfg, git_sha="x", git_dirty=False).gates[1].passed
+    bad = [*recs[:-1], recs[-1].model_copy(update={"deterministic": False})]
+    assert not summarize_validation(bad, hand, cfg, git_sha="x", git_dirty=False).gates[3].passed
