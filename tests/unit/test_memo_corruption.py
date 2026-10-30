@@ -29,7 +29,7 @@ def _base(case: str) -> tuple[FactSheet, Memo, str]:
 
 
 def _entries() -> list[dict[str, Any]]:
-    out = []
+    out: list[dict[str, Any]] = []
     for path in SETS:
         doc = yaml.safe_load(path.read_text())
         out.extend({**e, "set": doc["set"]} for e in doc["entries"])
