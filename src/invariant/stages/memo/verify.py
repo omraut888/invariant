@@ -256,6 +256,7 @@ _VERDICT_WORDS: Final = _words(
     r"succeed\w*|success\w*|winners?|losers?|outperform\w*|underperform\w*|beat|beats|beaten",
     r"better|worse|best|worst|superior|inferior|stable|unstable|stability|persist\w*",
     r"passengers?|collateral|confound\w*|spurious|genuine|real\s+edge|true\s+edge",
+    r"declin\w*|weaken\w*|fade[ds]?|fading|erod\w*|erosion",
 )
 _CAUSAL_WORDS: Final = _words(
     r"effects?|causal\w*|causes?|caused|causing|causation|drives?|driven|driving",
