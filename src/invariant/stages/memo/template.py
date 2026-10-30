@@ -303,8 +303,9 @@ def _methods(sheet: FactSheet) -> Section:
     if sheet.has("stress.ridge_cv_high"):
         text.append(
             "Stress diagnostic: each day is labelled by trailing volatility, and Sharpe ratios "
-            "in the high state get a moving-block bootstrap interval ({cite:kunsch1989}) with the "
-            "block length of ({cite:politis2004}; {cite:patton2009}) ({adr:16})."
+            "in the high state get a moving-block bootstrap interval ({cite:kunsch1989}) whose "
+            "block length follows the Politis-White rule ({cite:politis2004}; "
+            "{cite:patton2009}) ({adr:16})."
         )
     text.append("Benchmark validation rates carry Wilson intervals ({cite:wilson1927}).")
     return Section(id="methods", title="Methods", blocks=tuple(_p(t) for t in text))
