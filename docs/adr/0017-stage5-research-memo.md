@@ -1,8 +1,10 @@
 # ADR 0017: Stage 5, the research memo (fact sheet, template memo, verifier)
 
-Status: **proposed**. Pre-registered 2026-10-30 (approved by the user the same day); the
-validation below is fixed and pushed before its run. Results will go in a separate section at the end and are not edited into the
-pre-registration.
+Status: **accepted** (2026-10-31): the template-only verifier passed every gate on the rerun of
+deviation 1. Pre-registered 2026-10-30 (approved by the user the same day); the validation was
+fixed and pushed before its run. Results are in separate sections at the end, after the
+pre-registration, and are not edited into it. Run 1 failed G3; deviation 1 cut the LLM narrative
+and made the verifier template-only.
 
 ## Context
 Stages 1–3 decide; Stage 4 was evaluated and not adopted as a kill stage (ADR 0016). Stage 5
@@ -349,9 +351,57 @@ G1, G3 and G4 are deterministic.
 
 If any gate fails, Stage 5 is not done and the design returns to review; thresholds never move.
 
+## Results, deviation 1 rerun (recorded 2026-10-31, after the run)
+Run from a worktree at the pushed deviation commit de8a7de, clean tree, root seed 20261107, 8
+workers, about 20 minutes (median run 32 s). No post-launch fix. Report and hand-set results:
+`docs/results/0017-memo-validation-deviation1/`.
+
+48 runs (8 per preset; the coverage rule added none). Categories: Stage 1 kill 48, Stage 2 kill
+32, Stage 3 kill 7, multi-member pass 16; recommendations: candidate 27, against 13, not
+decided 8.
+
+| gate | result |
+|---|---|
+| G1 | **pass**: 48 of 48 template memos accepted |
+| G2 | **pass**: K1–K9 each 0 misses in 576 (upper bound .0052) |
+| G3 | **pass**: set (a) 0 of 96, set (b) 0 of 126, set (c) 0 of 146 missed |
+| G4 | **pass**: 48 of 48 deterministic and GroundTruth-independent |
+
+**The template-only verifier is accepted, and Stage 5 is accepted on the benchmark with it.**
+
+**Reported, not gated.** Every benign narrative sentence of sets (a) and (b) (25) is rejected, by
+design in template-only mode. Set (b)'s entailment entries: 0 of 2 missed (V1's template-only
+rule). Candidate memos with a passed edgeless signal: 5 of 27, the passenger risk the memo
+states. Set (c)'s author's hardest-ranked entries were all rejected; c_k5_01 (the
+recommendation field flipped with `memo.md` unchanged) by V5.
+
+**Which checks caught set (c)** (an entry can fire several): V1 alone 66 of 146, V9 alone 18,
+V3 with V9 14, V10 on 12 (including fullwidth digits, c_k2_12), V6 on 9, V5 on 11.
+
+**Limitations of the result.**
+- **Concentration on V1.** In template-only mode the only acceptable memo is the template memo,
+  so V1's equality of every template block with the verifier's re-render is the right check:
+  it needs no lexicon and so generalises. But it alone caught 66 of set (c)'s 146, including
+  the misattributed citations (c_k7_03–06: a corpus key on the right topic, the wrong paper), an
+  atom repointed to a fact that renders identically (c_k3_14) and a swapped run id (c_s_01).
+  Most template tampering therefore rests on one equality. A bug shared by the template and the
+  re-render the verifier uses would pass it; the raw-file checks (V2, V3, V5, V6) are the
+  independent second line, and they did not fire on those 66.
+- **"-0.00" against "0.00".** V3 compares a displayed number with its raw value at the displayed
+  precision, so it treats "-0.00" and "0.00" as equal. c_k1_02 changed one to the other and
+  was caught by V9 only because `memo.md` then differed from the rendering; a consistent change
+  in both files rests on V1 alone. Not changed: the sign of a zero rounded to the display is
+  not a claim about the run, but a sign shown for a value that rounds to zero is a reporting
+  defect a reader could misread.
+- **Scope.** The pass covers the template memo only. It says nothing about checking free prose:
+  that surface was removed by deviation 1, not solved. Set (b) was a regression check on this
+  run, not an independent one.
+
 ## Backlog (added 2026-10-31)
 - **LLM narrative** (cut by deviation 1). A free-prose narrative failed against an independent
   set; it is not retried in that form.
 - **Structured LLM narrative:** the model chooses and orders among verified atoms and fixed
   template sentences, writing no free text, so V1–V3 and V5 still cover everything it emits.
   It would need its own pre-registered validation.
+- **A raw-path check for template text:** an independent second check on the template blocks
+  that V1 alone now covers (above), and a sign check for values displayed as zero.

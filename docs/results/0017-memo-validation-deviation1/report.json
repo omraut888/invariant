@@ -1,0 +1,269 @@
+{
+  "n_runs": 48,
+  "runs_per_preset": {
+    "base": 8,
+    "realistic": 8,
+    "hidden_confounder": 8,
+    "multi_asset": 8,
+    "volfrag": 8,
+    "base_short": 8
+  },
+  "categories": {
+    "stage1_kill": 48,
+    "stage2_kill": 32,
+    "stage3_kill": 7,
+    "multi_member_pass": 16,
+    "candidate": 27,
+    "against": 13,
+    "not_decided": 8
+  },
+  "coverage_met": true,
+  "classes": [
+    {
+      "cls": "K1",
+      "n": 576,
+      "misses": 0,
+      "miss_rate_upper": 0.005187422697064403,
+      "channels": {
+        "md_number": 282,
+        "swap_atoms": 294
+      },
+      "checks": {
+        "V1": 294,
+        "V3": 173,
+        "V9": 282
+      }
+    },
+    {
+      "cls": "K2",
+      "n": 576,
+      "misses": 0,
+      "miss_rate_upper": 0.005187422697064403,
+      "channels": {
+        "md_number": 202,
+        "narrative_number": 222,
+        "template_number": 152
+      },
+      "checks": {
+        "V1": 374,
+        "V3": 480,
+        "V4": 222,
+        "V5": 6,
+        "V7": 28,
+        "V9": 202
+      }
+    },
+    {
+      "cls": "K3",
+      "n": 576,
+      "misses": 0,
+      "miss_rate_upper": 0.005187422697064403,
+      "channels": {
+        "repoint_keep": 278,
+        "repoint_rerender": 298
+      },
+      "checks": {
+        "V1": 576,
+        "V3": 163,
+        "V9": 276
+      }
+    },
+    {
+      "cls": "K4",
+      "n": 576,
+      "misses": 0,
+      "miss_rate_upper": 0.005187422697064403,
+      "channels": {
+        "md_fate": 195,
+        "narrative_verdict": 193,
+        "swap_fate": 188
+      },
+      "checks": {
+        "V1": 381,
+        "V4": 193,
+        "V5": 204,
+        "V9": 195
+      }
+    },
+    {
+      "cls": "K5",
+      "n": 576,
+      "misses": 0,
+      "miss_rate_upper": 0.005187422697064403,
+      "channels": {
+        "field": 196,
+        "md_line": 183,
+        "narrative": 197
+      },
+      "checks": {
+        "V1": 197,
+        "V4": 197,
+        "V5": 196,
+        "V7": 39,
+        "V9": 183
+      }
+    },
+    {
+      "cls": "K6",
+      "n": 576,
+      "misses": 0,
+      "miss_rate_upper": 0.005187422697064403,
+      "channels": {
+        "delete": 132,
+        "relabel": 113,
+        "reword": 98,
+        "spurious": 105,
+        "to_narrative": 128
+      },
+      "checks": {
+        "V1": 576,
+        "V4": 128,
+        "V6": 478,
+        "V7": 12,
+        "V8": 28
+      }
+    },
+    {
+      "cls": "K7",
+      "n": 576,
+      "misses": 0,
+      "miss_rate_upper": 0.005187422697064403,
+      "channels": {
+        "bib_add": 66,
+        "bib_drop": 78,
+        "drop_cite": 143,
+        "fake_key": 153,
+        "uncited": 136
+      },
+      "checks": {
+        "V1": 576,
+        "V2": 153,
+        "V4": 92,
+        "V7": 136,
+        "V9": 153
+      }
+    },
+    {
+      "cls": "K8",
+      "n": 576,
+      "misses": 0,
+      "miss_rate_upper": 0.005187422697064403,
+      "channels": {
+        "banned": 576
+      },
+      "checks": {
+        "V1": 576,
+        "V4": 117,
+        "V8": 576
+      }
+    },
+    {
+      "cls": "K9",
+      "n": 576,
+      "misses": 0,
+      "miss_rate_upper": 0.005187422697064403,
+      "channels": {
+        "delete": 162,
+        "duplicate_line": 139,
+        "insert": 153,
+        "substitute": 122
+      },
+      "checks": {
+        "V3": 19,
+        "V5": 12,
+        "V9": 576
+      }
+    }
+  ],
+  "hand_sets": [
+    {
+      "set": "a",
+      "n_corruptions": 96,
+      "missed": [],
+      "n_benign": 12,
+      "benign_rejected": [
+        "b01",
+        "b02",
+        "b03",
+        "b04",
+        "b05",
+        "b06",
+        "b07",
+        "b08",
+        "b09",
+        "b10",
+        "b11",
+        "b12"
+      ],
+      "entailment": [],
+      "entailment_missed": []
+    },
+    {
+      "set": "b",
+      "n_corruptions": 126,
+      "missed": [],
+      "n_benign": 13,
+      "benign_rejected": [
+        "b_ok_01",
+        "b_ok_02",
+        "b_ok_03",
+        "b_ok_04",
+        "b_ok_05",
+        "b_ok_06",
+        "b_ok_07",
+        "b_ok_08",
+        "b_ok_09",
+        "b_ok_10",
+        "b_ok_11",
+        "b_ok_12",
+        "b_ok_13"
+      ],
+      "entailment": [
+        "b_k7_06",
+        "b_k7_07"
+      ],
+      "entailment_missed": []
+    },
+    {
+      "set": "c",
+      "n_corruptions": 146,
+      "missed": [],
+      "n_benign": 0,
+      "benign_rejected": [],
+      "entailment": [],
+      "entailment_missed": []
+    }
+  ],
+  "gates": [
+    {
+      "name": "G1",
+      "passed": true,
+      "detail": "48 of 48 template memos accepted"
+    },
+    {
+      "name": "G2",
+      "passed": true,
+      "detail": "K1 0/576; K2 0/576; K3 0/576; K4 0/576; K5 0/576; K6 0/576; K7 0/576; K8 0/576; K9 0/576"
+    },
+    {
+      "name": "G3",
+      "passed": true,
+      "detail": "set a: 0/96 missed (entailment, not gated: 0/0); set b: 0/126 missed (entailment, not gated: 0/2); set c: 0/146 missed (entailment, not gated: 0/0)"
+    },
+    {
+      "name": "G4",
+      "passed": true,
+      "detail": "48 of 48 deterministic and GroundTruth-independent"
+    }
+  ],
+  "accepted": true,
+  "recommendations": {
+    "candidate for paper trading": 27,
+    "against trading": 13,
+    "not decided": 8
+  },
+  "candidate_with_edgeless_pass": 5,
+  "median_seconds": 31.57766808301676,
+  "git_sha": "de8a7de9f4a7d519611b129298c5fb07e10161fe",
+  "git_dirty": false
+}
