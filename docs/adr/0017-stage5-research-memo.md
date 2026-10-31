@@ -250,3 +250,108 @@ If any gate fails, Stage 5 is not done and the design returns to review.
   label.
 - **Repairing a rejected memo:** rejected by the requirement; a repaired memo is a new memo
   with no verification history.
+
+## Results, run 1 (recorded 2026-10-31, after the run)
+Run from a worktree at the pushed pre-registration commit 01ffdf8, clean tree, root seed
+20261105, 8 workers, about 20 minutes. No post-launch fix. Report and hand-set results:
+`docs/results/0017-memo-validation-run1/`.
+
+48 runs (8 per preset; the coverage rule added none). Categories: Stage 1 kill 48, Stage 2 kill
+27, Stage 3 kill 9, multi-member pass 9; recommendations: candidate 21, against 20, not decided 7.
+
+| gate | result |
+|---|---|
+| G1 | **pass**: 48 of 48 template memos accepted |
+| G2 | **pass**: K1–K9 each 0 misses in 576 (upper bound .0052) |
+| G3 | **fail**: set (a) 0 of 96 missed; set (b) 7 of 126 gated entries missed |
+| G4 | **pass**: 48 of 48 deterministic and GroundTruth-independent |
+
+**The verifier was not accepted: G3 failed.** It is recorded as it stands; no entry is exempted
+after the fact. All seven misses are narrative sentences on which no check fired:
+- **Character evasions (3):** b_k8_08 ("rоbust" with a Cyrillic о), b_k8_09 ("certified" with a
+  zero-width space), b_s_11 (a narrative paragraph of only a zero-width space). V4 and V8 matched
+  raw characters, with no Unicode normalisation and no rejection of format characters.
+- **Claims worded outside the lexicons (4):** b_k4_05 (a kill reframed as "for practical
+  purposes as good as clearing the bar"), b_k4_06 ("none of these signals is genuinely
+  predictive", read as proof of no edge), b_k5_06 ("still merits a modest live position" in an
+  against-trading run), b_k6_14 ("the volatility proxy tracks the true stress regime closely",
+  undercutting the stress caveat). This is the limit stated before the run ("a claim phrased in
+  words it does not list can pass V4–V8"), and G3 gated these entries anyway.
+
+**Reported, not gated.** Benign sentences falsely rejected: set (a) 0 of 12, **set (b) 8 of 13**
+(mostly V4, also V5 and V7; harmless signposting such as "Each stage's evidence follows in
+order."). Entailment entries: b_k7_06 missed, as expected. Candidate memos with a passed
+edgeless signal: in the report. Median run time 27 s.
+
+**b_k7_07 was rejected by V1 by accident.** The template orders the bibliography by key, and V1
+requires the references section to equal the bibliography rebuilt from the cited keys, in that
+order. The entry cites bollerslev1986 in a narrative sentence and adds the reference with
+`add_reference`, which appended it after wilson1927. The cited set and the bibliography matched;
+only the order differed. With the reference inserted at its sorted position the verifier
+accepts the entry. So in substance both entailment entries passed the verifier, as V7's stated
+limit predicts. The fix is to the corruption tool, not the verifier: `add_reference` now
+inserts at the sorted position, so an added entry is caught for what it adds, not for where it
+sits (`tests/unit/test_memo_corruption.py`).
+
+**Reading.** The template memo, the product, met every gate and all of set (a). Every miss and
+every benign false rejection was free narrative prose. Against an independent author the
+lexicon checks failed in both directions: they passed claims worded in new ways and rejected
+most harmless sentences. At that false-rejection rate most LLM attempts would fall back to the
+template anyway.
+
+## Deviation 1: template-only verifier and V10 (user, 2026-10-31; fixed and pushed before the rerun)
+Decisions (user, 2026-10-31):
+1. Record the G3 failure as it stands (above); no post-hoc exemptions.
+2. **The LLM narrative is cut to the backlog**, superseding the one-day time-box. The verifier
+   is template-only: V1 rejects any narrative paragraph outright, and any `narrative` flag
+   other than `none`. V4, V7 and V8 still run on a narrative paragraph so a rejection says what
+   the prose did, but they no longer decide anything.
+3. **The character-evasion class is fixed generally**, with no lexicon change: a new check
+   **V10** requires `memo.md` and every string of `memo.json` to be NFKC-normal (Unicode UAX
+   #15), with no format character (category Cf) and no non-ASCII letter, mark or digit
+   (categories L, M, N), which covers confusables. Template memos and the corpus are pure ASCII
+   (tested), so V10 costs no false rejection. **No word was added for the four claim misses.**
+4. b_k7_07 is explained and recorded (above); `add_reference` inserts at the sorted position.
+5. The validation is rerun under the unchanged gates, on fresh seeds, with a new independent set.
+
+**Rerun.** Config `configs/memo_validation_deviation1.yaml`: the run set, coverage rule,
+`instances_per_class`, `min_instances` and gates of the pre-registration, unchanged; **root seed
+20261107** (fresh, used nowhere else), so both the runs and the corruption streams are new; hand
+sets (a), (b) and **(c)**. Run from a worktree at the pushed commit of this deviation. A test
+pins that the config differs from the original only in the seed and the added set.
+
+**Set (c)** (`tests/fixtures/memo_adversarial/set_c.yaml`): 146 corruptions (K1 13, K2 14, K3 14, K4 13, K5 14,
+K6 18, K7 14, K8 14, K9 16, S 16) over all eight fixture cases, and no benign entry (its author
+found no change a correct template-only verifier must accept). Six are narrative insertions; the
+rest tamper with the template memo itself (`memo.json`, `memo.md`, or both kept consistent).
+It was written by a new agent given only a materials folder: the template-only memo format
+(`document.py`), the eight fixture memos, the mandatory registry, the corpus, the edit
+operations, the class definitions and a checker that applies entries without verifying them;
+never the verifier, sets (a) or (b), the tests or this ADR. It was frozen as written, all 146
+entries, before the verifier was run on it. Its author's report named the entries it judged
+hardest, so the verifier's author knows those; **no verifier change was made after set (c) was
+written.** Its entailment-class entries, if any, are exempt by the same class rule.
+
+**Gates, unchanged.** G1–G4 as pre-registered, with G3 over sets (a), (b) and (c) and the same
+by-class entailment exemption. Pass probabilities are as stated: (1 − p)^576 per class for G2;
+G1, G3 and G4 are deterministic.
+
+**What the rerun can and cannot show.**
+- In template-only mode, G2's narrative channels (in K2, K4, K5, K7 and K8) and every hand-set
+  narrative entry are rejected by V1's structural rule. For them the rerun measures that rule,
+  not the lexicons; the per-check counts in the report show which.
+- Set (b) has been seen and its misses fixed by design, so on the rerun it is a regression
+  check, not an independent one. Set (c) is the independent measure.
+- Benign narrative sentences in sets (a) and (b) are now rejected by design. They are still
+  reported; their rejection rate no longer means anything.
+- The gate still measures the verifier against the defined classes and three hand-written sets,
+  not against every possible tampering of a template memo.
+
+If any gate fails, Stage 5 is not done and the design returns to review; thresholds never move.
+
+## Backlog (added 2026-10-31)
+- **LLM narrative** (cut by deviation 1). A free-prose narrative failed against an independent
+  set; it is not retried in that form.
+- **Structured LLM narrative:** the model chooses and orders among verified atoms and fixed
+  template sentences, writing no free text, so V1–V3 and V5 still cover everything it emits.
+  It would need its own pre-registered validation.

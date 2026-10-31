@@ -57,6 +57,16 @@ def test_the_pre_registered_config_loads() -> None:
     assert all(set(ps) <= names for ps in v.COVERAGE_PRESETS.values())
 
 
+def test_the_deviation_config_changes_only_the_seed_and_the_sets() -> None:
+    """docs/adr/0017, deviation 1: a fresh root seed and set (c); everything else unchanged."""
+    first = load_memo_validation_config()
+    dev = load_memo_validation_config(Path("configs/memo_validation_deviation1.yaml"))
+    assert dev.root_seed == 20261107 != first.root_seed
+    assert dev.hand_sets == (*first.hand_sets, "tests/fixtures/memo_adversarial/set_c.yaml")
+    same = {"root_seed", "hand_sets"}
+    assert dev.model_dump(exclude=same) == first.model_dump(exclude=same)
+
+
 def test_the_coverage_rule_adds_seeds_to_the_mapped_presets(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

@@ -1,0 +1,23 @@
+# Stage 5 memo verifier validation, deviation 1 (docs/adr/0017, "Deviation 1"). The rerun of
+# the pre-registered validation after G3 failed: template-only verifier (V1 rejects any narrative
+# paragraph) and the V10 character check. Same run set, coverage rule and gates as
+# memo_validation.yaml; a fresh root seed (fresh runs and fresh corruption streams) and the
+# independent set (c). Fixed and pushed before the run.
+
+root_seed: 20261107     # fresh: not used by any earlier study, pilot, validation or fixture
+presets:
+  - {name: base, preset: base}
+  - {name: realistic, preset: realistic}
+  - {name: hidden_confounder, preset: hidden_confounder}
+  - {name: multi_asset, preset: multi_asset}
+  - {name: volfrag, preset: volfrag}
+  - {name: base_short, preset: base, n_obs: 4000}   # below Stage 2's min_obs: not-decided runs
+n_seeds: 8              # per preset, before the coverage rule
+max_seeds: 40           # per preset, after it
+coverage_min: 3         # runs per outcome category (validation.CATEGORIES)
+instances_per_class: 12 # corruptions per class per run: 48 runs give 576 per class
+min_instances: 500      # G2: at zero misses, the 95% upper bound on the miss rate is .006
+hand_sets:
+  - tests/fixtures/memo_adversarial/set_a.yaml
+  - tests/fixtures/memo_adversarial/set_b.yaml
+  - tests/fixtures/memo_adversarial/set_c.yaml
