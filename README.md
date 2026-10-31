@@ -3,8 +3,12 @@
 **Status:** Stages 1–3 (causal screen, decay test, portfolio construction) are complete and
 validated on a planted-signal benchmark. Stage 4 (adversarial stress) was evaluated and **not
 adopted as a kill stage** ([ADR 0016](docs/adr/0016-stage4-adversarial-study.md)); a
-reported-only stress diagnostic replaces it. Stage 5 (research memo) is next, then the first
-real-data run. No result below comes from real market data yet.
+reported-only stress diagnostic replaces it. Stage 5 (research memo) is accepted on the
+benchmark: a template memo built only from the ledger and stage results, and a verifier that
+rejects any memo that is not exactly that memo
+([ADR 0017](docs/adr/0017-stage5-research-memo.md)). An LLM-written narrative was planned and
+**cut**: an independent red team showed that word-list verification cannot police free prose.
+The first real-data run is next. No result below comes from real market data yet.
 
 INVARIANT is a research pipeline for trading signals that tries to kill every candidate and
 reports what survives. Most backtests show the signals that worked. INVARIANT puts each
@@ -29,6 +33,12 @@ before it ran. Where a method failed, or a stage has a blind spot, this README s
   confounded signal passes Stages 1–2 in .702 [.673, .730] of runs
   ([report](docs/results/0012-decay-stage-validation/report.json)). No observational stage
   can fix that.
+- **Free prose could not be verified, so the memo has none.** A word-list verifier for an LLM
+  narrative missed 7 of 126 corruptions written by an independent agent, and rejected 8 of its
+  13 harmless sentences ([report](docs/results/0017-memo-validation-run1/report.json)). The
+  template-only verifier then missed none of 368 hand-written and 5184 generated corruptions,
+  with no false rejection in 48 runs
+  ([report](docs/results/0017-memo-validation-deviation1/report.json)).
 
 ```
  candidate signals
@@ -46,7 +56,7 @@ before it ran. Where a method failed, or a stage has a blind spot, this README s
  4  Adversarial stress ─────── regime fragility: evaluated, not adopted (diagnostic only)
         │
         ▼
- 5  Research memo ─────────── unsupported claims: a case stronger than the evidence     (in progress)
+ 5  Research memo ─────────── unsupported claims: a case stronger than the evidence
         │
         ▼
  survivors, plus a ledger entry for every kill
@@ -141,6 +151,39 @@ Caveats:
 - **The test is on gross Sharpe.** On the null markets Ridge-CV loses about .31 of Sharpe to
   costs, so a false pass would lose money.
 
+### Stage 5, research memo
+[ADR 0017](docs/adr/0017-stage5-research-memo.md). The memo is built from one run's ledger,
+stage results and manifest; it never reads the benchmark's ground truth (a leakage test pins
+this).
+- **Every number comes from the run.** The memo is a document of segments, and every digit lies
+  inside an atom that renders one fact-sheet value with its subject and label. The verifier
+  rebuilds the fact sheet and reads the raw ledger and result files by its own code path.
+- **The recommendation follows a fixed rule.** "Candidate for paper trading" if any signal
+  passed every kill stage; "not decided" if a signal was killed without a test decision;
+  otherwise "against trading". The memo states every caveat whose trigger fires (a hidden
+  confounder can pass Stage 1; DRO was evaluated and ridge selected; Stage 4 was not adopted;
+  the stress diagnostic is a description, not a certification; passengers; ...).
+- **Template only.** The verifier accepts a memo only if it is exactly the run's template
+  memo: every block equals the re-render, `memo.md` equals the rendering of `memo.json`, and
+  no text may hold a zero-width or other format character, or a non-ASCII letter that could
+  pass for an ASCII one.
+- **The LLM narrative was cut.** The planned narrative was to be checked by word lists (no
+  numbers, verdict words, banned claims or uncited literature cues in prose). A set of
+  adversarial edits written by an independent agent, which never saw the verifier, got 7 of
+  126 past it: claims in new wording ("for practical purposes as good as clearing the bar")
+  and Unicode tricks. It also rejected 8 of 13 harmless sentences
+  ([run 1 report](docs/results/0017-memo-validation-run1/report.json)). Adding the missed
+  words would only have fitted that one set, so narrative paragraphs are now rejected outright.
+- **Validation.** On fresh seeds, the template-only verifier accepted all 48 template memos,
+  missed none of 576 generated corruptions in each of 9 classes (95% upper bound on the miss
+  rate .0052), and missed none of three hand-written sets (96, 126 and 146 entries; the third
+  written afterwards by a new independent agent)
+  ([report](docs/results/0017-memo-validation-deviation1/report.json)).
+- **What it cannot do.** It checks that a cited paper is in the corpus, not that it supports
+  the claim. Most template tampering is caught by one check (block equals re-render), so a bug
+  shared by the template and the verifier's re-render would pass. "-0.00" and "0.00" compare
+  equal at display precision.
+
 ### One run: what it killed and why
 `scripts/pipeline_demo.py --seed 0` runs Stages 1–3 on one benchmark market (T = 6000). Seed 0
 was fixed before the demo's first run, not picked afterwards, and a test pins this output. On
@@ -206,6 +249,8 @@ Then:
 ```sh
 uv run pytest -m "not slow"                        # fast suite, offline
 uv run python -m scripts.portfolio_stage_validation --n-jobs 8   # ADR 0014 validation, ~14 h
+uv run python -m scripts.memo_validation --n-jobs 8 \
+    --config configs/memo_validation_deviation1.yaml               # ADR 0017 validation, ~20 min
 ```
 
 Each stage's study and validation has a script in `scripts/` and a config in `configs/`.
@@ -228,9 +273,10 @@ fetch real ALFRED data. Working rules for contributors are in [CLAUDE.md](CLAUDE
       fragility.
   - **What remains.** Stage 3 reports a stress diagnostic: each portfolio's Sharpe in
     high-volatility periods, with an interval. It never decides.
-- **Stage 5, research memo** (next): a citation-backed memo for or against each strategy, built
-  from the ledger, that states each stage's limits, including Stage 4's non-adoption.
-- **Real data** (after Stage 5): ETFs, Fama-French factors and ALFRED macro vintages through
+- **Stage 5, research memo: accepted on the benchmark, template only**
+  ([ADR 0017](docs/adr/0017-stage5-research-memo.md)). The LLM narrative was cut after an
+  independent red team showed that word-list verification cannot police free prose.
+- **Real data** (next): ETFs, Fama-French factors and ALFRED macro vintages through
   Stages 1–3 and the memo.
 
 **Backlog**, each to be decided by its own pre-registered study:
@@ -241,6 +287,10 @@ fetch real ALFRED data. Working rules for contributors are in [CLAUDE.md](CLAUDE
 - A calibrated confidence radius for the DRO forecast arm, before it is reconsidered
   (ADR 0013).
 - A calibrated half-life interval (ADR 0011).
+- A structured LLM narrative that chooses and orders verified atoms and fixed sentences and
+  writes no free text, with its own validation (ADR 0017).
+- An independent second check on the memo's template text, which the re-render comparison
+  alone now covers, and a sign check for values displayed as zero (ADR 0017).
 - The decline test's size and power at T < 6000, which would allow a lower `min_obs`
   (ADR 0011).
 - The decline test's small excess size when a strong decaying co-parent is present (ADR 0011).

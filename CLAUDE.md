@@ -10,7 +10,11 @@ An autonomous quant research pipeline. Five stages; Stages 1–3 can kill a cand
    At ~24 years of daily data, plausible variation in high-volatility exposure is too small to
    overturn an average-profitable strategy. What remains is a reported-only stress diagnostic
    in Stage 3's ledger metrics (high-volatility-state Sharpe with an interval); it never decides.
-5. Research memo: citation-backed investment memo arguing for or against the strategy
+5. Research memo: citation-backed investment memo arguing for or against the strategy. It is
+   template-only (ADR 0017): built from the run's ledger and results, and accepted only if a
+   verifier finds it is exactly the run's template memo. The LLM narrative was cut after an
+   independent red team showed word-list verification can't police free prose; don't
+   reintroduce free prose without a new pre-registered validation.
 
 Design overview: docs/design.md (the ADRs in docs/adr/ are authoritative)
 
@@ -113,4 +117,7 @@ tree, so a failing check cannot be pushed. Never bypass it with `--no-verify`.
 - Stage 4 (ADRs 0015–0016) was evaluated and rejected as a kill stage. The benchmark gained
   s_regime and s_volfrag (reported-only, `identifiable = false`); Stage 3 reports a stress
   diagnostic. The memo must say Stage 4 was evaluated and not adopted, and why.
-- Stage 5 (research memo) is next.
+- Stage 5 (research memo, ADR 0017) is accepted on the benchmark, template-only. Run 1 failed
+  G3 (narrative prose); deviation 1 cut the LLM narrative, made the verifier template-only and
+  added V10 (characters); the rerun on fresh seeds and a new independent set passed every gate.
+- The first real-data run is next.
