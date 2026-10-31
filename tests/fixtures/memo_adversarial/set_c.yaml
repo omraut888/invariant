@@ -1,0 +1,1068 @@
+# Adversarial set (c), docs/adr/0017 deviation 1. Written 2026-10-31 by an independent agent
+# given only the template-only memo format, the fixture memos, the edit operations and the class
+# definitions; never the verifier, sets (a)/(b) or the ADR. Frozen as written, before the
+# verifier is run on it.
+set: c
+entries:
+  # ---------------------------------------------------------------- K1 wrong number
+  - id: c_k1_01
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: "s_real's family p '< 0.001' becomes '0.001'; the bound sign is dropped, a numeric parser may read both as 0.001"
+    ops:
+      - {op: md_replace, old: "| s_real | < 0.001 | < 0.001 |", new: "| s_real | 0.001 | < 0.001 |"}
+  - id: c_k1_02
+    case: hidden_confounder
+    class: K1
+    expect: reject
+    note: "Ridge-CV stress interval '-0.00' lower endpoint becomes '0.00' in table and prose; float comparison treats -0.0 == 0.0"
+    ops:
+      - {op: md_replace, old: "[-0.00, 1.47]", new: "[0.00, 1.47]"}
+      - {op: md_replace, old: "[-0.00, 1.47]", new: "[0.00, 1.47]"}
+  - id: c_k1_03
+    case: portfolio_kill
+    class: K1
+    expect: reject
+    note: "s_noise partial-correlation lower endpoint '-0.000' becomes '0.000' (sign of a rounded zero); equal as floats"
+    ops:
+      - {op: md_replace, old: "0.025 [-0.000, 0.049]", new: "0.025 [0.000, 0.049]"}
+  - id: c_k1_04
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: "equal-weight gross and net Sharpe sign-flipped from -0.03 to 0.03"
+    ops:
+      - {op: md_replace, old: "| equal weight | -0.03 | -0.03 |", new: "| equal weight | 0.03 | 0.03 |"}
+  - id: c_k1_05
+    case: pass_single
+    class: K1
+    expect: reject
+    note: "s_real coefficient after the break changed in the exponent only (7.47e-04 -> 7.47e-03), mantissa untouched"
+    ops:
+      - {op: md_replace, old: "1.18e-03 | 7.47e-04", new: "1.18e-03 | 7.47e-03"}
+  - id: c_k1_06
+    case: volfrag
+    class: K1
+    expect: reject
+    note: "s_volfrag partial-correlation upper endpoint 0.105 transposed to 0.150; point estimate untouched"
+    ops:
+      - {op: md_replace, old: "0.066 [0.027, 0.105]", new: "0.066 [0.027, 0.150]"}
+  - id: c_k1_07
+    case: hidden_confounder
+    class: K1
+    expect: reject
+    note: "Ridge-CV deflated Sharpe 0.961 transposed to 0.916 in both the table and the caveat, so the md is self-consistent"
+    ops:
+      - {op: md_replace, old: "0.961", new: "0.916"}
+      - {op: md_replace, old: "0.961", new: "0.916"}
+  - id: c_k1_08
+    case: portfolio_kill
+    class: K1
+    expect: reject
+    note: "deciding arm's LW p 0.064 becomes 0.046, below the 0.05 level, while the kill verdict is left standing"
+    ops:
+      - {op: md_replace, old: "| 1.000 | 0.064 |", new: "| 1.000 | 0.046 |"}
+  - id: c_k1_09
+    case: stage2_short
+    class: K1
+    expect: reject
+    note: "the decay data issue's threshold min_obs 5000 changed to 4000 inside a fact's value text, on one row only"
+    ops:
+      - {op: md_replace, old: "3989 design rows < min_obs 5000", new: "3989 design rows < min_obs 4000"}
+  - id: c_k1_10
+    case: not_decided
+    class: K1
+    expect: reject
+    note: "reproducibility panel rows 449 transposed to 494 (the causal table still says 449 complete rows)"
+    ops:
+      - {op: md_replace, old: "panel rows = 449", new: "panel rows = 494"}
+  - id: c_k1_11
+    case: realistic
+    class: K1
+    expect: reject
+    note: "last panel date moved by one day, 2022-12-30 -> 2022-12-31; a date, not a decimal"
+    ops:
+      - {op: md_replace, old: "to 2022-12-30", new: "to 2022-12-31"}
+  - id: c_k1_12
+    case: pass_multi
+    class: K1
+    expect: reject
+    note: "high-volatility share changed only in the stress caveat (0.30 -> 0.33); the stress section still says 0.30"
+    ops:
+      - {op: md_replace, old: "0.30 of days fall in it", new: "0.33 of days fall in it"}
+  - id: c_k1_13
+    case: volfrag
+    class: K1
+    expect: reject
+    note: "the interval level of s_real's diagnostic B relabelled 95% -> 90% on one row; the CI numbers are unchanged"
+    ops:
+      - {op: md_replace, old: "0.29 [0.04, 0.55], 95% interval |", new: "0.29 [0.04, 0.55], 90% interval |"}
+
+  # ---------------------------------------------------------------- K2 number in prose
+  - id: c_k2_01
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: "the {stage:decay} atom is replaced by the plain text 'Stage 2 (decay test)'; memo.md is byte-identical, but a digit now lives in plain text"
+    ops:
+      - {op: atom_replace, old: "{stage:decay}", new: "Stage 2 (decay test)"}
+  - id: c_k2_02
+    case: portfolio_kill
+    class: K2
+    expect: reject
+    note: "{adr:16} replaced by plain text 'ADR 0016'; identical rendering, digits outside any atom"
+    ops:
+      - {op: atom_replace, old: "{adr:16}", new: "ADR 0016"}
+  - id: c_k2_03
+    case: hidden_confounder
+    class: K2
+    expect: reject
+    note: "{term:one_over_n} replaced by plain text '1/N'; identical rendering, a digit in plain text"
+    ops:
+      - {op: atom_replace, old: "{term:one_over_n}", new: "1/N"}
+  - id: c_k2_04
+    case: pass_single
+    class: K2
+    expect: reject
+    note: "the cost fact atom is replaced by the literal '5'; same md, the number no longer comes from the fact sheet"
+    ops:
+      - {op: atom_replace, old: "{fact:portfolio.cost_bp|value}", new: "5"}
+  - id: c_k2_05
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: "registry's number words 'twenty-four years' rewritten as digits '24 years' in a mandatory paragraph"
+    ops:
+      - {op: text_replace, old: "about twenty-four years of daily data", new: "about 24 years of daily data"}
+  - id: c_k2_06
+    case: realistic
+    class: K2
+    expect: reject
+    note: "number words added to the methods ('five lags and six assets'), no digits for a digit scanner to find"
+    ops:
+      - {op: text_replace, old: "Bonferroni over each signal's lags and assets", new: "Bonferroni over each signal's five lags and six assets"}
+  - id: c_k2_07
+    case: hidden_confounder
+    class: K2
+    expect: reject
+    note: "a correct count in words ('None of the four signals') that does not come from the fact sheet"
+    ops:
+      - {op: text_replace, old: "No signal survived every kill stage", new: "None of the four signals survived every kill stage"}
+  - id: c_k2_08
+    case: stage2_short
+    class: K2
+    expect: reject
+    note: "'Some signals' becomes 'Two signals', a true count stated as a number word in a mandatory caveat"
+    ops:
+      - {op: text_replace, old: "Some signals were killed without a test decision", new: "Two signals were killed without a test decision"}
+  - id: c_k2_09
+    case: pass_multi
+    class: K2
+    expect: reject
+    note: "'(n = 2)' member count inserted into the portfolio paragraph's plain text"
+    ops:
+      - {op: text_replace, old: "Members: s_conf, s_real.", new: "Members (n = 2): s_conf, s_real."}
+  - id: c_k2_10
+    case: not_decided
+    class: K2
+    expect: reject
+    note: "'SHA-256' added to the reproducibility text; a digit run hiding inside a technical name"
+    ops:
+      - {op: text_replace, old: "A run is keyed by a hash of its data snapshot", new: "A run is keyed by a SHA-256 hash of its data snapshot"}
+  - id: c_k2_11
+    case: portfolio_kill
+    class: K2
+    expect: reject
+    note: "'only part of the time' made 'about four times in five', a number-word paraphrase of the 0.828 power fact"
+    ops:
+      - {op: text_replace, old: "passes a portfolio with a true edge only part of the time", new: "passes a portfolio with a true edge only about four times in five"}
+  - id: c_k2_12
+    case: pass_single
+    class: K2
+    expect: reject
+    note: "fullwidth digits '９５%' added to the methods; an ASCII [0-9] scan misses them"
+    ops:
+      - {op: text_replace, old: "Benchmark validation rates carry Wilson intervals (", new: "Benchmark validation rates carry ９５% Wilson intervals ("}
+  - id: c_k2_13
+    case: volfrag
+    class: K2
+    expect: reject
+    note: "a Roman numeral 'Stage III' in plain text, a number with no digits"
+    ops:
+      - {op: text_replace, old: "The kill test is the one-sided Ledoit-Wolf test", new: "The Stage III kill test is the one-sided Ledoit-Wolf test"}
+
+  # ---------------------------------------------------------------- K3 atom repointed
+  - id: c_k3_01
+    case: hidden_confounder
+    class: K3
+    expect: reject
+    note: "gross Sharpe atoms of Ridge-CV and DRO (fixed radius) swapped: the deciding arm shows 0.82, files consistent"
+    ops:
+      - {op: atom_replace, old: "{fact:portfolio.ridge_cv.sharpe|value}", new: "{fact:portfolio.dro_fc.sharpe|value}"}
+      - {op: atom_replace, old: "{fact:portfolio.dro_fc.sharpe|value}", new: "{fact:portfolio.ridge_cv.sharpe|value}"}
+  - id: c_k3_02
+    case: portfolio_kill
+    class: K3
+    expect: reject
+    note: "stress table rows swapped: Ridge-CV gets equal weight's high-volatility Sharpe (1.68) and vice versa; the caveat prose is left correct"
+    ops:
+      - {op: atom_replace, old: "{fact:stress.equal_weight_high|value}", new: "{fact:stress.ridge_cv_high|value}"}
+      - {op: atom_replace, old: "{fact:stress.ridge_cv_high|value}", new: "{fact:stress.equal_weight_high|value}"}
+  - id: c_k3_03
+    case: pass_multi
+    class: K3
+    expect: reject
+    note: "the recommendation's survivor list names s_decay's fate instead of s_conf's; every rendered string is a valid ledger fate"
+    ops:
+      - {op: atom_replace, old: "{fate:s_conf}", new: "{fate:s_decay}"}
+  - id: c_k3_04
+    case: volfrag
+    class: K3
+    expect: reject
+    note: "the s_volfrag row of the Signals table carries s_real's fate, so the volfrag kill disappears from the table"
+    ops:
+      - {op: atom_replace, old: "{fate:s_volfrag}", new: "{fate:s_real}"}
+  - id: c_k3_05
+    case: pass_single
+    class: K3
+    expect: reject
+    note: "portfolio_method caveat cites ADR 0014 instead of ADR 0013 for the DRO-vs-ridge study"
+    ops:
+      - {op: atom_replace, old: "{adr:13}", new: "{adr:14}"}
+  - id: c_k3_06
+    case: realistic
+    class: K3
+    expect: reject
+    note: "s_conf's family p cell repointed to s_real's fact (1.000 instead of 0.683)"
+    ops:
+      - {op: atom_replace, old: "{fact:causal.s_conf.family_p|value}", new: "{fact:causal.s_real.family_p|value}"}
+  - id: c_k3_07
+    case: hidden_confounder
+    class: K3
+    expect: reject
+    note: "hidden-confounder caveat attributed to Stage 2 (decay test) instead of Stage 1 via the stage atom"
+    ops:
+      - {op: atom_replace, old: "{stage:causal}", new: "{stage:decay}"}
+  - id: c_k3_08
+    case: portfolio_kill
+    class: K3
+    expect: reject
+    note: "out-of-sample day count repointed to the panel row count (5999 instead of 4738); a real run number on the wrong subject"
+    ops:
+      - {op: atom_replace, old: "{fact:portfolio.n_test_days|value}", new: "{fact:run.n_obs|value}"}
+  - id: c_k3_09
+    case: pass_multi
+    class: K3
+    expect: reject
+    note: "the benchmark term repointed: 'tested against HC3' instead of 1/N"
+    ops:
+      - {op: atom_replace, old: "{term:one_over_n}", new: "{term:hc3}"}
+  - id: c_k3_10
+    case: volfrag
+    class: K3
+    expect: reject
+    note: "Ridge-CV's net Sharpe table cell repointed to DRO (CV radius)'s 1.39; the caveat still says 1.31"
+    ops:
+      - {op: atom_replace, old: "{fact:portfolio.ridge_cv.sharpe_net|value}", new: "{fact:portfolio.dro_cv.sharpe_net|value}"}
+  - id: c_k3_11
+    case: stage2_short
+    class: K3
+    expect: reject
+    note: "the decay kill level atom repointed to s_decay's BH q (0.003) so the decay paragraph states a wrong alpha"
+    ops:
+      - {op: atom_replace, old: "{fact:decay.s_decay.alpha|value}", new: "{fact:causal.s_decay.q|value}"}
+  - id: c_k3_12
+    case: pass_multi
+    class: K3
+    expect: reject
+    note: "passenger caveat lists s_conf's B twice; s_real's B (the one including zero) is gone though the sentence still names s_real"
+    ops:
+      - {op: atom_replace, old: "{fact:portfolio.s_real.b}", new: "{fact:portfolio.s_conf.b}"}
+  - id: c_k3_13
+    case: not_decided
+    class: K3
+    expect: reject
+    note: "first panel date repointed to the last date: 'from 2001-09-21 to 2001-09-21'"
+    ops:
+      - {op: atom_replace, old: "{fact:run.first_date|value}", new: "{fact:run.last_date|value}"}
+  - id: c_k3_14
+    case: pass_single
+    class: K3
+    expect: reject
+    note: "Stage 1 level atom repointed to the decay stage's alpha; renders the same 0.05, so only the atom provenance is wrong"
+    ops:
+      - {op: atom_replace, old: "{fact:causal.s_conf.alpha|value}", new: "{fact:decay.s_decay.alpha|value}"}
+
+  # ---------------------------------------------------------------- K4 wrong verdict
+  - id: c_k4_01
+    case: portfolio_kill
+    class: K4
+    expect: reject
+    note: "memo.md Signals table says s_real passed all three stages; it was killed at Stage 3"
+    ops:
+      - {op: md_replace, old: "| s_real | s_real was killed at Stage 3 (portfolio construction) by its test (portfolio.no_edge_over_equal_weight) |", new: "| s_real | s_real passed all three kill stages |"}
+  - id: c_k4_02
+    case: pass_multi
+    class: K4
+    expect: reject
+    note: "s_noise's reason code swapped for another real code (not_significant_after_correction); same stage, same shape"
+    ops:
+      - {op: md_replace, old: "(causal.no_significant_link)", new: "(causal.not_significant_after_correction)"}
+  - id: c_k4_03
+    case: stage2_short
+    class: K4
+    expect: reject
+    note: "s_real's no-decision kill reframed as a test decision (decay.edge_declining)"
+    ops:
+      - {op: md_replace, old: "s_real was killed at Stage 2 (decay test) without a test decision (general.insufficient_data)", new: "s_real was killed at Stage 2 (decay test) by its test (decay.edge_declining)"}
+  - id: c_k4_04
+    case: hidden_confounder
+    class: K4
+    expect: reject
+    note: "s_conf's kill stage moved to Stage 3 while the reason code stays decay.edge_declining"
+    ops:
+      - {op: md_replace, old: "s_conf was killed at Stage 2 (decay test)", new: "s_conf was killed at Stage 3 (portfolio construction)"}
+  - id: c_k4_05
+    case: pass_single
+    class: K4
+    expect: reject
+    note: "survivor fate atom replaced by plain text that also claims s_conf passed (it was killed at Stage 1); no digits, files consistent"
+    ops:
+      - {op: delete_atom, atom: "{fate:s_real}"}
+      - {op: text_replace, old: "At least one signal survived every kill stage: ", new: "At least one signal survived every kill stage: s_real and s_conf passed all three kill stages"}
+  - id: c_k4_06
+    case: portfolio_kill
+    class: K4
+    expect: reject
+    note: "s_decay (killed at Stage 2) added to the portfolio member list"
+    ops:
+      - {op: text_replace, old: "Members: s_real.", new: "Members: s_decay, s_real."}
+  - id: c_k4_07
+    case: volfrag
+    class: K4
+    expect: reject
+    note: "member list swaps s_decay for s_volfrag, which was killed at Stage 2"
+    ops:
+      - {op: text_replace, old: "Members: s_conf, s_decay, s_real.", new: "Members: s_conf, s_real, s_volfrag."}
+  - id: c_k4_08
+    case: pass_multi
+    class: K4
+    expect: reject
+    note: "the decay rule reversed: 'A decline is a pass at the 0.05 level'"
+    ops:
+      - {op: text_replace, old: "A decline is a kill at the ", new: "A decline is a pass at the "}
+  - id: c_k4_09
+    case: not_decided
+    class: K4
+    expect: reject
+    note: "the no-decision kill reframed: 'That signal was ruled out'; one word deleted"
+    ops:
+      - {op: text_replace, old: "That signal was not ruled out", new: "That signal was ruled out"}
+  - id: c_k4_10
+    case: realistic
+    class: K4
+    expect: reject
+    note: "s_real's test kill reframed as a no-decision kill (general.insufficient_data) in memo.md only"
+    ops:
+      - {op: md_replace, old: "s_real was killed at Stage 1 (causal screen) by its test (causal.no_significant_link)", new: "s_real was killed at Stage 1 (causal screen) without a test decision (general.insufficient_data)"}
+  - id: c_k4_11
+    case: hidden_confounder
+    class: K4
+    expect: reject
+    note: "collateral caveat says Stage 3 'passed every member together'; reverses the portfolio verdict inside a mandatory paragraph"
+    ops:
+      - {op: text_replace, old: "killed every member together", new: "passed every member together"}
+  - id: c_k4_12
+    case: volfrag
+    class: K4
+    expect: reject
+    note: "memo.md Signals row says s_decay was killed at Stage 2; it passed (the s_volfrag fate text is borrowed)"
+    ops:
+      - {op: md_replace, old: "| s_decay | s_decay passed all three kill stages |", new: "| s_decay | s_decay was killed at Stage 2 (decay test) by its test (decay.edge_declining) |"}
+  - id: c_k4_13
+    case: pass_multi
+    class: K4
+    expect: reject
+    note: "'At least one signal survived' becomes 'Every signal survived'; s_decay and s_noise were killed"
+    ops:
+      - {op: text_replace, old: "At least one signal survived every kill stage: ", new: "Every signal survived every kill stage: "}
+
+  # ---------------------------------------------------------------- K5 recommendation
+  - id: c_k5_01
+    case: pass_multi
+    class: K5
+    expect: reject
+    note: "memo.json recommendation field set to 'against trading'; the md line renders from the sheet so memo.md is unchanged"
+    ops:
+      - {op: set_field, field: recommendation, value: "against trading"}
+  - id: c_k5_02
+    case: portfolio_kill
+    class: K5
+    expect: reject
+    note: "recommendation field set to 'candidate for paper trading' on a run where nothing survived; md unchanged"
+    ops:
+      - {op: set_field, field: recommendation, value: "candidate for paper trading"}
+  - id: c_k5_03
+    case: not_decided
+    class: K5
+    expect: reject
+    note: "recommendation field 'not decided' -> 'against trading' in json only"
+    ops:
+      - {op: set_field, field: recommendation, value: "against trading"}
+  - id: c_k5_04
+    case: realistic
+    class: K5
+    expect: reject
+    note: "recommendation field 'against trading' -> 'not decided' in json only"
+    ops:
+      - {op: set_field, field: recommendation, value: "not decided"}
+  - id: c_k5_05
+    case: volfrag
+    class: K5
+    expect: reject
+    note: "the restatement turned around: 'a candidate for paper trading and a recommendation to trade'"
+    ops:
+      - {op: text_replace, old: "That makes the strategy a candidate for paper trading, not a recommendation to trade.", new: "That makes the strategy a candidate for paper trading and a recommendation to trade."}
+  - id: c_k5_06
+    case: pass_single
+    class: K5
+    expect: reject
+    note: "memo.md recommendation line drops 'paper': 'candidate for trading'"
+    ops:
+      - {op: md_replace, old: "Recommendation: candidate for paper trading.", new: "Recommendation: candidate for trading."}
+  - id: c_k5_07
+    case: hidden_confounder
+    class: K5
+    expect: reject
+    note: "the restated conclusion contradicts the 'against trading' line: 'the strategy remains a candidate for paper trading'"
+    ops:
+      - {op: text_replace, old: "so there is no strategy to trade", new: "so the strategy remains a candidate for paper trading"}
+  - id: c_k5_08
+    case: stage2_short
+    class: K5
+    expect: reject
+    note: "memo.md recommendation line 'not decided' -> 'against trading'"
+    ops:
+      - {op: md_replace, old: "Recommendation: not decided.", new: "Recommendation: against trading."}
+  - id: c_k5_09
+    case: pass_multi
+    class: K5
+    expect: reject
+    note: "the {recommendation} atom deleted; the section keeps a lone '.' and the field stays set"
+    ops:
+      - {op: delete_atom, atom: "{recommendation}"}
+  - id: c_k5_10
+    case: realistic
+    class: K5
+    expect: reject
+    note: "{recommendation} atom replaced by identical plain text; md is byte-identical but the line no longer comes from the rule"
+    ops:
+      - {op: atom_replace, old: "{recommendation}", new: "Recommendation: against trading"}
+  - id: c_k5_11
+    case: not_decided
+    class: K5
+    expect: reject
+    note: "'supports no conclusion either way' -> 'argues against trading'; the not-decided outcome restated as a decision"
+    ops:
+      - {op: text_replace, old: "so the run supports no conclusion either way", new: "so the run argues against trading"}
+  - id: c_k5_12
+    case: portfolio_kill
+    class: K5
+    expect: reject
+    note: "recommendation line in memo.md with a Cyrillic 'а' in 'against'; looks identical, the string differs"
+    ops:
+      - {op: md_replace, old: "Recommendation: against trading.", new: "Recommendation: аgainst trading."}
+  - id: c_k5_13
+    case: pass_single
+    class: K5
+    expect: reject
+    note: "json says 'a recommendation to trade' with md kept as the correct original; only a json re-render catches it"
+    ops:
+      - {op: text_replace, old: "a candidate for paper trading, not a recommendation to trade", new: "a recommendation to trade", md: keep}
+
+  # ---------------------------------------------------------------- K6 mandatory statement
+  - id: c_k6_01
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: "the passenger caveat deleted from a two-member passing portfolio"
+    ops:
+      - {op: delete_statement, id: passenger}
+  - id: c_k6_02
+    case: stage2_short
+    class: K6
+    expect: reject
+    note: "the not_decided caveat deleted; the recommendation paragraph still mentions the no-decision kill, masking the gap"
+    ops:
+      - {op: delete_statement, id: not_decided}
+  - id: c_k6_03
+    case: pass_single
+    class: K6
+    expect: reject
+    note: "passenger caveat added for a one-member portfolio (trigger needs two members); registry text so it reads naturally"
+    ops:
+      - {op: add_statement, id: passenger}
+  - id: c_k6_04
+    case: hidden_confounder
+    class: K6
+    expect: reject
+    note: "collateral paragraph relabelled as statement 'passenger'; text and md unchanged, only the statement id is wrong"
+    ops:
+      - {op: set_statement, old: collateral, new: passenger}
+  - id: c_k6_05
+    case: volfrag
+    class: K6
+    expect: reject
+    note: "data_source caveat moved to the end of the limits (delete + re-add); every caveat present but registry order broken"
+    ops:
+      - {op: delete_statement, id: data_source}
+      - {op: add_statement, id: data_source}
+  - id: c_k6_06
+    case: portfolio_kill
+    class: K6
+    expect: reject
+    note: "not_detectable undercut: 'not that it has none' -> 'most likely because it has none'"
+    ops:
+      - {op: text_replace, old: "not that it has none", new: "most likely because it has none"}
+  - id: c_k6_07
+    case: realistic
+    class: K6
+    expect: reject
+    note: "one word reversed in stage1_descriptive: intervals 'ran wide' instead of 'ran narrow' on the benchmark"
+    ops:
+      - {op: text_replace, old: "ran narrow on the benchmark", new: "ran wide on the benchmark"}
+  - id: c_k6_08
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: "decay_power reworded: weakest when the decline began 'early' instead of 'recently'"
+    ops:
+      - {op: text_replace, old: "and is weakest when the decline began recently", new: "and is weakest when the decline began early"}
+  - id: c_k6_09
+    case: not_decided
+    class: K6
+    expect: reject
+    note: "not_decided undercut: a no-decision kill becomes 'weak evidence against an edge'"
+    ops:
+      - {op: text_replace, old: "Such a kill is evidence neither for nor against an edge.", new: "Such a kill is weak evidence against an edge."}
+  - id: c_k6_10
+    case: pass_single
+    class: K6
+    expect: reject
+    note: "gross_sharpe undercut: 'real costs may be higher' -> 'real costs are likely lower'"
+    ops:
+      - {op: text_replace, old: "; real costs may be higher.", new: "; real costs are likely lower."}
+  - id: c_k6_11
+    case: volfrag
+    class: K6
+    expect: reject
+    note: "passenger caveat's zero-interval list drops s_conf (whose B interval does include zero)"
+    ops:
+      - {op: text_replace, old: "includes zero for s_conf, s_decay, so B does not separate them", new: "includes zero for s_decay, so B does not separate it"}
+  - id: c_k6_12
+    case: hidden_confounder
+    class: K6
+    expect: reject
+    note: "stage4_not_adopted marked origin llm: the mandatory caveat becomes a narrative block quote"
+    ops:
+      - {op: set_origin, statement: stage4_not_adopted, origin: llm}
+  - id: c_k6_13
+    case: portfolio_kill
+    class: K6
+    expect: reject
+    note: "not_decided caveat added although no signal was killed without a test decision"
+    ops:
+      - {op: add_statement, id: not_decided}
+  - id: c_k6_14
+    case: stage2_short
+    class: K6
+    expect: reject
+    note: "hidden_confounder caveat undercut: 'It cannot rule out' -> 'It largely rules out' a missing common cause"
+    ops:
+      - {op: text_replace, old: "It cannot rule out a common cause missing from the data", new: "It largely rules out a common cause missing from the data"}
+  - id: c_k6_15
+    case: pass_multi
+    class: K6
+    expect: reject
+    note: "the stage1_descriptive paragraph removed from memo.md only; memo.json still has it"
+    ops:
+      - {op: md_replace, old: "At Stage 1 (causal screen), the best lag is where the evidence was strongest, not an identified horizon, and the partial-correlation intervals are descriptive: they are not adjusted for the selection of the link and ran narrow on the benchmark (ADR 0010).\n\n", new: ""}
+  - id: c_k6_16
+    case: realistic
+    class: K6
+    expect: reject
+    note: "not_detectable paragraph relabelled 'not_decided'; md unchanged, the required statement id is now missing and an untriggered one present"
+    ops:
+      - {op: set_statement, old: not_detectable, new: not_decided}
+  - id: c_k6_17
+    case: volfrag
+    class: K6
+    expect: reject
+    note: "decay_power undercut: the test 'misses few real declines' instead of many"
+    ops:
+      - {op: text_replace, old: "The test misses many real declines", new: "The test misses few real declines"}
+
+  # ---------------------------------------------------------------- K7 literature
+  - id: c_k7_01
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: "wilson1927 removed from the bibliography while still cited in methods"
+    ops:
+      - {op: delete_reference, key: wilson1927}
+  - id: c_k7_02
+    case: realistic
+    class: K7
+    expect: reject
+    note: "white1980 (a real corpus key, HC topic) added to the bibliography without being cited"
+    ops:
+      - {op: add_reference, key: white1980}
+  - id: c_k7_03
+    case: pass_single
+    class: K7
+    expect: reject
+    note: "HC3 attributed to White 1980 instead of MacKinnon & White 1985, bibliography adjusted to match; topical and corpus-valid"
+    ops:
+      - {op: atom_replace, old: "{cite:mackinnon1985}", new: "{cite:white1980}"}
+      - {op: delete_reference, key: mackinnon1985}
+      - {op: add_reference, key: white1980}
+  - id: c_k7_04
+    case: volfrag
+    class: K7
+    expect: reject
+    note: "moving-block bootstrap cited to Politis & Romano 1992 (circular block) instead of Kunsch 1989; bibliography matches"
+    ops:
+      - {op: atom_replace, old: "{cite:kunsch1989}", new: "{cite:politis1992}"}
+      - {op: delete_reference, key: kunsch1989}
+      - {op: add_reference, key: politis1992}
+  - id: c_k7_05
+    case: hidden_confounder
+    class: K7
+    expect: reject
+    note: "BH procedure cited to Benjamini & Yekutieli 2001 instead of 1995; same first author, bibliography consistent"
+    ops:
+      - {op: atom_replace, old: "{cite:benjamini1995}", new: "{cite:benjamini2001}"}
+      - {op: delete_reference, key: benjamini1995}
+      - {op: add_reference, key: benjamini2001}
+  - id: c_k7_06
+    case: stage2_short
+    class: K7
+    expect: reject
+    note: "sup-split test cited to Bai & Perron 2003 instead of Andrews 1993; bibliography consistent"
+    ops:
+      - {op: atom_replace, old: "{cite:andrews1993}", new: "{cite:bai2003}"}
+      - {op: delete_reference, key: andrews1993}
+      - {op: add_reference, key: bai2003}
+  - id: c_k7_07
+    case: not_decided
+    class: K7
+    expect: reject
+    note: "Stambaugh citation and reference removed and the sentence smoothed into an uncited literature claim; no empty parens, no digits"
+    ops:
+      - {op: delete_atom, atom: "{cite:stambaugh1999}"}
+      - {op: delete_reference, key: stambaugh1999}
+      - {op: text_replace, old: "distort such tests in small samples (", new: "distort such tests in small samples, as the predictive-regression literature shows"}
+      - {op: text_replace, old: "), which is why the stage requires a minimum sample.", new: ", which is why the stage requires a minimum sample."}
+  - id: c_k7_08
+    case: portfolio_kill
+    class: K7
+    expect: reject
+    note: "the Ledoit-Wolf test cited to Bailey & Lopez de Prado (already in the bibliography); ledoit2008 dropped so the bibliography is the cited set"
+    ops:
+      - {op: atom_replace, old: "{cite:ledoit2008}", new: "{cite:bailey2014}"}
+      - {op: delete_reference, key: ledoit2008}
+  - id: c_k7_09
+    case: pass_multi
+    class: K7
+    expect: reject
+    note: "{cite:bailey2014} replaced by identical plain text; md byte-identical, but bailey2014 is now an uncited bibliography entry"
+    ops:
+      - {op: atom_replace, old: "{cite:bailey2014}", new: "Bailey & Lopez de Prado 2014"}
+  - id: c_k7_10
+    case: realistic
+    class: K7
+    expect: reject
+    note: "an uncited, non-corpus attribution ('following Dunn's classic analysis') added to the methods, no digits"
+    ops:
+      - {op: text_replace, old: "Bonferroni over each signal's lags and assets", new: "Bonferroni over each signal's lags and assets (following Dunn's classic analysis)"}
+  - id: c_k7_11
+    case: volfrag
+    class: K7
+    expect: reject
+    note: "Andrews 1993 DOI suffix transposed in memo.md (2951764 -> 2951746)"
+    ops:
+      - {op: md_replace, old: "https://doi.org/10.2307/2951764", new: "https://doi.org/10.2307/2951746"}
+  - id: c_k7_12
+    case: hidden_confounder
+    class: K7
+    expect: reject
+    note: "memo.md bibliography 'fixed' into author order (Mohajerin Esfahani moved after MacKinnon); looks more correct than the key order"
+    ops:
+      - {op: md_replace, old: "Mohajerin Esfahani, Kuhn (2018). Data-driven distributionally robust optimization using the Wasserstein metric: performance guarantees and tractable reformulations. Mathematical Programming 171. https://doi.org/10.1007/s10107-017-1172-1 Summary: Wasserstein-ball distributionally robust optimization with finite-sample guarantees and convex reformulations.\n\n", new: ""}
+      - {op: md_replace, old: "Patton, Politis, White (2009).", new: "Mohajerin Esfahani, Kuhn (2018). Data-driven distributionally robust optimization using the Wasserstein metric: performance guarantees and tractable reformulations. Mathematical Programming 171. https://doi.org/10.1007/s10107-017-1172-1 Summary: Wasserstein-ball distributionally robust optimization with finite-sample guarantees and convex reformulations.\n\nPatton, Politis, White (2009)."}
+  - id: c_k7_13
+    case: pass_single
+    class: K7
+    expect: reject
+    note: "in-text citation shortened to '(Esfahani & Kuhn 2018)' in memo.md; plausible author form, not the corpus cite text"
+    ops:
+      - {op: md_replace, old: "(Mohajerin Esfahani & Kuhn 2018)", new: "(Esfahani & Kuhn 2018)"}
+  - id: c_k7_14
+    case: portfolio_kill
+    class: K7
+    expect: reject
+    note: "a non-corpus source (Spirtes et al. 2000) added next to Runge in memo.md"
+    ops:
+      - {op: md_replace, old: "(Runge et al. 2019)", new: "(Runge et al. 2019; Spirtes et al. 2000)"}
+
+  # ---------------------------------------------------------------- K8 banned claim
+  - id: c_k8_01
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: "'not' removed: 'so this portfolio is distributionally robust'; the phrase also occurs legitimately in the same paragraph"
+    ops:
+      - {op: text_replace, old: "so this portfolio is not distributionally robust", new: "so this portfolio is distributionally robust"}
+  - id: c_k8_02
+    case: volfrag
+    class: K8
+    expect: reject
+    note: "'lagged causal effect on the asset returns'; 'causal' appears legitimately all over the memo"
+    ops:
+      - {op: text_replace, old: "Each signal's lagged link to the asset returns", new: "Each signal's lagged causal effect on the asset returns"}
+  - id: c_k8_03
+    case: pass_single
+    class: K8
+    expect: reject
+    note: "decay section claims a half-life is reported; 'half-life' also appears legitimately in the no_half_life caveat"
+    ops:
+      - {op: text_replace, old: "Whether the coefficient on each signal's best link declined over the sample.", new: "Whether the coefficient on each signal's best link declined over the sample, and at what half-life."}
+  - id: c_k8_04
+    case: portfolio_kill
+    class: K8
+    expect: reject
+    note: "'the robust one-sided Ledoit-Wolf test'; 'Robust' is in the Ledoit-Wolf title, so a whitelist may let it pass"
+    ops:
+      - {op: text_replace, old: "The kill test is the one-sided Ledoit-Wolf test", new: "The kill test is the robust one-sided Ledoit-Wolf test"}
+  - id: c_k8_05
+    case: hidden_confounder
+    class: K8
+    expect: reject
+    note: "'a description and a certification'; 'certification' occurs legitimately in the stage name and in the original sentence"
+    ops:
+      - {op: text_replace, old: "It is a description, not a certification, and it never decides.", new: "It is a description and a certification, and it never decides."}
+  - id: c_k8_06
+    case: pass_multi
+    class: K8
+    expect: reject
+    note: "'proven' inserted with a Cyrillic 'о' (prоven) so a lexicon match fails"
+    ops:
+      - {op: text_replace, old: "The evidence is one sample", new: "The evidence is one prоven sample"}
+  - id: c_k8_07
+    case: volfrag
+    class: K8
+    expect: reject
+    note: "'stress-tested' written with a non-breaking hyphen U+2011, defeating an ASCII 'stress-tested' match"
+    ops:
+      - {op: text_replace, old: "The deciding arm is Ridge-CV", new: "The deciding arm is the stress‑tested Ridge-CV"}
+  - id: c_k8_08
+    case: pass_single
+    class: K8
+    expect: reject
+    note: "Ridge-CV called 'the DRO portfolio' in the portfolio section"
+    ops:
+      - {op: text_replace, old: "The deciding arm is Ridge-CV", new: "The deciding arm is Ridge-CV, the DRO portfolio"}
+  - id: c_k8_09
+    case: hidden_confounder
+    class: K8
+    expect: reject
+    note: "'crash-proof' inserted into the methods; a '-proof' compound"
+    ops:
+      - {op: text_replace, old: "with gross exposure capped and refit walk-forward", new: "with gross exposure capped, which makes them crash-proof, and refit walk-forward"}
+  - id: c_k8_10
+    case: realistic
+    class: K8
+    expect: reject
+    note: "'Each signal's outcome is certified'; 'certified' against the lexicon"
+    ops:
+      - {op: text_replace, old: "Each signal's outcome, and the numbers behind it, follow.", new: "Each signal's outcome is certified, and the numbers behind it follow."}
+  - id: c_k8_11
+    case: portfolio_kill
+    class: K8
+    expect: reject
+    note: "'immune' split by a zero-width space (immu​ne) in a new claim about high volatility"
+    ops:
+      - {op: text_replace, old: "Reported only; it never decides.", new: "Reported only; it never decides, and the portfolio proved immu​ne to high volatility."}
+  - id: c_k8_12
+    case: stage2_short
+    class: K8
+    expect: reject
+    note: "'s_real's edge is immune to decay' added; s_real's decay was never tested"
+    ops:
+      - {op: text_replace, old: "The stage tests only whether the edge declined.", new: "The stage tests only whether the edge declined; s_real's edge is immune to decay."}
+  - id: c_k8_13
+    case: not_decided
+    class: K8
+    expect: reject
+    note: "'a certified illustration' inserted into the data_source caveat"
+    ops:
+      - {op: text_replace, old: "One run is an illustration of how the pipeline decides", new: "One run is a certified illustration of how the pipeline decides"}
+
+  # ---------------------------------------------------------------- K9 memo.md drift
+  - id: c_k9_01
+    case: pass_multi
+    class: K9
+    expect: reject
+    note: "causal table delimiter row gets alignment colons; renders the same table in any Markdown viewer"
+    ops:
+      - {op: md_replace, old: "|---|---|---|---|---|\n| s_conf | 0.008", new: "|:---|---:|---:|---|---:|\n| s_conf | 0.008"}
+  - id: c_k9_02
+    case: hidden_confounder
+    class: K9
+    expect: reject
+    note: "a byte-order mark prepended to memo.md; invisible, and some readers strip it before comparing"
+    ops:
+      - {op: md_replace, old: "# Research memo", new: "﻿# Research memo"}
+  - id: c_k9_03
+    case: volfrag
+    class: K9
+    expect: reject
+    note: "an HTML comment carrying a banned claim inserted before Methods; invisible when the Markdown is rendered"
+    ops:
+      - {op: md_replace, old: "## Methods", new: "<!-- certified robust across regimes -->\n\n## Methods"}
+  - id: c_k9_04
+    case: pass_single
+    class: K9
+    expect: reject
+    note: "'0.30' rewritten '0.3' in the stress section; numerically equal, textually not the rendering"
+    ops:
+      - {op: md_replace, old: "0.30 of them fall", new: "0.3 of them fall"}
+  - id: c_k9_05
+    case: portfolio_kill
+    class: K9
+    expect: reject
+    note: "s_decay's coefficient before '1.40e-03' rewritten as '0.00140'; same value, different text"
+    ops:
+      - {op: md_replace, old: "1.40e-03 | 2.43e-04", new: "0.00140 | 2.43e-04"}
+  - id: c_k9_06
+    case: realistic
+    class: K9
+    expect: reject
+    note: "a zero-width joiner inside the s_real row label of the Signals table"
+    ops:
+      - {op: md_replace, old: "| s_real | s_real was killed", new: "| s_‍real | s_real was killed"}
+  - id: c_k9_07
+    case: not_decided
+    class: K9
+    expect: reject
+    note: "a no-break space after 'Recommendation:'; visually identical"
+    ops:
+      - {op: md_replace, old: "Recommendation: not decided.", new: "Recommendation: not decided."}
+  - id: c_k9_08
+    case: stage2_short
+    class: K9
+    expect: reject
+    note: "two trailing spaces (a Markdown hard break) after a limits sentence; whitespace-normalising comparison misses it"
+    ops:
+      - {op: md_replace, old: "The stage tests only whether the edge declined.", new: "The stage tests only whether the edge declined.  "}
+  - id: c_k9_09
+    case: pass_multi
+    class: K9
+    expect: reject
+    note: "a U+2212 minus sign in s_noise's interval endpoint; looks like '-0.012'"
+    ops:
+      - {op: md_replace, old: "0.013 [-0.012, 0.037]", new: "0.013 [−0.012, 0.037]"}
+  - id: c_k9_10
+    case: hidden_confounder
+    class: K9
+    expect: reject
+    note: "json gross_sharpe caveat reworded ('real costs are lower') with memo.md kept correct; only re-rendering json catches it"
+    ops:
+      - {op: text_replace, old: "real costs may be higher", new: "real costs are lower", md: keep}
+  - id: c_k9_11
+    case: volfrag
+    class: K9
+    expect: reject
+    note: "json Signals row for s_volfrag repointed to s_real's fate, md kept as the correct original"
+    ops:
+      - {op: atom_replace, old: "{fate:s_volfrag}", new: "{fate:s_real}", md: keep}
+  - id: c_k9_12
+    case: pass_single
+    class: K9
+    expect: reject
+    note: "CRLF line endings after the Recommendation heading; invisible in most viewers"
+    ops:
+      - {op: md_replace, old: "## Recommendation\n\n", new: "## Recommendation\r\n\r\n"}
+  - id: c_k9_13
+    case: portfolio_kill
+    class: K9
+    expect: reject
+    note: "Cyrillic 'а' in 'radius' of the DRO arm label"
+    ops:
+      - {op: md_replace, old: "Wasserstein DRO (fixed radius)", new: "Wasserstein DRO (fixed rаdius)"}
+  - id: c_k9_14
+    case: realistic
+    class: K9
+    expect: reject
+    note: "the run id wrapped in a right-to-left override, so it displays reversed while the characters are still there"
+    ops:
+      - {op: md_replace, old: "run id = 05c004fe4d9fe40a", new: "run id = ‮05c004fe4d9fe40a‬"}
+  - id: c_k9_15
+    case: stage2_short
+    class: K9
+    expect: reject
+    note: "the blank line between two limits paragraphs removed, so Markdown merges data_source and hidden_confounder into one paragraph"
+    ops:
+      - {op: md_replace, old: "validation ADRs.\n\nStage 1 (causal screen) tests", new: "validation ADRs.\nStage 1 (causal screen) tests"}
+  - id: c_k9_16
+    case: not_decided
+    class: K9
+    expect: reject
+    note: "an en dash in 'Benjamini–Hochberg'; looks like the hyphen in the rendering"
+    ops:
+      - {op: md_replace, old: "Benjamini-Hochberg", new: "Benjamini–Hochberg"}
+
+  # ---------------------------------------------------------------- S structure
+  - id: c_s_01
+    case: pass_multi
+    class: S
+    expect: reject
+    note: "memo.json run_id set to another fixture's real run id (pass_single's); md renders the run id from the sheet so it is unchanged"
+    ops:
+      - {op: set_field, field: run_id, value: "2f0e33d0e3d641b3"}
+  - id: c_s_02
+    case: volfrag
+    class: S
+    expect: reject
+    note: "narrative flag set to 'llm' with no narrative paragraph; md unchanged"
+    ops:
+      - {op: set_field, field: narrative, value: llm}
+  - id: c_s_03
+    case: portfolio_kill
+    class: S
+    expect: reject
+    note: "memo title changed to 'Research memo: s_real'"
+    ops:
+      - {op: set_field, field: title, value: "Research memo: s_real"}
+  - id: c_s_04
+    case: hidden_confounder
+    class: S
+    expect: reject
+    note: "section title 'Stress diagnostic' -> 'Stress test' (also suggests a test that decides)"
+    ops:
+      - {op: set_title, section: stress, title: "Stress test"}
+  - id: c_s_05
+    case: realistic
+    class: S
+    expect: reject
+    note: "section title 'Causal screen' -> 'Causal discovery'; a plausible synonym"
+    ops:
+      - {op: set_title, section: causal, title: "Causal discovery"}
+  - id: c_s_06
+    case: not_decided
+    class: S
+    expect: reject
+    note: "run_id upper-cased; a case-insensitive hex comparison accepts it"
+    ops:
+      - {op: set_field, field: run_id, value: "E49636C2DCB49557"}
+  - id: c_s_07
+    case: stage2_short
+    class: S
+    expect: reject
+    note: "limits section title with a Cyrillic 'о' in 'to'"
+    ops:
+      - {op: set_title, section: limits, title: "Limits that apply tо this run"}
+  - id: c_s_08
+    case: pass_single
+    class: S
+    expect: reject
+    note: "the Decides column of Ridge-CV changed 'yes' -> 'no', so no arm decides"
+    ops:
+      - {op: text_replace, old: "yes", new: "no"}
+  - id: c_s_09
+    case: hidden_confounder
+    class: S
+    expect: reject
+    note: "the Gross/Net Sharpe column headers swapped in memo.md; values stay, so every Sharpe is mislabelled"
+    ops:
+      - {op: md_replace, old: "| Arm | Gross Sharpe | Net Sharpe |", new: "| Arm | Net Sharpe | Gross Sharpe |"}
+  - id: c_s_10
+    case: volfrag
+    class: S
+    expect: reject
+    note: "Ridge-CV's 'other days' stress Sharpe atom deleted, leaving an empty cell like equal weight's legitimate blank"
+    ops:
+      - {op: delete_atom, atom: "{fact:stress.ridge_cv_low|value}"}
+  - id: c_s_11
+    case: pass_multi
+    class: S
+    expect: reject
+    note: "the Stress diagnostic heading demoted to level 3 in memo.md, nesting it under Portfolio construction"
+    ops:
+      - {op: md_replace, old: "## Stress diagnostic", new: "### Stress diagnostic"}
+  - id: c_s_12
+    case: portfolio_kill
+    class: S
+    expect: reject
+    note: "run_id with a trailing zero-width space"
+    ops:
+      - {op: set_field, field: run_id, value: "e96d48b23473828d​"}
+  - id: c_s_13
+    case: stage2_short
+    class: S
+    expect: reject
+    note: "the '## Decay test' heading removed from memo.md, folding the decay table into the causal section"
+    ops:
+      - {op: md_replace, old: "## Decay test\n\n", new: ""}
+  - id: c_s_14
+    case: pass_single
+    class: S
+    expect: reject
+    note: "json Methods title changed to 'Methodology' with memo.md kept as the original"
+    ops:
+      - {op: set_title, section: methods, title: "Methodology", md: keep}
+
+  # ---------------------------------------------------------------- narrative insertions (6)
+  - id: c_s_15
+    case: pass_multi
+    class: S
+    expect: reject
+    note: "a harmless-looking paragraph inserted with origin 'template'; no quote marker, but it is not the template memo"
+    ops:
+      - {op: insert_llm, section: limits, text: "These limits apply jointly, and none of them is resolved by this run.", origin: template}
+  - id: c_s_16
+    case: realistic
+    class: S
+    expect: reject
+    note: "a narrative paragraph with no numbers or claims; the template-only system must reject any narrative"
+    ops:
+      - {op: insert_llm, section: recommendation, text: "The outcome matches what the planted design of the benchmark leads one to expect."}
+  - id: c_k6_18
+    case: volfrag
+    class: K6
+    expect: reject
+    note: "an exact duplicate of the passenger caveat inserted as a template paragraph labelled 'passenger'"
+    ops:
+      - {op: insert_llm, section: limits, origin: template, statement: passenger, text: "{stage:portfolio} decides once for the whole portfolio, so every member shares its verdict, and a member with no edge can pass as a passenger of one that has it."}
+  - id: c_k8_14
+    case: pass_single
+    class: K8
+    expect: reject
+    note: "a narrative paragraph calling the portfolio robust to high volatility, with atom-backed numbers only"
+    ops:
+      - {op: insert_llm, section: stress, text: "With {fact:stress.ridge_cv_high}, the portfolio is robust to high-volatility periods."}
+  - id: c_k5_14
+    case: hidden_confounder
+    class: K5
+    expect: reject
+    note: "a narrative paragraph advising paper trading of s_real despite 'against trading'"
+    ops:
+      - {op: insert_llm, section: recommendation, text: "Even so, s_real is worth paper trading on its own."}
+  - id: c_k2_14
+    case: portfolio_kill
+    class: K2
+    expect: reject
+    note: "a narrative paragraph adding a number word ('half a point') next to an atom-backed Sharpe"
+    ops:
+      - {op: insert_llm, section: portfolio, text: "{fact:portfolio.ridge_cv.sharpe} beats equal weight by almost half a point."}
