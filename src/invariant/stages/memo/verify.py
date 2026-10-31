@@ -10,9 +10,12 @@ Checks
 ------
 - **V1 structure.** The memo parses; its run id, title, recommendation and sections are the
   template memo's; every template block (paragraph or table) equals the verifier's re-render;
-  narrative (LLM) paragraphs only end the narrative sections, at most ``MAX_NARRATIVE`` per
-  section, carry no statement id, and use only text, full-form fact, fate and cite segments;
-  the ``narrative`` flag says whether there are any; the bibliography is exactly the cited keys.
+  the bibliography is exactly the cited keys. **Template-only:** any narrative (LLM) paragraph
+  is a failure, and so is a ``narrative`` flag other than ``none`` (docs/adr/0017, deviation 1:
+  free narrative prose failed the hand-written set (b), so the LLM narrative is in the
+  backlog). The narrative format's own structural rules (only ending the narrative sections,
+  at most ``MAX_NARRATIVE`` per section, no statement id, only text, full-form fact, fate and
+  cite segments) are still checked and reported.
 - **V2 atoms.** Every atom names something that exists (fact, signal, corpus key, term), and
   each fact's value equals its sources, resolved from the raw files.
 - **V3 numbers.** Every digit of ``memo.md`` lies inside an atom, and every number in an atom
@@ -35,12 +38,21 @@ Checks
   "certif*", "stress-test*", "guarantee*", "prove*", "causal effect", "half-life", "robust*",
   "-proof", ...).
 - **V9 rendering.** ``memo.md`` equals ``render(memo.json)``.
+- **V10 characters.** ``memo.md`` and every string of ``memo.json`` are NFKC-normal (Unicode
+  UAX #15) and hold no format character (category Cf: zero-width spaces and joiners, bidi
+  controls, soft hyphens) and no non-ASCII letter, mark or digit (categories L, M, N), which
+  covers confusables such as a Cyrillic o (U+043E) in ``robust``. Template memos are pure ASCII, so
+  this costs no false rejection; it closes the evasions set (b) found in the lexicon checks.
+
+V4, V7 and V8 still run on any narrative paragraph, so a rejection names what the prose did;
+in template-only mode V1 rejects such a paragraph regardless.
 
 Limits
 ------
 The verifier checks that a literature claim is cited, not that the cited paper supports it;
 entailment is semantic. It checks narrative prose by lexicon, so a claim phrased in words it
-does not list can pass V4; the adversarial sets measure that (docs/adr/0017).
+does not list can pass V4; set (b) found four such claims (docs/adr/0017), which is why
+narrative paragraphs are rejected outright.
 """
 
 from __future__ import annotations
@@ -48,6 +60,7 @@ from __future__ import annotations
 import json
 import math
 import re
+import unicodedata
 from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -99,7 +112,7 @@ MAX_NARRATIVE: Final = 2
 @dataclass(frozen=True)
 class Failure:
     check: str
-    """``V1`` ... ``V9``."""
+    """``V1`` ... ``V10``."""
     detail: str
 
 
@@ -344,6 +357,7 @@ def _v1_structure(memo: Memo, sheet: FactSheet, log: _Log) -> None:
         if not narrative:
             continue
         narrated = True
+        log.fail("V1", f"section {sec.id}: narrative paragraphs are not accepted (template-only)")
         if sec.id not in NARRATIVE_SECTIONS:
             log.fail("V1", f"section {sec.id} may not carry narrative paragraphs")
         if len(narrative) > MAX_NARRATIVE:
@@ -363,6 +377,43 @@ def _v1_structure(memo: Memo, sheet: FactSheet, log: _Log) -> None:
         memo.narrative_model
     ):
         log.fail("V1", f"narrative flag {memo.narrative!r} does not match the paragraphs")
+    if memo.narrative != "none" or memo.narrative_model is not None:
+        log.fail("V1", f"narrative flag {memo.narrative!r} in a template-only memo")
+
+
+_NON_ASCII_CONFUSABLE: Final = ("L", "M", "N")
+"""Unicode major categories whose non-ASCII members V10 rejects (letters, marks, digits)."""
+
+
+def _strings(node: object) -> Iterator[str]:
+    if isinstance(node, str):
+        yield node
+    elif isinstance(node, dict):
+        for k, v in node.items():
+            yield str(k)
+            yield from _strings(v)
+    elif isinstance(node, list):
+        for v in node:
+            yield from _strings(v)
+
+
+def _v10_characters(memo_json: str, memo_md: str, log: _Log) -> None:
+    try:
+        doc: object = json.loads(memo_json)
+    except json.JSONDecodeError:
+        doc = memo_json
+    for where, texts in (("memo.md", [memo_md]), ("memo.json", list(_strings(doc)))):
+        bad: set[str] = set()
+        for t in texts:
+            if unicodedata.normalize("NFKC", t) != t:
+                log.fail("V10", f"{where}: text is not NFKC-normal: {t[:60]!r}")
+            for ch in t:
+                cat = unicodedata.category(ch)
+                if cat == "Cf" or (ord(ch) > 127 and cat[0] in _NON_ASCII_CONFUSABLE):
+                    bad.add(ch)
+        for ch in sorted(bad):
+            name, cat = unicodedata.name(ch, "unnamed"), unicodedata.category(ch)
+            log.fail("V10", f"{where}: character U+{ord(ch):04X} {name} ({cat})")
 
 
 def _v2_atoms(memo: Memo, sheet: FactSheet, raw: _Raw, log: _Log) -> bool:
@@ -651,15 +702,18 @@ def verify(
     """Verify a memo's two files against its run directory (module docstring)."""
     log = _Log()
     root = results_root if results_root is not None else default_results_root()
+    _v10_characters(memo_json, memo_md, log)
     try:
         memo = Memo.model_validate_json(memo_json)
     except ValidationError as exc:
-        return VerificationReport((Failure("V1", f"memo.json is not a memo: {exc}"),))
+        log.fail("V1", f"memo.json is not a memo: {exc}")
+        return VerificationReport(tuple(log.failures))
     try:
         sheet = build_fact_sheet(run_dir, results_root=root)
         raw = _Raw(Path(run_dir), root)
     except (MemoInputError, OSError, ValueError) as exc:
-        return VerificationReport((Failure("V1", f"the run cannot support a memo: {exc}"),))
+        log.fail("V1", f"the run cannot support a memo: {exc}")
+        return VerificationReport(tuple(log.failures))
     if memo.run_id != sheet.run_id:
         log.fail("V1", f"memo run id {memo.run_id!r} is not the run's {sheet.run_id!r}")
     _v1_structure(memo, sheet, log)

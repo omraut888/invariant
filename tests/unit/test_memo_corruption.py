@@ -4,6 +4,7 @@ These tests check the sets themselves: every entry applies to its fixture memo a
 Whether the verifier rejects them is tested in ``test_memo_verify.py``.
 """
 
+import json
 from functools import cache
 from pathlib import Path
 from typing import Any
@@ -65,3 +66,17 @@ def test_an_op_that_does_not_apply_is_an_error() -> None:
         apply_ops(
             memo, md, [{"op": "insert_llm", "section": "causal", "text": "{cite:nope2020}"}], sheet
         )
+
+
+def test_an_added_reference_takes_its_sorted_position() -> None:
+    """docs/adr/0017: set (b)'s b_k7_07 was rejected only because the entry was appended."""
+    sheet = build_fact_sheet(FIXTURES / "memo_runs" / "volfrag")
+    memo = build_template_memo(sheet)
+    ops = [
+        {"op": "insert_llm", "section": "stress", "text": "A claim ({cite:bollerslev1986})."},
+        {"op": "add_reference", "key": "bollerslev1986"},
+    ]
+    t = apply_ops(memo, render(memo, sheet).text, ops, sheet)
+    refs = next(s for s in json.loads(t.memo_json)["sections"] if s["id"] == "references")
+    keys = [b["segments"][0]["key"] for b in refs["blocks"]]
+    assert keys == sorted(keys) and "bollerslev1986" in keys

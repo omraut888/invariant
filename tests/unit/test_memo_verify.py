@@ -67,7 +67,50 @@ def test_hand_written_sets(entry: dict[str, Any]) -> None:
     sheet, memo, md = _base(entry["case"])
     t = apply_ops(memo, md, entry["ops"], sheet)
     report = _verify(entry["case"], t.memo_json, t.md)
-    assert report.accepted is (entry["expect"] == "accept"), (entry["note"], report.failures)
+    if entry["expect"] == "reject":
+        assert not report.accepted, entry["note"]
+        return
+    # Template-only (docs/adr/0017, deviation 1): a benign narrative sentence is rejected by V1
+    # alone; the lexicon checks still pass it.
+    assert report.checks_failed() == ("V1",), (entry["note"], report.failures)
+    assert all("narrative" in f.detail for f in report.failures), report.failures
+
+
+_EVASIONS = [
+    ("rob\u043eust", "U+043E"),  # Cyrillic o
+    ("certi\u200bfied", "U+200B"),  # zero-width space
+    ("\u200b", "U+200B"),
+    ("soft\u00adhyphen", "U+00AD"),
+    ("\u202ebidi", "U+202E"),
+    ("e\u0301", "U+0301"),  # a combining mark
+    ("\u0663", "U+0663"),  # an Arabic-Indic digit
+    ("\uff52obust", "NFKC"),  # fullwidth r
+]
+
+
+@pytest.mark.parametrize(("text", "code"), _EVASIONS)
+def test_character_evasions_are_rejected_anywhere(text: str, code: str) -> None:
+    _, memo, md = _base("pass_multi")
+    for json_, md_ in (
+        (memo.model_dump_json().replace("Recommendation", f"Recommendation{text}", 1), md),
+        (memo.model_dump_json(), md.replace("Recommendation", f"Recommendation{text}", 1)),
+    ):
+        report = _verify("pass_multi", json_, md_)
+        v10 = [f.detail for f in report.failures if f.check == "V10"]
+        assert any(code in d for d in v10), report.failures
+
+
+def test_template_memos_pass_the_character_check() -> None:
+    for case in CASES:
+        _, memo, md = _base(case)
+        assert md.isascii() and memo.model_dump_json().isascii()
+
+
+def test_a_template_memo_flagged_as_narrated_is_rejected() -> None:
+    _, memo, md = _base("pass_multi")
+    flagged = memo.model_copy(update={"narrative": "llm", "narrative_model": "m"})
+    report = _verify("pass_multi", flagged.model_dump_json(), md)
+    assert any("template-only" in f.detail for f in report.failures)
 
 
 def test_verification_is_deterministic() -> None:

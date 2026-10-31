@@ -26,7 +26,8 @@ Operations (``op`` and its arguments):
 - ``set_field`` ``field``, ``value``: a top-level memo field (``recommendation``, ``run_id``,
   ``narrative``, ``title``);
 - ``set_title`` ``section``, ``title``;
-- ``delete_reference`` / ``add_reference`` ``key``: edit the bibliography.
+- ``delete_reference`` / ``add_reference`` ``key``: edit the bibliography (an added entry goes
+  at its sorted position).
 """
 
 from __future__ import annotations
@@ -195,13 +196,22 @@ def _apply(doc: _Doc, md: str, op: Mapping[str, Any], sheet: FactSheet) -> tuple
                     raise CorruptionError(f"no reference {op['key']!r}")
                 del blocks[idx[0]]
             else:
-                blocks.append(
+                # At its sorted position, as the template orders the bibliography, so an added
+                # entry is caught for what it adds, not for where it sits (docs/adr/0017).
+                at = sum(
+                    1
+                    for b in blocks
+                    if b["segments"][0].get("type") == "bibliography"
+                    and b["segments"][0]["key"] < op["key"]
+                )
+                blocks.insert(
+                    at,
                     {
                         "kind": "paragraph",
                         "origin": "template",
                         "statement": None,
                         "segments": [bib],
-                    }
+                    },
                 )
         case _:
             raise CorruptionError(f"unknown operation {kind!r}")
