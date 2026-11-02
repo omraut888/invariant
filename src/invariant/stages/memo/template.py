@@ -120,11 +120,37 @@ def _recommendation(sheet: FactSheet) -> Section:
 
 
 def _signals(sheet: FactSheet) -> Section:
-    rows = tuple((_cell(s), _cell(f"{{fate:{s}}}")) for s in sheet.signal_ids())
+    if not sheet.signal_docs:
+        rows = tuple((_cell(s), _cell(f"{{fate:{s}}}")) for s in sheet.signal_ids())
+        return Section(
+            id="signals",
+            title="Signals",
+            blocks=(Table(header=("Signal", "Outcome over the kill stages"), rows=rows),),
+        )
+    # Real data: each candidate's frozen definition and the papers that motivate it (ADR 0018).
+    doc_rows = tuple(
+        (
+            _cell(d.id),
+            _cell(f"{{fact:signals.{d.id}.definition|value}}"),
+            _cell("; ".join(f"{{cite:{k}}}" for k in d.cites)),
+            _cell(f"{{fate:{d.id}}}"),
+        )
+        for d in sheet.signal_docs
+    )
+    intro = (
+        "The candidates were fixed before any stage ran on market data ({adr:18}), with the "
+        "papers that motivate each. Each is one series tested against every asset's return."
+    )
     return Section(
         id="signals",
         title="Signals",
-        blocks=(Table(header=("Signal", "Outcome over the kill stages"), rows=rows),),
+        blocks=(
+            _p(intro),
+            Table(
+                header=("Signal", "Definition", "Motivated by", "Outcome over the kill stages"),
+                rows=doc_rows,
+            ),
+        ),
     )
 
 

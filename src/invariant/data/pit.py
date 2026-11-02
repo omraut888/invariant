@@ -68,8 +68,9 @@ Journal of Econometrics 105(1), 111-130.
 from __future__ import annotations
 
 import itertools
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
+from datetime import date
 from typing import Final
 
 import numpy as np
@@ -95,7 +96,9 @@ __all__ = [
     "build_pit_panel",
     "forward_returns",
     "lag_by_sessions",
+    "market_asof",
     "synthetic_on_sessions",
+    "within_vintage_change",
 ]
 
 SYNTHETIC_FEATURE_LAG_SESSIONS: Final = 0
@@ -133,32 +136,148 @@ def alfred_asof(vintages: pd.DataFrame, series_id: str, sessions: pd.DatetimeInd
     ``obs_date`` (the observation that value belongs to, NaT where ``value`` is NaN).
     """
     sess = _check_sessions(sessions)
-    table = validate_vintages(vintages, series_id)
-    table = table[table["value"].notna()]
-
-    # Usable on sessions [start, stop): from the session after realtime_start until the session
-    # after the superseding vintage's date (realtime_end + 1 day). An open end (9999-12-31)
-    # maps past every session.
-    start: _IntArray = np.searchsorted(sess, _dates(table["realtime_start"]), side="right")
-    stop: _IntArray = np.searchsorted(sess, _dates(table["realtime_end"]) + _ONE_DAY, side="right")
-    keep = start < stop
-    start, stop = start[keep], stop[keep]
-    obs = _dates(table["observation_date"])[keep]
-    values = table["value"].to_numpy(dtype="float64")[keep]
-
+    rows = _usable_rows(validate_vintages(vintages, series_id), sess)
     n = len(sess)
     out_value: _FloatArray = np.full(n, np.nan)
     out_obs: _DateArray = np.full(n, np.datetime64("NaT"), dtype=DATE_DTYPE)
-    # The usable set is constant between consecutive start/stop positions.
-    cuts = np.unique(np.concatenate([start, stop, [0, n]]))
+    for lo, hi, active in _views(rows, n):
+        # Periods of one observation are disjoint, so the newest observation is unique.
+        i = active[np.argmax(rows.obs[active])]
+        out_value[lo:hi] = rows.values[i]
+        out_obs[lo:hi] = rows.obs[i]
+    return pd.DataFrame({"value": out_value, "obs_date": out_obs}, index=sessions)
+
+
+@dataclass(frozen=True)
+class _Rows:
+    """Vintage rows with the session positions they are usable on, ``[start, stop)``."""
+
+    start: _IntArray
+    stop: _IntArray
+    obs: _DateArray
+    values: _FloatArray
+
+
+def _usable_rows(table: pd.DataFrame, sess: _DateArray) -> _Rows:
+    """The non-NaN rows of a validated vintage table that are usable on some session.
+
+    Usable on sessions [start, stop): from the session after realtime_start until the session
+    after the superseding vintage's date (realtime_end + 1 day). An open end (9999-12-31) maps
+    past every session. A NaN row is never a value, but it still ends the previous period of
+    its observation (through that period's realtime_end), so an older value never resurrects.
+    """
+    table = table[table["value"].notna()]
+    start: _IntArray = np.searchsorted(sess, _dates(table["realtime_start"]), side="right")
+    stop: _IntArray = np.searchsorted(sess, _dates(table["realtime_end"]) + _ONE_DAY, side="right")
+    keep = start < stop
+    return _Rows(
+        start=start[keep],
+        stop=stop[keep],
+        obs=_dates(table["observation_date"])[keep],
+        values=table["value"].to_numpy(dtype="float64")[keep],
+    )
+
+
+def _views(rows: _Rows, n: int) -> Iterator[tuple[int, int, _IntArray]]:
+    """``(lo, hi, active)``: the rows usable on every session in ``[lo, hi)``, for each run of
+    sessions over which the usable set is constant and not empty."""
+    cuts = np.unique(np.concatenate([rows.start, rows.stop, [0, n]]))
     cuts = cuts[(cuts >= 0) & (cuts <= n)]
     for lo, hi in itertools.pairwise(cuts):
-        active = np.flatnonzero((start <= lo) & (stop > lo))
+        active = np.flatnonzero((rows.start <= lo) & (rows.stop > lo))
         if active.size:
-            # Periods of one observation are disjoint, so the newest observation is unique.
-            i = active[np.argmax(obs[active])]
-            out_value[lo:hi] = values[i]
-            out_obs[lo:hi] = obs[i]
+            yield int(lo), int(hi), active
+
+
+def market_asof(
+    vintages: pd.DataFrame,
+    observations: pd.DataFrame,
+    series_id: str,
+    *,
+    first_vintage: date,
+    pre_archive_lag: int,
+    sessions: pd.DatetimeIndex,
+) -> pd.DataFrame:
+    """As-known value of a daily FRED market series at each session (docs/adr/0019).
+
+    Observations dated on or after ``first_vintage`` follow ADR 0004's rule on their archived
+    ``vintages`` exactly (as ``alfred_asof``). An observation dated before it, which has no
+    vintage, is its current value in ``observations`` (``OBSERVATION_COLUMNS``), usable
+    ``pre_archive_lag`` sessions after its date (counting the first session after the date as
+    one) and never superseded. At each session the value is that of the newest usable
+    observation with a value. Returns ``value`` and ``obs_date`` indexed by ``sessions``.
+    """
+    if pre_archive_lag < 1:
+        raise ValueError(f"pre_archive_lag must be >= 1, got {pre_archive_lag}")
+    sess = _check_sessions(sessions)
+    fv = np.datetime64(first_vintage.isoformat(), "D").astype(DATE_DTYPE)
+    table = validate_vintages(vintages, series_id)
+    archived = _usable_rows(table[_dates(table["observation_date"]) >= fv], sess)
+    obs_frame = observations[observations["series_id"] == series_id]
+    pre = obs_frame[(_dates(obs_frame["observation_date"]) < fv) & obs_frame["value"].notna()]
+    pre_obs = _dates(pre["observation_date"])
+    pre_start: _IntArray = np.searchsorted(sess, pre_obs, side="right") + (pre_archive_lag - 1)
+    n = len(sess)
+    rows = _Rows(
+        start=np.concatenate([archived.start, pre_start]),
+        stop=np.concatenate([archived.stop, np.full(len(pre_obs), n + 1, dtype=np.intp)]),
+        obs=np.concatenate([archived.obs, pre_obs]),
+        values=np.concatenate([archived.values, pre["value"].to_numpy(dtype="float64")]),
+    )
+    keep = rows.start < n
+    rows = _Rows(rows.start[keep], rows.stop[keep], rows.obs[keep], rows.values[keep])
+    out_value: _FloatArray = np.full(n, np.nan)
+    out_obs: _DateArray = np.full(n, np.datetime64("NaT"), dtype=DATE_DTYPE)
+    for lo, hi, active in _views(rows, n):
+        i = active[np.argmax(rows.obs[active])]
+        out_value[lo:hi] = rows.values[i]
+        out_obs[lo:hi] = rows.obs[i]
+    return pd.DataFrame({"value": out_value, "obs_date": out_obs}, index=sessions)
+
+
+def within_vintage_change(
+    vintages: pd.DataFrame,
+    series_id: str,
+    sessions: pd.DatetimeIndex,
+    *,
+    months: int,
+    log: bool,
+) -> pd.DataFrame:
+    """Change of a monthly ALFRED series computed inside one vintage (docs/adr/0019).
+
+    At session t the usable rows (ADR 0006's as-of rule) are one vintage: each observation's
+    value as known at t. The change is ``f(x_t(o)) - f(x_t(o - months))`` with ``f = log`` if
+    ``log`` else the identity, where o is the newest observation such that both o and
+    ``o - months`` have a value in that vintage. Both values come from the same vintage, never
+    one from an older vintage: differencing the as-of series (``alfred_asof``) would subtract
+    the value of o-1 as known *before* o's release, mixing vintages (Croushore & Stark 2001).
+    Returns ``value`` and ``obs_date`` (o) indexed by ``sessions``. Observation dates must be
+    month starts.
+    """
+    if months < 1:
+        raise ValueError(f"months must be >= 1, got {months}")
+    sess = _check_sessions(sessions)
+    rows = _usable_rows(validate_vintages(vintages, series_id), sess)
+    month = rows.obs.astype("datetime64[M]")
+    if (month.astype(DATE_DTYPE) != rows.obs).any():
+        raise DataValidationError(f"{series_id}: observation dates are not month starts")
+    if log and (rows.values <= 0).any():
+        raise DataValidationError(f"{series_id}: a log change needs positive values")
+    m = month.astype("int64")
+    f = np.log(rows.values) if log else rows.values
+    n = len(sess)
+    out_value: _FloatArray = np.full(n, np.nan)
+    out_obs: _DateArray = np.full(n, np.datetime64("NaT"), dtype=DATE_DTYPE)
+    for lo, hi, active in _views(rows, n):
+        order = active[np.argsort(m[active])]
+        ms = m[order]
+        has_base = np.isin(ms - months, ms)
+        if not has_base.any():
+            continue
+        j = int(np.flatnonzero(has_base)[-1])
+        base = order[int(np.searchsorted(ms, ms[j] - months))]
+        out_value[lo:hi] = f[order[j]] - f[base]
+        out_obs[lo:hi] = rows.obs[order[j]]
     return pd.DataFrame({"value": out_value, "obs_date": out_obs}, index=sessions)
 
 

@@ -218,3 +218,100 @@ entries:
     doi: 10.1016/0304-4076(89)90083-3
     summary: Monte Carlo evidence on the finite-sample size and power of variance-ratio tests.
     stages: []
+  # Real-data candidate signals (docs/adr/0018): the paper that motivates each signal.
+  - key: moskowitz2012
+    authors: [Moskowitz, Ooi, Pedersen]
+    year: 2012
+    title: Time series momentum
+    venue: Journal of Financial Economics 104(2)
+    doi: 10.1016/j.jfineco.2011.11.003
+    summary: Documents that an asset's own past 12-month excess return predicts its future return across futures markets (time-series momentum).
+    stages: [signals]
+  - key: french1987
+    authors: [French, Schwert, Stambaugh]
+    year: 1987
+    title: Expected stock returns and volatility
+    venue: Journal of Financial Economics 19(1)
+    doi: 10.1016/0304-405X(87)90026-2
+    summary: Relates the expected market risk premium to predictable stock market volatility, and unexpected volatility to contemporaneous returns.
+    stages: [signals]
+  - key: moreira2017
+    authors: [Moreira, Muir]
+    year: 2017
+    title: Volatility-managed portfolios
+    venue: Journal of Finance 72(4)
+    doi: 10.1111/jofi.12513
+    summary: Shows that scaling factor exposure down when recent realized variance is high raised Sharpe ratios, as volatility rose more than expected returns.
+    stages: [signals]
+  - key: bollerslev2009
+    authors: [Bollerslev, Tauchen, Zhou]
+    year: 2009
+    title: Expected stock returns and variance risk premia
+    venue: Review of Financial Studies 22(11)
+    doi: 10.1093/rfs/hhp008
+    summary: Finds that the gap between implied and realized variance (the variance risk premium) predicts quarterly aggregate stock returns.
+    stages: [signals]
+  - key: campbell1987
+    authors: [Campbell]
+    year: 1987
+    title: Stock returns and the term structure
+    venue: Journal of Financial Economics 18(2)
+    doi: 10.1016/0304-405X(87)90045-6
+    summary: Shows that variables from the term structure of interest rates predict excess returns on stocks and bonds.
+    stages: [signals]
+  - key: fama1989
+    authors: [Fama, French]
+    year: 1989
+    title: Business conditions and expected returns on stocks and bonds
+    venue: Journal of Financial Economics 25(1)
+    doi: 10.1016/0304-405X(89)90095-0
+    summary: Finds that the default spread and term spread track business conditions and predict expected returns on stocks and bonds.
+    stages: [signals]
+  - key: keim1986
+    authors: [Keim, Stambaugh]
+    year: 1986
+    title: Predicting returns in the stock and bond markets
+    venue: Journal of Financial Economics 17(2)
+    doi: 10.1016/0304-405X(86)90070-X
+    summary: Shows that ex-ante observable variables, including the spread between low-grade bond and bill yields, predict stock and bond risk premia.
+    stages: [signals]
+  - key: ang2007
+    authors: [Ang, Bekaert]
+    year: 2007
+    title: "Stock return predictability: Is it there?"
+    venue: Review of Financial Studies 20(3)
+    doi: 10.1093/rfs/hhl021
+    summary: Finds that the short interest rate is the most robust short-horizon predictor of excess equity returns, and dividend yield predictability weak.
+    stages: [signals]
+  - key: fama1990
+    authors: [Fama]
+    year: 1990
+    title: Stock returns, expected returns, and real activity
+    venue: Journal of Finance 45(4)
+    doi: 10.1111/j.1540-6261.1990.tb02428.x
+    summary: Relates stock returns to future growth in industrial production and to shocks to expected returns.
+    stages: [signals]
+  - key: flannery2002
+    authors: [Flannery, Protopapadakis]
+    year: 2002
+    title: Macroeconomic factors do influence aggregate stock returns
+    venue: Review of Financial Studies 15(3)
+    doi: 10.1093/rfs/15.3.751
+    summary: Finds that announcements of a few macro series, including the employment report, move aggregate stock returns or their volatility.
+    stages: [signals]
+  - key: boyd2005
+    authors: [Boyd, Hu, Jagannathan]
+    year: 2005
+    title: "The stock market's reaction to unemployment news: Why bad news is usually good for stocks"
+    venue: Journal of Finance 60(2)
+    doi: 10.1111/j.1540-6261.2005.00742.x
+    summary: Finds that the stock market's response to rising unemployment depends on the business cycle, through interest rates and growth expectations.
+    stages: [signals]
+  - key: fama1977
+    authors: [Fama, Schwert]
+    year: 1977
+    title: Asset returns and inflation
+    venue: Journal of Financial Economics 5(2)
+    doi: 10.1016/0304-405X(77)90014-9
+    summary: Finds that common stock returns were negatively related to expected and unexpected inflation.
+    stages: [signals]

@@ -6,7 +6,14 @@ A fact sheet is built deterministically from one run directory and nothing else:
 - the kill ledger, read through ``KillLedger.read`` (which verifies the hash chain);
 - the stage results ``causal_result.json``, ``decay_result.json`` and ``portfolio_result.json``;
 - the run manifest;
-- benchmark validation rates from the archived reports in ``docs/results`` (``reference.py``).
+- benchmark validation rates from the archived reports in ``docs/results`` (``reference.py``);
+- on real data, ``signals.json``: each candidate signal's frozen definition, the corpus keys of
+  the papers that motivate it, and the sources it reads (docs/adr/0018). A real-data run
+  without it is refused;
+- optionally, ``sensitivity/``: the manifest and ledger of ADR 0018's sensitivity run (the same
+  snapshot, seed and config but for the FRED market lag rule), copied in by
+  ``invariant sensitivity``. Its hash chain is verified on read, and each signal's outcome is
+  compared with this run's.
 
 The ledger is the decision record, so facts are read from its metrics. Each stage's verdict and
 reason are cross-checked against that stage's result file, and the portfolio metrics against
@@ -19,7 +26,8 @@ planted (tests/leakage/test_memo_inputs.py).
 Every fact has a stable id, a kind (which fixes its rendering, ``format_value``), a label (what
 the number is, with no digits), the signal or object it is about, and ``sources``: where each of
 its numbers came from (``ledger:<signal>:<stage>:<metric>``, ``result:<file>:<json pointer>``,
-``manifest:<dotted path>``, ``reference:<report>:<json pointer>``, ``const:<name>``). The
+``manifest:<dotted path>``, ``reference:<report>:<json pointer>``, ``const:<name>``,
+``signals:<signal>:<field>``). The
 verifier resolves sources by its own code path, independently of this module.
 """
 
@@ -28,12 +36,12 @@ from __future__ import annotations
 import json
 import math
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from enum import StrEnum
 from pathlib import Path
-from typing import Final
+from typing import Final, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from invariant.core.run_hash import MANIFEST_NAME
 from invariant.core.types import KillReason, StageName
@@ -41,21 +49,27 @@ from invariant.ledger.kill_ledger import FateStatus, KillLedger, LedgerEntry, Me
 from invariant.stages.causal.stage import CAUSAL_RESULT_NAME
 from invariant.stages.decay.stage import DECAY_RESULT_NAME
 from invariant.stages.dro.walkforward import Arm
+from invariant.stages.memo.literature import load_corpus
 from invariant.stages.memo.reference import load_reference_facts
 from invariant.stages.portfolio.stage import PORTFOLIO_RESULT_NAME
 
 __all__ = [
     "ARM_LABELS",
     "MEMO_STAGES",
+    "SENSITIVITY_DIR",
+    "SIGNALS_NAME",
     "DataKind",
     "Fact",
     "FactKind",
     "FactSheet",
     "MemoInputError",
     "Recommendation",
+    "SignalDoc",
     "SignalFate",
+    "SourceKind",
     "build_fact_sheet",
     "format_value",
+    "write_signal_docs",
 ]
 
 MEMO_STAGES: Final = (StageName.CAUSAL, StageName.DECAY, StageName.PORTFOLIO)
@@ -68,6 +82,10 @@ ARM_LABELS: Final[Mapping[Arm, str]] = {
     Arm.RIDGE_CV: "Ridge-CV",
     Arm.DRO_CV: "Wasserstein DRO (CV radius)",
 }
+SENSITIVITY_DIR: Final = "sensitivity"
+"""A copy of the sensitivity run's manifest and ledger (docs/adr/0018)."""
+SIGNALS_NAME: Final = "signals.json"
+"""Real-data runs: the candidate definitions the run used (docs/adr/0018)."""
 DSR_TRIALS: Final = 4
 """Trials behind the deflated Sharpe ratio: the four non-1/N arms (ADR 0014)."""
 
@@ -219,6 +237,20 @@ class SignalFate(BaseModel):
     stages_decided: tuple[StageName, ...]
 
 
+SourceKind = Literal["etf", "fred_market", "alfred", "french"]
+
+
+class SignalDoc(BaseModel):
+    """One real-data candidate as the run recorded it (``signals.json``)."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str
+    definition: str
+    cites: tuple[str, ...] = Field(min_length=1)
+    sources: tuple[SourceKind, ...] = Field(min_length=1)
+
+
 class FactSheet(BaseModel):
     """Everything a memo may state about one run (module docstring)."""
 
@@ -226,6 +258,11 @@ class FactSheet(BaseModel):
 
     run_id: str
     data_kind: DataKind
+    signal_docs: tuple[SignalDoc, ...] = ()
+    """Real data only: the candidates' definitions, in ledger order."""
+    sensitivity_differs: tuple[str, ...] | None = None
+    """With a sensitivity run attached: the signals whose outcome (verdict and deciding stage)
+    differs from this run's, in ledger order; ``None`` without one."""
     fates: tuple[SignalFate, ...]
     members: tuple[str, ...]
     """Stage 3's members (empty when no signal reached Stage 3)."""
@@ -368,6 +405,71 @@ def _signals_of(result: dict[str, object], key: str) -> dict[str, dict[str, obje
     return {str(r["signal_id"]): r for r in rows if isinstance(r, dict)}
 
 
+def write_signal_docs(run_dir: Path, docs: Sequence[SignalDoc]) -> Path:
+    """Write ``signals.json`` (real-data runs; docs/adr/0018)."""
+    path = Path(run_dir) / SIGNALS_NAME
+    payload = {"signals": [d.model_dump(mode="json") for d in docs]}
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return path
+
+
+def _sensitivity(
+    run_dir: Path, manifest: Mapping[str, object], fates: Sequence[SignalFate]
+) -> tuple[str, ...] | None:
+    """The signals whose outcome differs in the attached sensitivity run (module docstring)."""
+    sdir = run_dir / SENSITIVITY_DIR
+    if not sdir.is_dir():
+        return None
+    sens = _read_json(sdir / MANIFEST_NAME)
+    if sens.get("status") != "completed":
+        raise MemoInputError("the sensitivity run is not completed")
+    mine, theirs = manifest["inputs"], sens.get("inputs")
+    if not isinstance(mine, dict) or not isinstance(theirs, dict):
+        raise MemoInputError("a run manifest has no inputs")
+    for key in ("snapshot_id", "seed"):
+        if mine.get(key) != theirs.get(key):
+            raise MemoInputError(f"the sensitivity run's {key} differs from this run's")
+    ledger = KillLedger.read(sdir)  # verifies the hash chain
+    if ledger.contains_placeholders():
+        raise MemoInputError("the sensitivity ledger contains placeholder entries")
+    other = ledger.fates(MEMO_STAGES)
+    if set(other) != {f.signal_id for f in fates}:
+        raise MemoInputError("the sensitivity run tested other signals")
+    return tuple(
+        f.signal_id
+        for f in fates
+        if (other[f.signal_id].status, other[f.signal_id].stage) != (f.status, f.stage)
+    )
+
+
+def _signal_docs(
+    run_dir: Path, data_kind: DataKind, signal_ids: Sequence[str]
+) -> tuple[SignalDoc, ...]:
+    """``signals.json``: required on real data, refused on the benchmark; one entry per signal
+    of the ledger, returned in ledger order. Every cite key must be in the corpus."""
+    path = run_dir / SIGNALS_NAME
+    if data_kind is DataKind.SYNTHETIC:
+        if path.exists():
+            raise MemoInputError(f"a benchmark run has a {SIGNALS_NAME}")
+        return ()
+    if not path.exists():
+        raise MemoInputError(f"a real-data run needs {SIGNALS_NAME} (docs/adr/0018)")
+    raw = _read_json(path).get("signals")
+    if not isinstance(raw, list):
+        raise MemoInputError(f"{SIGNALS_NAME} has no signal list")
+    try:
+        docs = {d.id: d for d in (SignalDoc.model_validate(x) for x in raw)}
+    except ValidationError as exc:
+        raise MemoInputError(f"{SIGNALS_NAME} is malformed: {exc}") from None
+    if len(docs) != len(raw) or set(docs) != set(signal_ids):
+        raise MemoInputError(f"{SIGNALS_NAME} does not list exactly the ledger's signals")
+    corpus = load_corpus()
+    unknown = sorted({k for d in docs.values() for k in d.cites} - set(corpus))
+    if unknown:
+        raise MemoInputError(f"{SIGNALS_NAME} cites keys outside the corpus: {unknown}")
+    return tuple(docs[s] for s in signal_ids)
+
+
 def build_fact_sheet(run_dir: Path, *, results_root: Path | None = None) -> FactSheet:
     """The fact sheet of the completed run in ``run_dir`` (module docstring).
 
@@ -411,6 +513,8 @@ def build_fact_sheet(run_dir: Path, *, results_root: Path | None = None) -> Fact
     if any(synthetic) and not all(synthetic):
         raise MemoInputError("a run mixes synthetic and real signal columns")
     data_kind = DataKind.SYNTHETIC if all(synthetic) else DataKind.REAL
+    docs = _signal_docs(run_dir, data_kind, [f.signal_id for f in fates])
+    differs = _sensitivity(run_dir, manifest, fates)
 
     b = _Builder()
     inputs = manifest["inputs"]
@@ -757,9 +861,30 @@ def build_fact_sheet(run_dir: Path, *, results_root: Path | None = None) -> Fact
     if len(ids) != len(set(ids)):
         raise MemoInputError("duplicate fact ids")
     fates_t = tuple(sorted(fates, key=lambda f: f.signal_id))
+    if differs is not None:
+        sens = _read_json(run_dir / SENSITIVITY_DIR / MANIFEST_NAME)
+        b.add(
+            "sensitivity.run_id",
+            FactKind.TEXT,
+            None,
+            "sensitivity run id",
+            str(sens["run_id"]),
+            "sensitivity:run_id",
+        )
+    for d in docs:
+        b.add(
+            f"signals.{d.id}.definition",
+            FactKind.TEXT,
+            d.id,
+            "definition",
+            d.definition,
+            f"signals:{d.id}:definition",
+        )
     return FactSheet(
         run_id=str(manifest["run_id"]),
         data_kind=data_kind,
+        signal_docs=docs,
+        sensitivity_differs=differs,
         fates=fates_t,
         members=members,
         portfolio_ran=portfolio_ran,

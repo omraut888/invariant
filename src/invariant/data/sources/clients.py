@@ -13,6 +13,13 @@ and never touch the network. The concrete classes are thin adapters:
   that the row count equals the API-reported ``count``, that ``count`` did not change between
   pages (a release landing mid-fetch), and that no (date, realtime_start) row repeats (unstable
   ordering across pages). Any failure raises: a partial vintage history is worse than none.
+- ``FredMarketHttpClient`` (``FredMarketClient``): for a daily market series, its current
+  values, its first ALFRED vintage date (``series/vintagedates``) and its archived vintages.
+  FRED refuses a request spanning more than 2000 vintage dates, so the archive is requested one
+  calendar year of real time at a time, from the first vintage to the fetch date (FRED also
+  refuses a real-time period that starts before the first vintage or ends in the future).
+  Requests are spaced ``min_interval_s`` apart for FRED's rate limit. Every request pages and
+  checks counts as above.
 - ``YFinanceClient`` (``PriceClient``): ``yfinance.download`` with ``auto_adjust=False`` (both
   ``Close`` and ``Adj Close``), ``repair=False`` (no heuristic data edits) and ``actions=False``.
   yfinance has no retry knob and reports per-ticker failures by returning all-NaN columns
@@ -45,6 +52,9 @@ __all__ = [
     "AlfredFetchError",
     "AlfredRawSeries",
     "FredAlfredClient",
+    "FredMarketClient",
+    "FredMarketHttpClient",
+    "FredMarketRaw",
     "HttpClient",
     "HttpError",
     "HttpxClient",
@@ -55,6 +65,7 @@ __all__ = [
 ALFRED_REALTIME_START = "1776-07-04"
 ALFRED_REALTIME_END = "9999-12-31"
 FRED_OBSERVATIONS_URL = "https://api.stlouisfed.org/fred/series/observations"
+FRED_VINTAGEDATES_URL = "https://api.stlouisfed.org/fred/series/vintagedates"
 _RETRY_STATUSES = frozenset({429, 500, 502, 503, 504})
 
 
@@ -108,6 +119,30 @@ class AlfredRawSeries:
 class AlfredClient(Protocol):
     def all_releases(self, series_id: str) -> AlfredRawSeries:
         """All vintages of ``series_id``; rows carry date, realtime_start/end, value."""
+        ...
+
+
+@dataclass(frozen=True)
+class FredMarketRaw:
+    """One daily FRED series as fetched (all fields still strings).
+
+    ``current``: rows with date and value, the current vintage. ``archive``: every archived
+    vintage row (date, realtime_start, realtime_end, value) of observations in the requested
+    window, from real-time periods clipped to whole calendar years. ``first_vintage``: the
+    series' first ALFRED vintage date.
+    """
+
+    series_id: str
+    current: tuple[Mapping[str, str], ...]
+    first_vintage: str
+    archive: tuple[Mapping[str, str], ...]
+    requests: int
+
+
+class FredMarketClient(Protocol):
+    def market_series(self, series_id: str, start: date, end: date, today: date) -> FredMarketRaw:
+        """Observations dated in ``[start, end]``: current values and every archived vintage up
+        to ``today``."""
         ...
 
 
@@ -264,6 +299,130 @@ class FredAlfredClient:
             )
         _log().info("alfred_fetched", series_id=series_id, rows=count, pages=pages)
         return AlfredRawSeries(series_id=series_id, rows=tuple(rows), count=count, pages=pages)
+
+
+class FredMarketHttpClient:
+    """``FredMarketClient`` over the FRED API (see module docstring)."""
+
+    def __init__(
+        self,
+        http: HttpClient,
+        api_key: SecretStr,
+        *,
+        min_interval_s: float,
+        sleep: Callable[[float], None] = time.sleep,
+        clock: Callable[[], float] = time.monotonic,
+    ) -> None:
+        if not api_key.get_secret_value():
+            raise ValueError("FRED API key is empty; set FRED_API_KEY in .env")
+        self._http = http
+        self._api_key = api_key
+        self._min_interval_s = min_interval_s
+        self._sleep = sleep
+        self._clock = clock
+        self._last: float | None = None
+        self._requests = 0
+
+    def _get(self, url: str, params: Mapping[str, str]) -> Mapping[str, object]:
+        if self._last is not None:
+            wait = self._min_interval_s - (self._clock() - self._last)
+            if wait > 0:
+                self._sleep(wait)
+        full = {**params, "api_key": self._api_key.get_secret_value(), "file_type": "json"}
+        redacted: HttpError | None = None
+        body = b""
+        try:
+            body = self._http.get_bytes(url, full)
+        except HttpError as exc:
+            redacted = HttpError(
+                str(exc).replace(self._api_key.get_secret_value(), "***"), exc.status
+            )
+        finally:
+            self._last = self._clock()
+            self._requests += 1
+        if redacted is not None:
+            raise redacted
+        try:
+            payload = json.loads(body)
+        except ValueError:
+            raise AlfredFetchError(f"malformed FRED response from {url}") from None
+        if not isinstance(payload, dict):
+            raise AlfredFetchError(f"unexpected FRED response from {url}")
+        return payload
+
+    def _observations(
+        self, series_id: str, params: Mapping[str, str], fields: Sequence[str]
+    ) -> list[Mapping[str, str]]:
+        rows: list[Mapping[str, str]] = []
+        count: int | None = None
+        while count is None or len(rows) < count:
+            page = self._get(
+                FRED_OBSERVATIONS_URL,
+                {
+                    **params,
+                    "series_id": series_id,
+                    "sort_order": "asc",
+                    "order_by": "observation_date",
+                    "limit": "100000",
+                    "offset": str(len(rows)),
+                },
+            )
+            page_count, observations = page.get("count"), page.get("observations")
+            if not isinstance(page_count, int) or not isinstance(observations, list):
+                raise AlfredFetchError(f"{series_id}: unexpected types in FRED response")
+            if count is not None and page_count != count:
+                raise AlfredFetchError(f"{series_id}: API count changed during pagination")
+            count = page_count
+            if not observations and len(rows) < count:
+                break
+            for obs in observations:
+                if not isinstance(obs, dict) or any(
+                    not isinstance(obs.get(k), str) for k in fields
+                ):
+                    raise AlfredFetchError(f"{series_id}: malformed observation {obs!r}")
+                rows.append({k: obs[k] for k in fields})
+        if len(rows) != count:
+            raise AlfredFetchError(
+                f"{series_id}: retrieved {len(rows)} rows but the API reported {count}"
+            )
+        return rows
+
+    def market_series(self, series_id: str, start: date, end: date, today: date) -> FredMarketRaw:
+        self._requests = 0
+        window = {"observation_start": start.isoformat(), "observation_end": end.isoformat()}
+        current = self._observations(series_id, window, ("date", "value"))
+        vintages = self._get(
+            FRED_VINTAGEDATES_URL, {"series_id": series_id, "sort_order": "asc", "limit": "1"}
+        ).get("vintage_dates")
+        if not isinstance(vintages, list) or not vintages or not isinstance(vintages[0], str):
+            raise AlfredFetchError(f"{series_id}: no ALFRED vintage dates")
+        first = date.fromisoformat(vintages[0])
+        archive: list[Mapping[str, str]] = []
+        for year in range(first.year, today.year + 1):
+            lo, hi = max(date(year, 1, 1), first), min(date(year, 12, 31), today)
+            if lo > hi:
+                continue
+            archive.extend(
+                self._observations(
+                    series_id,
+                    {**window, "realtime_start": lo.isoformat(), "realtime_end": hi.isoformat()},
+                    _ROW_FIELDS,
+                )
+            )
+        _log().info(
+            "fred_market_fetched",
+            series_id=series_id,
+            rows=len(current),
+            archive_rows=len(archive),
+            requests=self._requests,
+        )
+        return FredMarketRaw(
+            series_id=series_id,
+            current=tuple(current),
+            first_vintage=first.isoformat(),
+            archive=tuple(archive),
+            requests=self._requests,
+        )
 
 
 # ---------------------------------------------------------------------------------------------

@@ -34,6 +34,7 @@ FILES = (
     "causal_result.json",
     "decay_result.json",
     "portfolio_result.json",
+    "signals.json",  # real-data-shaped cases only
 )
 OUT = find_project_root() / "tests" / "fixtures" / "memo_runs"
 
@@ -56,10 +57,13 @@ def _members(run: Path) -> tuple[list[str], str | None]:
 
 
 def _case(preset: str, n_obs: int | None, seed: int, tmp: str) -> tuple[str, int, str]:
-    if preset == "d1_base":
+    """``<preset>_real`` runs ``<preset>`` real-data-shaped (ADR 0018)."""
+    real = preset.endswith("_real")
+    base = preset.removesuffix("_real")
+    if base == "d1_base":
         cfg = next(s for s in dro_scenarios() if s.name == "d1_base").config(n_obs)
     else:
-        cfg = load_benchmark_config(None if preset == "base" else preset)
+        cfg = load_benchmark_config(None if base == "base" else base)
         if n_obs is not None:
             cfg = cfg.model_copy(update={"n_obs": n_obs})
     git, patch = read_git_state()
@@ -69,6 +73,7 @@ def _case(preset: str, n_obs: int | None, seed: int, tmp: str) -> tuple[str, int
         Path(tmp) / f"{preset}-{n_obs}-{seed}",
         git_state=git,
         patch=patch,
+        real_shaped=real,
     )
     return preset, seed, str(run)
 
@@ -83,6 +88,7 @@ CASES: dict[str, tuple[str, int | None, Want]] = {
     "volfrag": ("volfrag", None, lambda m, v, r: v is not None),
     "not_decided": ("base", 450, lambda m, v, r: True),
     "stage2_short": ("base", 4000, lambda m, v, r: _decay_general_kill(r)),
+    "real_shaped": ("d1_base_real", None, lambda m, v, r: len(m) >= 2 and v == "pass"),
 }
 
 

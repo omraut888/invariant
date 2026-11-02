@@ -15,18 +15,27 @@ from invariant.data.sources.base import SourceName, SourcePayload
 from invariant.data.sources.clients import (
     AlfredClient,
     FredAlfredClient,
+    FredMarketClient,
+    FredMarketHttpClient,
     HttpClient,
     HttpxClient,
     PriceClient,
     YFinanceClient,
 )
 from invariant.data.sources.etf import fetch_etf_prices
+from invariant.data.sources.fred_market import fetch_fred_market
 from invariant.data.sources.french import fetch_french_factors
 
 __all__ = ["FETCHED_SOURCES", "build_snapshot"]
 
-FETCHED_SOURCES: tuple[SourceName, ...] = (SourceName.ETF, SourceName.FRENCH, SourceName.ALFRED)
-"""Sources with a network fetcher. ``SourceName.SYNTHETIC`` is written by the benchmark only."""
+FETCHED_SOURCES: tuple[SourceName, ...] = (
+    SourceName.ETF,
+    SourceName.FRENCH,
+    SourceName.ALFRED,
+    SourceName.FRED_MARKET,
+)
+"""Sources with a network fetcher. ``SourceName.SYNTHETIC`` is written by the benchmark only.
+``FRED_MARKET`` is fetched only when ``data.fred_market`` is configured."""
 
 
 def build_snapshot(
@@ -37,6 +46,7 @@ def build_snapshot(
     price_client: PriceClient | None = None,
     http: HttpClient | None = None,
     alfred_client: AlfredClient | None = None,
+    market_client: FredMarketClient | None = None,
 ) -> Snapshot:
     """Fetch ``sources`` as configured and write them as one immutable snapshot.
 
@@ -60,7 +70,7 @@ def build_snapshot(
                 fetch_etf_prices(
                     client,
                     config.universe.tickers,
-                    config.dates.start,
+                    config.fetch_start,
                     config.dates.end,
                     calendar=data_cfg.calendar,
                 )
@@ -75,6 +85,22 @@ def build_snapshot(
                     http, settings.fred_api_key, page_size=data_cfg.alfred.page_size
                 )
             payloads.append(fetch_alfred(alfred_client, data_cfg.alfred.series))
+        if SourceName.FRED_MARKET in sources and data_cfg.fred_market is not None:
+            if market_client is None:
+                if settings.fred_api_key is None:
+                    raise ValueError("FRED_API_KEY is not set; required for FRED market series")
+                market_client = FredMarketHttpClient(
+                    http, settings.fred_api_key, min_interval_s=data_cfg.fred_market.min_interval_s
+                )
+            payloads.append(
+                fetch_fred_market(
+                    market_client,
+                    data_cfg.fred_market.series,
+                    config.fetch_start,
+                    config.dates.end,
+                    calendar=data_cfg.calendar,
+                )
+            )
         return write_snapshot(payloads, default_snapshots_dir(settings))
     finally:
         if owned is not None:

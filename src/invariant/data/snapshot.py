@@ -62,6 +62,11 @@ from invariant.data.sources.etf import (
     adj_close_panel,
     log_returns,
 )
+from invariant.data.sources.fred_market import (
+    ARCHIVE_COLUMNS,
+    OBSERVATION_COLUMNS,
+    FredMarketReport,
+)
 from invariant.data.sources.french import FACTOR_COLUMNS, FrenchReport
 from invariant.data.sources.synthetic import FEATURES_TABLE, SyntheticFeatureReport, features_frame
 
@@ -419,6 +424,23 @@ class Snapshot:
     def alfred_vintages(self) -> pd.DataFrame:
         """Long vintage table (``VINTAGE_COLUMNS``) for all series."""
         return self.table(SourceName.ALFRED, "vintages")[list(VINTAGE_COLUMNS)]
+
+    # --- fred_market --------------------------------------------------------------------------
+
+    def fred_market_report(self) -> FredMarketReport:
+        return FredMarketReport.model_validate(self._report(SourceName.FRED_MARKET))
+
+    def fred_market_observations(self) -> pd.DataFrame:
+        """Current values (``OBSERVATION_COLUMNS``) of every FRED market series."""
+        return self.table(SourceName.FRED_MARKET, "observations")[list(OBSERVATION_COLUMNS)]
+
+    def fred_market_vintages(self) -> pd.DataFrame:
+        """Archived vintages (``VINTAGE_COLUMNS``) of every FRED market series."""
+        return self.table(SourceName.FRED_MARKET, "vintages")[list(VINTAGE_COLUMNS)]
+
+    def fred_market_archive(self) -> pd.DataFrame:
+        """The per-observation posting and revision audit (``ARCHIVE_COLUMNS``)."""
+        return self.table(SourceName.FRED_MARKET, "archive")[list(ARCHIVE_COLUMNS)]
 
     # --- synthetic (benchmark only) -----------------------------------------------------------
 

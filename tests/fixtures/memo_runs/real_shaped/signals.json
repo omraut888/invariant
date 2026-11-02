@@ -1,0 +1,46 @@
+{
+  "signals": [
+    {
+      "cites": [
+        "moskowitz2012"
+      ],
+      "definition": "stand-in for a 12-1 month momentum sum of SPY log returns over sessions t-251 to t-21",
+      "id": "sig_s_real",
+      "sources": [
+        "etf"
+      ]
+    },
+    {
+      "cites": [
+        "campbell1987",
+        "fama1989"
+      ],
+      "definition": "stand-in for the 10-year minus 3-month Treasury spread, usable 5 sessions after its date",
+      "id": "sig_s_conf",
+      "sources": [
+        "fred_market"
+      ]
+    },
+    {
+      "cites": [
+        "fama1990"
+      ],
+      "definition": "stand-in for a 1-month log change of a monthly series within the vintage usable at t",
+      "id": "sig_s_decay",
+      "sources": [
+        "alfred"
+      ]
+    },
+    {
+      "cites": [
+        "bollerslev2009"
+      ],
+      "definition": "stand-in for (VIX/100)^2/12 minus 21-session realised variance of SPY",
+      "id": "sig_s_noise",
+      "sources": [
+        "etf",
+        "fred_market"
+      ]
+    }
+  ]
+}

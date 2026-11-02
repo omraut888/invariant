@@ -111,6 +111,8 @@ class RunPreset(_Frozen):
     preset: str
     """A benchmark preset (``configs/benchmark.yaml``), or ``base`` for the default market."""
     n_obs: StrictInt | None = Field(default=None, ge=200)
+    real_shaped: bool = False
+    """Run the pipeline real-data-shaped (``benchmark.run_benchmark_pipeline``; ADR 0018)."""
 
 
 class MemoValidationConfig(_Frozen):
@@ -208,7 +210,14 @@ def run_task(
     dataset = generate_market(market, ds_seed)
     corrupt = RngFactory(cfg.root_seed).child(f"corrupt/{preset.name}/{index}")
     with tempfile.TemporaryDirectory(dir=work_dir) as tmp:
-        run = run_benchmark_pipeline(dataset, pl_seed, Path(tmp), git_state=git_state, patch=patch)
+        run = run_benchmark_pipeline(
+            dataset,
+            pl_seed,
+            Path(tmp),
+            git_state=git_state,
+            patch=patch,
+            real_shaped=preset.real_shaped,
+        )
         sheet = build_fact_sheet(run)
         memo = build_template_memo(sheet)
         md = render(memo, sheet).text

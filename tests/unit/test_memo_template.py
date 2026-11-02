@@ -23,6 +23,7 @@ EXPECTED = {
     "realistic": (Recommendation.AGAINST, {"not_detectable"}, {"portfolio_method", "no_half_life"}),
     "stage2_short": (Recommendation.NOT_DECIDED, {"not_decided", "no_half_life"}, {"decay_power"}),
     "not_decided": (Recommendation.NOT_DECIDED, {"not_decided"}, {"hidden_confounder"}),
+    "real_shaped": (Recommendation.PAPER_TRADING_CANDIDATE, {"passenger"}, {"collateral"}),
 }
 
 
@@ -97,6 +98,27 @@ def test_real_data_frames_benchmark_rates_as_validation_rates() -> None:
     assert "benchmark validation rate" in text and "not a property of this strategy" in text
 
 
+def test_a_real_data_memo_states_definitions_citations_and_its_sources() -> None:
+    """The real-data path (docs/adr/0018) on the real-data-shaped fixture."""
+    sheet = build_fact_sheet(FIXTURES / "real_shaped")
+    assert sheet.data_kind is DataKind.REAL and len(sheet.signal_docs) == 4
+    memo, md = _memo("real_shaped")
+    signals = next(sec for sec in memo.sections if sec.id == "signals")
+    table = next(b for b in signals.blocks if isinstance(b, Table))
+    assert table.header == ("Signal", "Definition", "Motivated by", "Outcome over the kill stages")
+    for d in sheet.signal_docs:
+        assert d.definition in md
+    assert "Moskowitz et al. 2012" in md and "Campbell 1987; Fama & French 1989" in md
+    refs = md[md.index("## References") :]
+    assert "Time series momentum" in refs  # cited signals reach the bibliography
+    text = next(m for m in MANDATORY if m.id == "data_source").text(sheet)
+    assert "(ADR 0019)" not in text  # atoms are unrendered here
+    assert text.count("{adr:19}") == 2 and "Fama-French" not in text
+    assert "{stage:portfolio} trades at that close" in text
+    synthetic = build_fact_sheet(FIXTURES / "pass_single")
+    assert not synthetic.signal_docs
+
+
 def test_parse_rejects_malformed_atoms() -> None:
     assert parse("a {stage:causal} b")[1].type == "stage"
     with pytest.raises(ValueError, match="unparsed"):
@@ -110,7 +132,14 @@ def test_literature_corpus() -> None:
     assert len(corpus) >= 20
     for e in corpus.values():
         assert len(e.summary) <= SUMMARY_MAX
-        assert set(e.stages) <= {"causal", "decay", "portfolio", "adversarial", "benchmark"}
+        assert set(e.stages) <= {
+            "causal",
+            "decay",
+            "portfolio",
+            "adversarial",
+            "benchmark",
+            "signals",
+        }
     keys = set()
     for case in CASES:
         memo, _ = _memo(case)

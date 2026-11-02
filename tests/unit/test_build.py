@@ -54,7 +54,10 @@ def test_build_snapshot_with_injected_clients(tmp_path: Path) -> None:
         alfred_client=FakeAlfredClient({"UNRATE": UNRATE_ROWS}),
     )
     assert snap.path.parent == default_snapshots_dir(settings) == tmp_path / "snapshots"
-    assert {s.source for s in snap.manifest.sources} == set(FETCHED_SOURCES)
+    # fred_market is fetched only when configured (base.yaml does not configure it).
+    assert {s.source for s in snap.manifest.sources} == set(FETCHED_SOURCES) - {
+        SourceName.FRED_MARKET
+    }
     assert snap.etf_report().complete
     assert snap.alfred_report().series[0].series_id == "UNRATE"
 

@@ -46,3 +46,12 @@ def test_one_run_through_every_step(tmp_path: Path) -> None:
     report = summarize_validation(records, hand, cfg, git_sha="x", git_dirty=False)
     assert [g.name for g in report.gates] == ["G1", "G2", "G3", "G4"]
     assert report.n_runs == 1
+
+
+def test_a_real_shaped_run_through_every_step() -> None:
+    """The real-data-shaped arm (ADR 0018) on one tiny seed."""
+    cfg = _cfg(presets=[{"name": "tiny_real", "preset": "base", "n_obs": 450, "real_shaped": True}])
+    rec = run_task(cfg.presets[0], 0, cfg, git_state=GIT)
+    assert rec.template_accepted, rec.template_failures
+    assert rec.deterministic and rec.ground_truth_independent
+    assert all(c.n == 1 for c in rec.classes)

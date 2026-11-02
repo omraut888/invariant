@@ -67,13 +67,53 @@ def _data(sheet: FactSheet) -> str:
             "strategy. The rates at which each stage decides correctly were measured over many "
             "runs and are in the validation ADRs."
         )
-    return (
+    used = {src for d in sheet.signal_docs for src in d.sources}
+    parts = [
         "This run used market data, with known limits ({adr:4}): the ETF universe has "
-        "survivorship and hindsight bias, price levels are not point-in-time (only returns are "
-        "used), and the Fama-French factors are revised with every release and used with a "
-        "lag. Every rate this memo quotes from the planted-signal benchmark is a benchmark "
+        "survivorship and hindsight bias, and price levels are not point-in-time, so only "
+        "returns are used."
+    ]
+    if "fred_market" in used:
+        parts.append(
+            "Daily FRED market series are used as FRED first posted them once their archive "
+            "begins; before it, each value is assumed usable a fixed number of sessions after "
+            "its date, set from the archive's regular posting delays, and revisions before the "
+            "archive cannot be seen ({adr:19})."
+        )
+    if "alfred" in used:
+        parts.append(
+            "Macro series are the vintages known at each date, and their changes are computed "
+            "within one vintage ({adr:19})."
+        )
+    if "french" in used:
+        parts.append(
+            "The Fama-French factors are revised with every release and are used with a lag."
+        )
+    parts.append(
+        "{stage:causal} tests lags starting one session back, which includes a link a trade "
+        "entered at the next session's close could not use; {stage:portfolio} trades at that "
+        "close, so it alone tests what could have been traded ({adr:18})."
+    )
+    parts.append(
+        "Every rate this memo quotes from the planted-signal benchmark is a benchmark "
         "validation rate, measured on synthetic data with a known answer. It describes how the "
         "pipeline's tests behave, and is not a property of this strategy."
+    )
+    return " ".join(parts)
+
+
+_SENSITIVITY_RUN: Final = (
+    "A sensitivity run on the same snapshot and seed used the maximum-lag rule for the daily "
+    "FRED market series: current values throughout, each usable only after the longest posting "
+    "delay the archive shows ({adr:18}; sensitivity run {fact:sensitivity.run_id|value})."
+)
+
+
+def _lag_sensitivity(sheet: FactSheet) -> str:
+    names = ", ".join(sheet.sensitivity_differs or ())
+    return (
+        f"{_SENSITIVITY_RUN} For {names}, the outcome there differs from this run's, so the "
+        "result for these signals depends on the posting-lag assumption ({adr:19})."
     )
 
 
@@ -172,6 +212,15 @@ def _collateral(sheet: FactSheet) -> str:
 
 MANDATORY: Final[tuple[Mandatory, ...]] = (
     Mandatory("data_source", lambda s: True, _data),
+    Mandatory("lag_sensitivity", lambda s: bool(s.sensitivity_differs), _lag_sensitivity),
+    Mandatory(
+        "lag_sensitivity_agrees",
+        lambda s: s.sensitivity_differs == (),
+        lambda s: (
+            f"{_SENSITIVITY_RUN} Every signal's outcome there is the same as in this run, so "
+            "no result here depends on that choice of posting lag."
+        ),
+    ),
     Mandatory(
         "hidden_confounder",
         lambda s: _passed_stage(s, StageName.CAUSAL),

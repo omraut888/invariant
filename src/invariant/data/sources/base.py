@@ -40,6 +40,7 @@ class SourceName(StrEnum):
     ETF = "etf"
     FRENCH = "french"
     ALFRED = "alfred"
+    FRED_MARKET = "fred_market"
     SYNTHETIC = "synthetic"  # planted-signal benchmark features only; never fetched
 
 

@@ -230,3 +230,45 @@ def test_sentence_forms_are_checked(sentence: str, match: str) -> None:
             sources=("a", "b", "c", "d"),
             sentence=sentence,
         )
+
+
+def _copy(case: str, tmp: Path) -> Path:
+    dest = tmp / case
+    shutil.copytree(FIXTURES / case, dest)
+    for f in dest.iterdir():
+        f.chmod(0o644)
+    return dest
+
+
+def test_a_real_data_run_needs_its_signal_definitions(tmp_path: Path) -> None:
+    run = _copy("real_shaped", tmp_path)
+    sheet = build_fact_sheet(run)
+    fact = sheet.fact(f"signals.{sheet.signal_docs[0].id}.definition")
+    assert fact.sources == (f"signals:{sheet.signal_docs[0].id}:definition",)
+    (run / "signals.json").unlink()
+    with pytest.raises(MemoInputError, match=r"needs signals\.json"):
+        build_fact_sheet(run)
+
+
+@pytest.mark.parametrize(
+    "edit",
+    [
+        lambda d: d["signals"].pop(),  # a signal without a definition
+        lambda d: d["signals"][0].update(cites=["nobody2020"]),  # a key outside the corpus
+        lambda d: d["signals"][0].update(sources=["yahoo"]),  # an unknown source kind
+    ],
+)
+def test_malformed_signal_definitions_are_refused(tmp_path: Path, edit: object) -> None:
+    run = _copy("real_shaped", tmp_path)
+    doc = json.loads((run / "signals.json").read_text())
+    edit(doc)  # type: ignore[operator]
+    (run / "signals.json").write_text(json.dumps(doc))
+    with pytest.raises(MemoInputError):
+        build_fact_sheet(run)
+
+
+def test_a_benchmark_run_with_signal_definitions_is_refused(tmp_path: Path) -> None:
+    run = _copy("pass_single", tmp_path)
+    shutil.copy(FIXTURES / "real_shaped" / "signals.json", run / "signals.json")
+    with pytest.raises(MemoInputError, match="benchmark run"):
+        build_fact_sheet(run)

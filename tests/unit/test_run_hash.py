@@ -141,8 +141,9 @@ def test_same_inputs_same_run_id() -> None:
 
 def test_golden_run_id() -> None:
     # Pinned: if this changes without a change to the PipelineConfig schema, canonicalization
-    # changed and HASH_SCHEMA_VERSION must be bumped. (Last re-pinned when `decay` was added.)
-    assert compute_run_id(_inputs()) == "485aae913204902c"
+    # changed and HASH_SCHEMA_VERSION must be bumped. (Last re-pinned when `data.fred_market`,
+    # `signals` and `snapshot_id` were added, docs/adr/0019.)
+    assert compute_run_id(_inputs()) == "f6b81b4c6108313f"
 
 
 @pytest.mark.parametrize(

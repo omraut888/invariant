@@ -87,6 +87,8 @@ from invariant.stages.memo.document import (
 from invariant.stages.memo.facts import (
     DSR_TRIALS,
     MEMO_STAGES,
+    SENSITIVITY_DIR,
+    SIGNALS_NAME,
     Fact,
     FactKind,
     FactSheet,
@@ -218,6 +220,18 @@ class _Raw:
             case "const":
                 if rest == "dsr_trials":
                     return DSR_TRIALS
+            case "sensitivity":
+                node = self.doc(self.run_dir / SENSITIVITY_DIR / "manifest.json")
+                assert isinstance(node, dict)
+                return node[rest]
+            case "signals":
+                sid, _, name = rest.partition(":")
+                doc = self.doc(self.run_dir / SIGNALS_NAME)
+                assert isinstance(doc, dict)
+                hits = [d for d in doc["signals"] if isinstance(d, dict) and d.get("id") == sid]
+                if len(hits) != 1:
+                    raise KeyError(source)
+                return hits[0][name]
         raise KeyError(source)
 
 
@@ -636,9 +650,27 @@ def _v5_verdicts(memo: Memo, sheet: FactSheet, md: str, raw: _Raw, log: _Log) ->
             log.fail("V5", f"{clause!r} disagrees with the raw ledger ({fate})")
 
 
+def _raw_sensitivity(raw: _Raw) -> list[str] | None:
+    """Signals whose outcome differs in the attached sensitivity run, from its raw ledger."""
+    sdir = raw.run_dir / SENSITIVITY_DIR
+    if not sdir.is_dir():
+        return None
+    other = _Raw(sdir, raw.results_root)
+    if set(other.signals()) != set(raw.signals()):
+        raise MemoInputError("the sensitivity run tested other signals")
+    return [
+        s
+        for s in raw.signals()
+        if (other.fate(s).passed, other.fate(s).stage) != (raw.fate(s).passed, raw.fate(s).stage)
+    ]
+
+
 def _raw_triggers(raw: _Raw) -> set[str]:
     """The mandatory statements' triggers, recomputed from the raw ledger (``mandatory.py``)."""
     out = {"data_source", "stage4_not_adopted"}
+    differs = _raw_sensitivity(raw)
+    if differs is not None:
+        out.add("lag_sensitivity" if differs else "lag_sensitivity_agrees")
     reasons = {
         str(e["reason"]) for e in raw.entries if e["verdict"] == "kill" and e["reason"] is not None
     }
@@ -694,6 +726,23 @@ def _v6_mandatory(memo: Memo, sheet: FactSheet, raw: _Raw, log: _Log) -> None:
                     log.fail("V6", f"statement {block.statement!r} is not a template limit")
     if found != want:
         log.fail("V6", f"statements {found} are not the triggered set {want}")
+    _v6_sensitivity_names(memo, raw, log)
+
+
+def _v6_sensitivity_names(memo: Memo, raw: _Raw, log: _Log) -> None:
+    """The sensitivity statement names exactly the signals whose raw outcomes differ."""
+    differs = _raw_sensitivity(raw)
+    for sec in memo.sections:
+        for block in sec.blocks:
+            if isinstance(block, Paragraph) and block.statement == "lag_sensitivity":
+                text = "".join(seg.text for seg in block.segments if isinstance(seg, Text))
+                named = {
+                    s for s in raw.signals() if re.search(rf"(?<![\w]){re.escape(s)}(?![\w])", text)
+                }
+                if named != set(differs or ()):
+                    log.fail(
+                        "V6", f"lag_sensitivity names {sorted(named)}, the raw ledgers {differs}"
+                    )
 
 
 def verify(

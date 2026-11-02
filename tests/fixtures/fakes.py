@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 from invariant.config.settings import FrenchConfig
-from invariant.data.sources.clients import AlfredRawSeries
+from invariant.data.sources.clients import AlfredRawSeries, FredMarketRaw
 
 FIXTURES = Path(__file__).resolve().parent
 FIVE_FACTOR_CSV = FIXTURES / "french" / "F-F_Research_Data_5_Factors_2x3_daily.csv"
@@ -107,3 +107,29 @@ class FakeAlfredClient:
 
     def all_releases(self, series_id: str) -> AlfredRawSeries:
         return alfred_raw(series_id, self.series[series_id])
+
+
+def market_raw(
+    series_id: str,
+    current: Sequence[tuple[str, str]],
+    archive: Sequence[Mapping[str, str]],
+    first_vintage: str,
+) -> FredMarketRaw:
+    """A ``FredMarketRaw`` from (date, value) pairs and ``alfred_row`` archive rows."""
+    return FredMarketRaw(
+        series_id=series_id,
+        current=tuple({"date": d, "value": v} for d, v in current),
+        first_vintage=first_vintage,
+        archive=tuple(archive),
+        requests=1,
+    )
+
+
+class FakeMarketClient:
+    def __init__(self, series: Mapping[str, FredMarketRaw]) -> None:
+        self.series = dict(series)
+        self.calls: list[tuple[str, date, date, date]] = []
+
+    def market_series(self, series_id: str, start: date, end: date, today: date) -> FredMarketRaw:
+        self.calls.append((series_id, start, end, today))
+        return self.series[series_id]

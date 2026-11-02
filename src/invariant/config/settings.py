@@ -170,6 +170,16 @@ class FrenchConfig(_Frozen):
     momentum_url: str = Field(pattern=r"^https://")
 
 
+def _check_series_ids(series: tuple[str, ...]) -> tuple[str, ...]:
+    bad = [s for s in series if not _FRED_SERIES_RE.fullmatch(s)]
+    if bad:
+        raise ValueError(f"FRED series ids must be uppercase alphanumeric, got {bad}")
+    dupes = sorted({s for s in series if series.count(s) > 1})
+    if dupes:
+        raise ValueError(f"duplicate series: {dupes}")
+    return series
+
+
 class AlfredConfig(_Frozen):
     """FRED/ALFRED series fetched with all vintages."""
 
@@ -179,13 +189,25 @@ class AlfredConfig(_Frozen):
     @field_validator("series")
     @classmethod
     def _check_series(cls, series: tuple[str, ...]) -> tuple[str, ...]:
-        bad = [s for s in series if not _FRED_SERIES_RE.fullmatch(s)]
-        if bad:
-            raise ValueError(f"FRED series ids must be uppercase alphanumeric, got {bad}")
-        dupes = sorted({s for s in series if series.count(s) > 1})
-        if dupes:
-            raise ValueError(f"duplicate series: {dupes}")
-        return series
+        return _check_series_ids(series)
+
+
+class FredMarketConfig(_Frozen):
+    """Daily FRED market series (docs/adr/0019): current values, a measured posting lag and a
+    revision audit. ``min_interval_s`` spaces requests to stay under FRED's rate limit."""
+
+    series: tuple[str, ...] = Field(min_length=1)
+    min_interval_s: float = Field(ge=0, le=10)
+    lag_rule: Literal["exact_in_archive", "max_lag"] = "exact_in_archive"
+    """``exact_in_archive`` (the primary rule): archived vintages from the first vintage on,
+    current values before it at 1 + the largest regular posting lag. ``max_lag`` (ADR 0018's
+    sensitivity run): current values throughout, each usable 1 + the archive's largest posting
+    lag sessions after its date (docs/adr/0019)."""
+
+    @field_validator("series")
+    @classmethod
+    def _check_series(cls, series: tuple[str, ...]) -> tuple[str, ...]:
+        return _check_series_ids(series)
 
 
 class DataConfig(_Frozen):
@@ -195,6 +217,8 @@ class DataConfig(_Frozen):
     http: HttpConfig
     french: FrenchConfig
     alfred: AlfredConfig
+    fred_market: FredMarketConfig | None = None
+    """``None``: not fetched (the benchmark and Phase 0 runs)."""
 
     @field_validator("calendar")
     @classmethod
@@ -335,6 +359,25 @@ class PortfolioConfig(_Frozen):
         return self
 
 
+class SignalsConfig(_Frozen):
+    """Real-data candidate signals (``invariant.data.signals``; docs/adr/0018, 0019).
+
+    ``ids`` name registry definitions; ``warmup_start`` is where signal inputs are fetched from,
+    so that every lookback is complete at the first panel session.
+    """
+
+    ids: tuple[str, ...] = Field(min_length=1)
+    warmup_start: date
+
+    @field_validator("ids")
+    @classmethod
+    def _check_ids(cls, ids: tuple[str, ...]) -> tuple[str, ...]:
+        dupes = sorted({s for s in ids if ids.count(s) > 1})
+        if dupes:
+            raise ValueError(f"duplicate signal ids: {dupes}")
+        return ids
+
+
 class PipelineConfig(_Frozen):
     universe: UniverseConfig
     dates: DateRange
@@ -345,6 +388,21 @@ class PipelineConfig(_Frozen):
     causal: CausalConfig
     decay: DecayConfig
     portfolio: PortfolioConfig
+    signals: SignalsConfig | None = None
+    """``None``: the panel's features are the raw sources (benchmark, Phase 0)."""
+    snapshot_id: str | None = Field(default=None, pattern=r"^[0-9a-f]{16}$")
+    """A real-data run's pinned snapshot (docs/adr/0018); ``invariant run`` refuses any other."""
+
+    @model_validator(mode="after")
+    def _check_warmup(self) -> Self:
+        if self.signals is not None and self.signals.warmup_start > self.dates.start:
+            raise ValueError("signals.warmup_start must not be after dates.start")
+        return self
+
+    @property
+    def fetch_start(self) -> date:
+        """First date fetched: the warm-up start when signals are configured."""
+        return self.signals.warmup_start if self.signals is not None else self.dates.start
 
 
 def deep_merge(base: Mapping[str, object], override: Mapping[str, object]) -> dict[str, object]:
