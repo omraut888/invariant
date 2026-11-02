@@ -54,11 +54,12 @@ from pydantic import BaseModel, ConfigDict, Field, StrictInt
 from scipy.stats import beta
 
 from invariant.benchmark.config import load_benchmark_config
+from invariant.benchmark.ground_truth import GroundTruth
 from invariant.benchmark.synthetic import generate_market
 from invariant.config.settings import ConfigError, find_project_root
 from invariant.core.logging import get_logger
 from invariant.core.run_hash import GitState, RngFactory, canonical_json
-from invariant.stages.memo.benchmark import run_benchmark_pipeline
+from invariant.stages.memo.benchmark import real_shaped_id, run_benchmark_pipeline
 from invariant.stages.memo.corruption import CLASSES, CorruptionError, apply_ops, generate
 from invariant.stages.memo.document import render
 from invariant.stages.memo.facts import FactSheet, build_fact_sheet
@@ -74,6 +75,7 @@ __all__ = [
     "RunRecord",
     "entailment_only",
     "load_memo_validation_config",
+    "passed_with_true_edge",
     "run_hand_sets",
     "run_task",
     "run_validation",
@@ -190,6 +192,23 @@ def _categories(sheet: FactSheet) -> tuple[str, ...]:
     return tuple(out)
 
 
+def passed_with_true_edge(
+    passed: Sequence[str], truth: GroundTruth, *, real_shaped: bool
+) -> tuple[bool, ...]:
+    """Whether each passed signal has a planted edge (reported only). In a real-data-shaped run
+    the ledger's ids are ``real_shaped_id`` of GroundTruth's. An id GroundTruth does not know
+    raises: it once defaulted to "no edge", which counted every real-data-shaped candidate as
+    edgeless (docs/adr/0018)."""
+    edges = {
+        (real_shaped_id(s.signal_id) if real_shaped else s.signal_id): s.has_causal_edge
+        for s in truth.signals
+    }
+    unknown = [s for s in passed if s not in edges]
+    if unknown:
+        raise ValueError(f"passed signals not in GroundTruth: {unknown}")
+    return tuple(edges[s] for s in passed)
+
+
 def run_task(
     preset: RunPreset,
     index: int,
@@ -264,7 +283,6 @@ def run_task(
         if keep_dir is not None and (not report.accepted or any(c.misses for c in classes)):
             shutil.copytree(run, keep_dir / f"{preset.name}-{index}", dirs_exist_ok=True)
     passed = tuple(f.signal_id for f in sheet.fates if f.status.value == "passed")
-    edges = {s.signal_id: s.has_causal_edge for s in truth.signals}
     return RunRecord(
         preset=preset.name,
         index=index,
@@ -273,7 +291,7 @@ def run_task(
         recommendation=str(sheet.recommendation),
         members=sheet.members,
         passed=passed,
-        passed_with_true_edge=tuple(bool(edges.get(s, False)) for s in passed),
+        passed_with_true_edge=passed_with_true_edge(passed, truth, real_shaped=preset.real_shaped),
         template_accepted=report.accepted,
         template_failures=tuple(f"{f.check}: {f.detail}" for f in report.failures),
         deterministic=deterministic,

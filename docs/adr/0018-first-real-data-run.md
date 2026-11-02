@@ -308,6 +308,23 @@ table (first vintages VIXCLS 2010-11-22, T10Y3M 2014-01-27, DBAA and DAAA 2014-0
 observations 4, 2, 12, 13, 0). ALFRED vintage rows with missing values: INDPRO 600, UNRATE 1,
 CPIAUCSL 259, PAYEMS 0; the panel has no missing value after its first row.
 
+## Harness fix: the edgeless-pass count (reported-only metric, 2026-11-02)
+- **Cause.** `run_task` looked up each passed signal's planted edge by GroundTruth id
+  (`s_real`) with a default of "no edge". In a real-data-shaped run the ledger names the signal
+  `sig_s_real`, so every lookup missed, and every candidate memo was counted as having an
+  edgeless pass (22 of 22).
+- **Fix** (the commit that adds this section, after ae65781). The id mapping is one function,
+  `benchmark.real_shaped_id`, used by the pipeline's rename and by the new
+  `validation.passed_with_true_edge`, which raises on an id GroundTruth does not know instead of
+  defaulting. Unit tests cover both id forms and the unknown-id error.
+- **Effect.** The metric is reported, not gated: G1–G4, the verifier, the memo and both
+  real-data runs are unaffected, and nothing was rerun. The count was recomputed from the
+  archived `records.jsonl` with each run's GroundTruth regenerated from its seed: **2 of 22**
+  candidate memos had a passed edgeless signal, both `hidden_confounder` runs in which `s_conf`
+  passed (indices 1 and 2). One task (`hidden_confounder`, index 1) was rerun with the fix and
+  reproduced its recorded run id `ad080fb9dfdab14c`, with flags (False, True) where the archived
+  record has (False, False). The archived report is left as written.
+
 ## Backlog (added 2026-11-02)
 - **A pooled cross-asset Stage 1 decision unit**: one test of a signal's link to all assets
   jointly, with more power for an effect common across assets than Bonferroni over 65 tests. It

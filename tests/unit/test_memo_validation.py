@@ -4,6 +4,9 @@ from pathlib import Path
 
 import pytest
 
+from invariant.benchmark.config import load_benchmark_config
+from invariant.benchmark.ground_truth import GroundTruth
+from invariant.benchmark.synthetic import generate_market
 from invariant.core.run_hash import GitState
 from invariant.stages.memo import validation as v
 from invariant.stages.memo.corruption import CLASSES
@@ -180,3 +183,30 @@ def test_an_entailment_miss_is_reported_not_gated() -> None:
     assert rep.hand_sets[1].entailment_missed == ("b1",)
     gated = [hand[0], hand[1].model_copy(update={"gated": True})]
     assert not summarize_validation(recs, gated, cfg, git_sha="x", git_dirty=False).accepted
+
+
+@pytest.fixture(scope="module")
+def tiny_truth() -> GroundTruth:
+    market = load_benchmark_config(None).model_copy(update={"n_obs": 300})
+    return generate_market(market, 0).ground_truth
+
+
+def test_passed_with_true_edge_maps_real_shaped_ids(tiny_truth: GroundTruth) -> None:
+    """ADR 0018: a real-data-shaped ledger names ``sig_<id>``; the lookup must map it, not
+    default to "no edge"."""
+    edges = {s.signal_id: s.has_causal_edge for s in tiny_truth.signals}
+    assert edges["s_real"] and not edges["s_noise"]
+    assert v.passed_with_true_edge(("s_real", "s_noise"), tiny_truth, real_shaped=False) == (
+        True,
+        False,
+    )
+    shaped = ("sig_s_real", "sig_s_noise")
+    assert v.passed_with_true_edge(shaped, tiny_truth, real_shaped=True) == (True, False)
+    assert v.passed_with_true_edge((), tiny_truth, real_shaped=True) == ()
+
+
+def test_passed_with_true_edge_rejects_an_unknown_id(tiny_truth: GroundTruth) -> None:
+    with pytest.raises(ValueError, match="not in GroundTruth"):
+        v.passed_with_true_edge(("sig_s_real",), tiny_truth, real_shaped=False)
+    with pytest.raises(ValueError, match="not in GroundTruth"):
+        v.passed_with_true_edge(("s_real",), tiny_truth, real_shaped=True)

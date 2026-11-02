@@ -31,7 +31,7 @@ from invariant.orchestration.pipeline import run_kill_stages
 from invariant.stages.causal.validation import pipeline_config
 from invariant.stages.memo.facts import SignalDoc, SourceKind, write_signal_docs
 
-__all__ = ["STAND_INS", "run_benchmark_pipeline"]
+__all__ = ["STAND_INS", "real_shaped_id", "run_benchmark_pipeline"]
 
 STAND_INS: Final[tuple[tuple[str, tuple[str, ...], tuple[SourceKind, ...]], ...]] = (
     (
@@ -56,6 +56,12 @@ STAND_INS: Final[tuple[tuple[str, tuple[str, ...], tuple[SourceKind, ...]], ...]
     ),
 )
 """Real-data-shaped runs: candidate i gets ``STAND_INS[i % 4]``."""
+
+
+def real_shaped_id(signal_id: str) -> str:
+    """The id benchmark signal ``signal_id`` (a GroundTruth id) carries in a real-data-shaped
+    run, as in its ledger and fact sheet."""
+    return "sig_" + signal_id
 
 
 def run_benchmark_pipeline(
@@ -84,7 +90,7 @@ def run_benchmark_pipeline(
             if c.startswith("syn_")
         }
         panel = dataclasses.replace(panel, features=panel.features.rename(columns=renamed))
-        signals = tuple("sig_" + s for s in config.causal.signals or ())
+        signals = tuple(real_shaped_id(s) for s in config.causal.signals or ())
         config = config.model_copy(
             update={"causal": config.causal.model_copy(update={"signals": signals})}
         )
