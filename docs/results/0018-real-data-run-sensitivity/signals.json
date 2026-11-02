@@ -1,0 +1,108 @@
+{
+  "signals": [
+    {
+      "cites": [
+        "moskowitz2012"
+      ],
+      "definition": "sum of SPY daily log returns over sessions t-251 to t-21 (12-1 month time-series momentum)",
+      "id": "sig_tsmom_spy",
+      "sources": [
+        "etf"
+      ]
+    },
+    {
+      "cites": [
+        "french1987",
+        "moreira2017"
+      ],
+      "definition": "half the log of annualised SPY realised variance over sessions t-20 to t: 0.5 log((252/21) sum r^2)",
+      "id": "sig_rv_spy",
+      "sources": [
+        "etf"
+      ]
+    },
+    {
+      "cites": [
+        "bollerslev2009"
+      ],
+      "definition": "variance risk premium: (VIX/100)^2/12 minus the sum of squared SPY daily log returns over sessions t-20 to t",
+      "id": "sig_vrp",
+      "sources": [
+        "etf",
+        "fred_market"
+      ]
+    },
+    {
+      "cites": [
+        "campbell1987",
+        "fama1989"
+      ],
+      "definition": "10-year minus 3-month Treasury constant-maturity yield (FRED T10Y3M), the newest value usable at t",
+      "id": "sig_term_spread",
+      "sources": [
+        "fred_market"
+      ]
+    },
+    {
+      "cites": [
+        "keim1986",
+        "fama1989"
+      ],
+      "definition": "Moody's Baa minus Aaa corporate bond yield (FRED DBAA - DAAA), the newest values usable at t",
+      "id": "sig_default_spread",
+      "sources": [
+        "fred_market"
+      ]
+    },
+    {
+      "cites": [
+        "ang2007"
+      ],
+      "definition": "3-month Treasury bill rate (FRED DTB3) minus its mean over the prior 252 sessions, each value as usable at its session",
+      "id": "sig_rel_bill",
+      "sources": [
+        "fred_market"
+      ]
+    },
+    {
+      "cites": [
+        "fama1990"
+      ],
+      "definition": "industrial production (ALFRED INDPRO): log change from month o-1 to o, both from the vintage usable at t",
+      "id": "sig_ip_growth",
+      "sources": [
+        "alfred"
+      ]
+    },
+    {
+      "cites": [
+        "flannery2002"
+      ],
+      "definition": "nonfarm payrolls (ALFRED PAYEMS): log change from month o-1 to o, both from the vintage usable at t",
+      "id": "sig_payrolls_growth",
+      "sources": [
+        "alfred"
+      ]
+    },
+    {
+      "cites": [
+        "boyd2005"
+      ],
+      "definition": "unemployment rate (ALFRED UNRATE): change from month o-1 to o, both from the vintage usable at t",
+      "id": "sig_unrate_change",
+      "sources": [
+        "alfred"
+      ]
+    },
+    {
+      "cites": [
+        "fama1977"
+      ],
+      "definition": "CPI inflation (ALFRED CPIAUCSL): log change from month o-12 to o, both from the vintage usable at t",
+      "id": "sig_inflation",
+      "sources": [
+        "alfred"
+      ]
+    }
+  ]
+}

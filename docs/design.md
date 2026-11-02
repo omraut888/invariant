@@ -100,6 +100,18 @@ superseded by the ADRs, and where they differ the ADRs are authoritative.
   tampering is caught by the re-render comparison alone, so a bug shared by the template and
   that re-render would pass; a raw-path second check is in the backlog.
 
+## Real data ([ADR 0018](adr/0018-first-real-data-run.md), [0019](adr/0019-fred-market-source-and-within-vintage-changes.md))
+- **Inputs.** 13 ETFs (Yahoo returns), daily FRED market series (VIXCLS, T10Y3M, DBAA, DAAA,
+  DTB3) as first posted once their archive begins and with a measured pre-archive lag before it,
+  and ALFRED vintages of INDPRO, UNRATE, CPIAUCSL and PAYEMS with changes computed within one
+  vintage. Ten candidate signals are frozen in `data/signals.py`; the run refuses any snapshot
+  but the pinned one.
+- **First run** (2005–2025, 5,282 sessions): all ten were killed at Stage 1, smallest BH q .576,
+  so Stages 2 and 3 did not run. A pre-registered sensitivity run with the most conservative
+  posting-lag rule gave the same verdict for every signal. The run is reported, not graded;
+  at realistic strength Stage 1's power is .140 (ADR 0010), so the null is weak evidence.
+  Ledgers, memos and the snapshot's manifest are in [results/](results/).
+
 ## Foundations
 
 | Component | Where | ADR |
@@ -107,7 +119,7 @@ superseded by the ADRs, and where they differ the ADRs are authoritative.
 | Settings (`.env`) and layered YAML config | `config/` | [0001](adr/0001-config-layering-and-core-contracts.md) |
 | Run identity (hash of snapshot, config, git SHA, seed), manifests, named RNG streams | `core/run_hash.py` | [0002](adr/0002-run-identity-and-rng-streams.md) |
 | Planted-signal benchmark (SCM generator, GroundTruth, stylized-facts check) | `benchmark/` | [0003](adr/0003-planted-signal-benchmark-scm.md) |
-| Data sources: ETF prices, Fama-French factors, ALFRED vintages | `data/sources/` | [0004](adr/0004-data-sources-and-pit-limitations.md) |
+| Data sources: ETF prices, Fama-French factors, ALFRED vintages, FRED market series | `data/sources/` | [0004](adr/0004-data-sources-and-pit-limitations.md), [0019](adr/0019-fred-market-source-and-within-vintage-changes.md) |
 | Immutable, content-addressed snapshots | `data/snapshot.py` | [0005](adr/0005-immutable-snapshots.md) |
 | Point-in-time panel and forward-return targets | `data/pit.py` | [0006](adr/0006-point-in-time-panel.md) |
 | Kill ledger and benchmark scorer | `ledger/` | [0007](adr/0007-kill-ledger-and-benchmark-scoring.md) |
@@ -142,4 +154,5 @@ byte-identical (pinned by a test).
 - Yahoo adjusted price *levels* are not point-in-time; only returns are used.
 - Fama-French factors are revised with every release; they are used only with a 42-session
   lag and a revision caveat.
-- Macro features are levels only for now.
+- Macro features are within-vintage changes (ADR 0019); FRED market series before their archive
+  begins rest on a posting-lag assumption, checked by a sensitivity run (ADR 0018).

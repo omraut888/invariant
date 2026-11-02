@@ -120,4 +120,7 @@ tree, so a failing check cannot be pushed. Never bypass it with `--no-verify`.
 - Stage 5 (research memo, ADR 0017) is accepted on the benchmark, template-only. Run 1 failed
   G3 (narrative prose); deviation 1 cut the LLM narrative, made the verifier template-only and
   added V10 (characters); the rerun on fresh seeds and a new independent set passed every gate.
-- The first real-data run is next.
+- The first real-data run (ADRs 0018–0019) is done and reported: all ten pre-registered signals
+  were killed at Stage 1 (smallest BH q .576); the max-lag sensitivity run agrees. Archived in
+  docs/results/0018-*. Partly a power statement (Stage 1 power .140 at realistic strength).
+- Next, by its own pre-registered study: a pooled cross-asset Stage 1 decision unit (backlog).

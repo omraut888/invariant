@@ -1,6 +1,7 @@
 # ADR 0018: The first real-data run (signals, snapshot, report)
 
-Status: **proposed**. Pre-registration (2026-10-31). Frozen and pushed before any stage runs on
+Status: **accepted** (2026-11-02): the memo revalidation passed every gate and both runs are
+reported below. Pre-registration (2026-10-31). Frozen and pushed before any stage runs on
 real data. Results will go in a separate section at the end and are not edited into it. No
 signal may be added, dropped or redefined after results are seen; any change is a new,
 separately labelled run.
@@ -217,3 +218,99 @@ with definitions and citations, the real-data `data_source` statement) has only 
   on other periods, not ground truth. Rejected.
 - **A longer sample** (pre-2005) to raise power: GLD's inception binds the balanced panel
   (`configs/base.yaml`), and the base window is the one every stage was validated for.
+
+## Results, memo revalidation (recorded 2026-11-02, after the run)
+Run from a worktree at the pushed pre-registration commit ae65781 (`git_dirty: false`), config
+`configs/memo_validation_real.yaml`, root seed 20261113, median 32 s per run. No post-launch
+fix. Report and hand-set results: `docs/results/0018-memo-revalidation/`.
+
+48 real-data-shaped runs (8 per preset; the coverage rule added none). Categories: Stage 1 kill
+48, Stage 2 kill 30, Stage 3 kill 7, multi-member pass 12; recommendations: candidate 22,
+against 20, not decided 6.
+
+| gate | result |
+|---|---|
+| G1 | **pass**: 48 of 48 template memos accepted |
+| G2 | **pass**: K1–K9 each 0 misses in 576 (upper bound .0052) |
+| G3 | **pass**: set (a) 0 of 96, set (b) 0 of 126, set (c) 0 of 146 gated entries missed |
+| G4 | **pass**: 48 of 48 deterministic and GroundTruth-independent |
+
+**The real-data memo path is revalidated; the run proceeded.** Reported, not gated: every benign
+narrative sentence of sets (a) and (b) (25) is rejected, by design in template-only mode; set
+(b)'s entailment entries 0 of 2 missed. The report's count of candidate memos with a passed
+edgeless signal reads 22 of 22. That count is wrong: it is a harness bug in a reported-only
+metric, recorded below; no gate reads it.
+
+## Results, the real-data run (recorded 2026-11-02, after the run)
+Both runs were made from the same worktree at ae65781 with a clean tree, on snapshot
+`930504ace5464752`, seed 20261112, then attached with `invariant sensitivity`. No post-launch
+fix; neither run was repeated.
+
+| run | lag rule | run id | ledger head (SHA-256) | archive |
+|---|---|---|---|---|
+| primary | `exact_in_archive` | `f4e53b224b61ad35` | `ca27a4c9…` | `docs/results/0018-real-data-run-primary/` |
+| sensitivity | `max_lag` | `75f1372b65ff89f7` | `053bcc61…` | `docs/results/0018-real-data-run-sensitivity/` |
+
+Panel: 5,282 rows, 2005-01-04 to 2025-12-31; Stage 1 tested 5,272 rows (τ_max = 5). Both memos
+were written and accepted by the verifier, and re-verified from the archived run directories.
+
+**Every candidate was killed at Stage 1, `causal.no_significant_link`, in both runs.** Stages 2
+and 3 saw no signal (`not_reached`: all ten), so there is no portfolio, no Sharpe, no DSR and no
+stress diagnostic. The memo's recommendation is "against trading": no signal survived every
+kill stage. This is the outcome stated in advance.
+
+Stage 1 (output 1). Family p is Bonferroni over the signal's 65 tests (13 assets × 5 lags), q is
+BH across the ten signals; the verdict is q against α = .05. Best link and r are descriptive only
+(below).
+
+| signal | family p | BH q | best link | partial r [95% interval] | sensitivity: family p, q, best link, r |
+|---|---|---|---|---|---|
+| `payrolls_growth` | .058 | .576 | XLI, lag 1 | −.050 [−.072, −.007] | .072, .716, XLI lag 1, −.048 |
+| `unrate_change` | .403 | 1 | XLI, lag 1 | −.039 [−.064, −.016] | .467, 1, XLI lag 1, −.037 |
+| `inflation` | .588 | 1 | XLK, lag 4 | −.048 [−.080, −.013] | .652, 1, XLV lag 1, −.031 |
+| `ip_growth` | 1 | 1 | XLI, lag 3 | .040 [−.000, .070] | 1, 1, XLP lag 3, .039 |
+| `rel_bill` | 1 | 1 | XLF, lag 3 | .041 [.005, .076] | 1, 1, XLF lag 3, .037 |
+| `rv_spy` | 1 | 1 | XLK, lag 3 | .032 [.002, .062] | 1, 1, XLB lag 5, .027 |
+| `term_spread` | 1 | 1 | GLD, lag 3 | −.026 [−.050, −.003] | 1, 1, GLD lag 3, +.044 |
+| `vrp` | 1 | 1 | TLT, lag 3 | −.041 [−.077, −.011] | .507, 1, IEF lag 5, −.050 |
+| `default_spread` | 1 | 1 | XLU, lag 3 | −.023 [−.056, .013] | 1, 1, GLD lag 5, +.019 |
+| `tsmom_spy` | 1 | 1 | XLF, lag 4 | −.017 [−.041, .009] | 1, 1, XLU lag 2, +.014 |
+
+**The bracketed intervals are not evidence.** Each is the interval of the best of 65 tests,
+after selection, and Stage 1's bootstrap intervals already undercovered on the benchmark
+(ADR 0010). That most exclude zero is what selection produces. For scale (an illustration, not
+a test): the largest |r| of 65 independent null correlations at n = 5,272 has 5th, 50th and 95th
+percentiles .028, .035 and .046; the ten best |r| here run from .017 to .050. The tests are
+correlated, so this is only a guide; the family p is the calibrated statement.
+
+**Sensitivity (output 5): no outcome differs.** Every signal has the same verdict and deciding
+stage under both lag rules, so the memo carries `lag_sensitivity_agrees` and no signal's result
+depends on the posting-lag assumption. Below the verdicts the runs differ even for the six
+signals whose inputs are identical in both (ETF and ALFRED): Stage 1 conditions on every signal,
+so changing four of them changes every conditioning set. `term_spread`'s best link is GLD at lag
+3 in both, with r of opposite sign (−.026, +.044); `default_spread` and `tsmom_spy` also flip
+sign at a different best link. This is another reason to read the best links as noise.
+
+**What the null means.** It is partly a statement about power. At realistic strength (IC .02)
+Stage 1 passed a true edge in .140 [.112, .173] of benchmark runs at T = 6000 (ADR 0010), and
+this panel is shorter. Each signal's evidence is Bonferroni-corrected over its 65 tests, so a
+single link must clear a high bar, and a weak edge shared by many assets gains nothing from
+appearing in several of them (the backlog item below). A
+kill here says the edge was not detectable by this test at this sample size, not that there is
+no effect. The run does not reach Stages 2 and 3, so it says nothing about decay or
+tradability.
+
+**Snapshot (output 4)** (`docs/results/0018-snapshot/manifest.json`; derived statistics only, no
+values). ETF: 12 tickers have all 5,684 sessions from 2003-06-02 with none missing; GLD begins
+2004-11-18 (371 sessions before inception), before the panel start. FRED market: ADR 0019's
+table (first vintages VIXCLS 2010-11-22, T10Y3M 2014-01-27, DBAA and DAAA 2014-04-02, DTB3
+2005-06-28; pre-archive lags 3, 5, 5, 5, 8; DBAA and DAAA 110 batch-posted observations; revised
+observations 4, 2, 12, 13, 0). ALFRED vintage rows with missing values: INDPRO 600, UNRATE 1,
+CPIAUCSL 259, PAYEMS 0; the panel has no missing value after its first row.
+
+## Backlog (added 2026-11-02)
+- **A pooled cross-asset Stage 1 decision unit**: one test of a signal's link to all assets
+  jointly, with more power for an effect common across assets than Bonferroni over 65 tests. It
+  is to be chosen by its own pre-registered study (size under persistence, power on the
+  benchmark, and the hidden-confounder pass rate), not adopted because this run found nothing.
+- Per-asset signals (above).

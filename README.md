@@ -8,7 +8,10 @@ benchmark: a template memo built only from the ledger and stage results, and a v
 rejects any memo that is not exactly that memo
 ([ADR 0017](docs/adr/0017-stage5-research-memo.md)). An LLM-written narrative was planned and
 **cut**: an independent red team showed that word-list verification cannot police free prose.
-The first real-data run is next. No result below comes from real market data yet.
+The first real-data run is done
+([ADR 0018](docs/adr/0018-first-real-data-run.md)): all ten pre-registered candidates were
+killed at Stage 1 ([below](#results-on-real-data)). Every other result in this README is from
+the synthetic benchmark.
 
 INVARIANT is a research pipeline for trading signals that tries to kill every candidate and
 reports what survives. Most backtests show the signals that worked. INVARIANT puts each
@@ -39,6 +42,10 @@ before it ran. Where a method failed, or a stage has a blind spot, this README s
   template-only verifier then missed none of 368 hand-written and 5184 generated corruptions,
   with no false rejection in 48 runs
   ([report](docs/results/0017-memo-validation-deviation1/report.json)).
+- **On real data, nothing survived Stage 1.** Ten macro and market signals from the
+  literature, 2005–2025, against 13 ETFs: the smallest BH q was .576
+  ([ledger](docs/results/0018-real-data-run-primary/kill_ledger.jsonl)). At realistic
+  strength Stage 1 has power of about .14, so this is a weak negative, not proof of no effect.
 
 ```
  candidate signals
@@ -64,6 +71,67 @@ before it ran. Where a method failed, or a stage has a blind spot, this README s
 
 More detail: [docs/design.md](docs/design.md) and the decision records in
 [docs/adr/](docs/adr/).
+
+## Results on real data
+
+**This describes what the pipeline did on one dataset. It is not a trading recommendation, and a
+kill is not evidence that a signal has no effect.**
+
+The first real-data run ([ADR 0018](docs/adr/0018-first-real-data-run.md)) fixed ten candidate
+signals and every setting before any stage saw market data. Each signal is one common series
+(12-1 momentum and realised volatility of SPY, the variance risk premium, the term and default
+spreads, the relative bill rate, and four ALFRED macro series taken as their real-time
+vintages), tested against daily returns of 13 ETFs (SPY, nine sector SPDRs, TLT, IEF, GLD),
+2005-01-04 to 2025-12-31 (5,282 sessions). Snapshot `930504ace5464752`, seed 20261112, commit
+ae65781. Before the run, the memo's real-data path was revalidated on fresh seeds and passed
+every gate ([report](docs/results/0018-memo-revalidation/report.json)).
+
+**What was killed, and where.** All ten were killed at Stage 1 (causal screen) as
+`causal.no_significant_link`. None reached Stage 2 or 3, so there is no portfolio, Sharpe, DSR
+or stress diagnostic, and the memo's recommendation is "against trading". This is the outcome
+the ADR predicted before the run.
+
+| signal | family p (Bonferroni, 65 tests) | BH q (10 signals) | best link | partial r [interval] ⚠ |
+|---|---|---|---|---|
+| `payrolls_growth` | .058 | .576 | XLI, lag 1 | −.050 [−.072, −.007] |
+| `unrate_change` | .403 | 1 | XLI, lag 1 | −.039 [−.064, −.016] |
+| `inflation` | .588 | 1 | XLK, lag 4 | −.048 [−.080, −.013] |
+| `ip_growth` | 1 | 1 | XLI, lag 3 | .040 [−.000, .070] |
+| `rel_bill` | 1 | 1 | XLF, lag 3 | .041 [.005, .076] |
+| `rv_spy` | 1 | 1 | XLK, lag 3 | .032 [.002, .062] |
+| `term_spread` | 1 | 1 | GLD, lag 3 | −.026 [−.050, −.003] |
+| `vrp` | 1 | 1 | TLT, lag 3 | −.041 [−.077, −.011] |
+| `default_spread` | 1 | 1 | XLU, lag 3 | −.023 [−.056, .013] |
+| `tsmom_spy` | 1 | 1 | XLF, lag 4 | −.017 [−.041, .009] |
+
+> **⚠ The bracketed intervals are not evidence of an effect.** Each is for the best of a
+> signal's 65 tests (13 assets × 5 lags), chosen after the fact, and Stage 1's bootstrap
+> intervals already ran narrow on the benchmark (ADR 0010). That most exclude zero is what
+> selecting the largest of 65 correlations produces: under independence, the largest |r| of 65
+> null correlations at this sample size has a median of .035 and a 95th percentile of .046.
+> The family p and BH q are the calibrated numbers, and the verdict uses only q. In the
+> sensitivity run below, `term_spread`'s best link is the same (GLD, lag 3) but r changes sign.
+
+**The null is partly a statement about power.** At realistic signal strength (IC .02), Stage 1
+detected a true edge in only .140 [.112, .173] of benchmark runs at T = 6000
+([report](docs/results/0010-causal-stage-validation/report.json)), and this panel is shorter.
+Each signal's evidence is Bonferroni-corrected over its 65 tests, so a weak edge shared by many
+assets is not helped by appearing in several of them. A pooled cross-asset test is in the
+backlog. Stage 1 also conditions only on these 23 observed series, so it cannot rule out
+confounding by anything else.
+
+**Sensitivity: the posting-lag assumption does not change any outcome.** Daily FRED series have
+no archive before 2010–2014, so their pre-archive availability is an assumption
+([ADR 0019](docs/adr/0019-fred-market-source-and-within-vintage-changes.md)). A pre-registered
+second run used the most conservative alternative (each value usable only after the longest
+delay the archive shows: up to 112 sessions for the credit spreads). Every signal got the same
+verdict at the same stage (smallest q .716,
+[ledger](docs/results/0018-real-data-run-sensitivity/kill_ledger.jsonl)).
+
+Archived: both runs' ledgers, stage results and memos
+([primary memo](docs/results/0018-real-data-run-primary/memo/memo.md)), the revalidation report,
+and the snapshot's manifest (row counts, coverage and the FRED posting audit; no market values,
+which the sources' terms do not let us republish).
 
 ## Results on the benchmark
 
@@ -276,10 +344,13 @@ fetch real ALFRED data. Working rules for contributors are in [CLAUDE.md](CLAUDE
 - **Stage 5, research memo: accepted on the benchmark, template only**
   ([ADR 0017](docs/adr/0017-stage5-research-memo.md)). The LLM narrative was cut after an
   independent red team showed that word-list verification cannot police free prose.
-- **Real data** (next): ETFs, Fama-French factors and ALFRED macro vintages through
-  Stages 1–3 and the memo.
+- **Real data: first run done** ([ADR 0018](docs/adr/0018-first-real-data-run.md)). Ten
+  candidates, all killed at Stage 1; the posting-lag sensitivity run agrees.
 
 **Backlog**, each to be decided by its own pre-registered study:
+- A pooled cross-asset Stage 1 decision unit: one test of a signal against all assets jointly,
+  with more power for an effect common across assets (ADR 0018).
+- Per-signal-per-asset candidates, such as each ETF's own momentum (ADR 0018).
 - A net-of-cost confirmation of the Stage 3 method, at a cost level justified in advance
   (ADR 0013).
 - A per-signal Stage 3 rule built on the marginal-Sharpe diagnostic, to stop passengers
@@ -297,8 +368,13 @@ fetch real ALFRED data. Working rules for contributors are in [CLAUDE.md](CLAUDE
 
 ## Limitations
 
-- Everything above is measured on synthetic markets. Real markets violate the benchmark's
-  assumptions (stationarity, linear effects, a known set of candidates).
+- Every rate above is measured on synthetic markets. Real markets violate the benchmark's
+  assumptions (stationarity, linear effects, a known set of candidates), and the real-data run
+  has no ground truth: it is reported, not graded.
+- Daily FRED series have no vintage archive before 2010–2014; their earlier availability is an
+  assumption, checked by a sensitivity run (ADR 0019).
+- The candidate list comes from a literature that searched many predictors on overlapping data;
+  no correction here undoes that (Harvey, Liu & Zhu 2016).
 - The ETF universe has survivorship and hindsight bias. Yahoo adjusted price levels are not
   point-in-time, so only returns are used. Fama-French factors are revised with every release
   and are used with a 42-session lag.
