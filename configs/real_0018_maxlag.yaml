@@ -1,0 +1,29 @@
+# The first real-data run's reported-only sensitivity run (docs/adr/0018, "Sensitivity run"):
+# identical to real_0018.yaml except data.fred_market.lag_rule (max_lag). Merged over
+# configs/base.yaml, which supplies the
+# universe (13 ETFs), the 2005-01-03..2025-12-31 window, execution lag 1 and every stage
+# setting as validated. Frozen with the ADR: no signal is added, dropped or redefined after
+# results are seen; any change is a new, separately labelled run.
+
+seed: 20261112            # fresh: used by no earlier study, validation or fixture
+snapshot_id: 930504ace5464752   # fetched 2026-10-31; `invariant run` refuses any other
+
+data:
+  fred_market:            # docs/adr/0019
+    series: [VIXCLS, T10Y3M, DBAA, DAAA, DTB3]
+    min_interval_s: 0.6   # FRED allows about 120 requests a minute
+    lag_rule: max_lag     # current values, each 1 + the archive's max posting lag sessions late
+
+signals:
+  warmup_start: 2003-06-02   # 401 sessions before the panel: every lookback is complete at its start
+  ids:
+    - tsmom_spy
+    - rv_spy
+    - vrp
+    - term_spread
+    - default_spread
+    - rel_bill
+    - ip_growth
+    - payrolls_growth
+    - unrate_change
+    - inflation

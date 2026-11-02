@@ -1,0 +1,24 @@
+# Stage 5 memo verifier revalidation on real-data-shaped runs (docs/adr/0018, "Memo
+# revalidation"). Read by scripts/memo_validation.py --config. The real-data path of the memo
+# (signals table with definitions and citations, the real-data data_source statement) was not
+# exercised by ADR 0017's validation, whose runs were all synthetic. Same run set, coverage
+# rule, instances and gates as memo_validation_deviation1.yaml, every preset real-data-shaped,
+# on a fresh root seed. Fixed and pushed before the run.
+
+root_seed: 20261113     # fresh: not used by any earlier study, pilot, validation or fixture
+presets:
+  - {name: base, preset: base, real_shaped: true}
+  - {name: realistic, preset: realistic, real_shaped: true}
+  - {name: hidden_confounder, preset: hidden_confounder, real_shaped: true}
+  - {name: multi_asset, preset: multi_asset, real_shaped: true}
+  - {name: volfrag, preset: volfrag, real_shaped: true}
+  - {name: base_short, preset: base, n_obs: 4000, real_shaped: true}
+n_seeds: 8              # per preset, before the coverage rule
+max_seeds: 40           # per preset, after it
+coverage_min: 3         # runs per outcome category (validation.CATEGORIES)
+instances_per_class: 12 # corruptions per class per run: 48 runs give 576 per class
+min_instances: 500      # G2: at zero misses, the 95% upper bound on the miss rate is .006
+hand_sets:              # regression only: written against the synthetic fixtures
+  - tests/fixtures/memo_adversarial/set_a.yaml
+  - tests/fixtures/memo_adversarial/set_b.yaml
+  - tests/fixtures/memo_adversarial/set_c.yaml
