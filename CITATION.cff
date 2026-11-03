@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "INVARIANT: a quant research pipeline that tries to kill every candidate signal"
+type: software
+authors:
+  - family-names: Raut
+    given-names: Om
+version: 1.0.0
+date-released: 2026-11-03
+license: MIT
+repository-code: "https://github.com/omraut888/invariant"
+url: "https://github.com/omraut888/invariant"
+abstract: >-
+  A research pipeline that puts candidate trading signals through a causal screen, a decay
+  test and portfolio construction, records every kill in a hash-chained ledger, and writes a
+  verified template memo. Each stage was validated on a planted-signal benchmark by a
+  pre-registered study before use on real data.
+keywords:
+  - quantitative finance
+  - causal discovery
+  - multiple testing
+  - reproducibility
