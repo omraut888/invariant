@@ -34,7 +34,7 @@ def test_bounds_validated() -> None:
         window_bounds(100, 1)
 
 
-@settings(max_examples=30, deadline=None)
+@settings(max_examples=30)
 @given(st.integers(0, 3), st.integers(0, 2**32 - 1))
 def test_window_r_equals_ols_partial_correlation(k: int, seed: int) -> None:
     rng = np.random.default_rng(seed)

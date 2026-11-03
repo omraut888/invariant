@@ -31,9 +31,7 @@ RUNS = FIXTURES / "memo_runs"
 CASES = sorted(p.name for p in RUNS.iterdir())
 DIGITS = "0123456789\u0660\u0663\u0669\u0966\u0969\uff10\uff15\uff19"
 """ASCII, Arabic-Indic, Devanagari and fullwidth digits."""
-SETTINGS = settings(
-    max_examples=40, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture]
-)
+SETTINGS = settings(max_examples=40, suppress_health_check=[HealthCheck.function_scoped_fixture])
 
 
 @cache

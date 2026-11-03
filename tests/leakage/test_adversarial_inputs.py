@@ -17,7 +17,7 @@ from invariant.stages.adversarial.state import trailing_volatility
 pytestmark = pytest.mark.leakage
 
 
-@settings(max_examples=60, deadline=None)
+@settings(max_examples=60)
 @given(t=st.integers(20, 498), seed=st.integers(0, 2**32 - 1))
 def test_trailing_volatility_at_t_ignores_returns_after_t(t: int, seed: int) -> None:
     gen = np.random.default_rng(seed)

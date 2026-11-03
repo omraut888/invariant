@@ -26,7 +26,7 @@ def _m(i: np.ndarray, tau: float, hl: float) -> np.ndarray:
     return np.where(i < tau, 1.0, np.exp2(-np.maximum(i - tau, 0) / hl))
 
 
-@settings(max_examples=50, deadline=None)
+@settings(max_examples=50)
 @given(st.integers(0, 1200), st.floats(1.0, 5000.0), st.integers(5, 200))
 def test_window_mean_matches_brute_force(tau: int, hl: float, width: int) -> None:
     bounds = window_bounds(1200, width)

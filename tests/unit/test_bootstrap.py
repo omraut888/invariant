@@ -39,7 +39,7 @@ def test_block_length_validated() -> None:
     assert default_block_length(1) == 1
 
 
-@settings(max_examples=30, deadline=None)
+@settings(max_examples=30)
 @given(st.integers(0, 3), st.integers(0, 2**32 - 1))
 def test_partial_corr_matches_residual_regression(k: int, seed: int) -> None:
     rng = np.random.default_rng(seed)

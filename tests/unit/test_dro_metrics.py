@@ -38,7 +38,7 @@ def test_dsr_reproduces_the_papers_worked_example() -> None:
         deflated_sharpe_from_moments(sr, 1250, 0, 3, n_trials=1, trial_sharpe_variance=v)
 
 
-@settings(max_examples=50, deadline=None)
+@settings(max_examples=50)
 @given(st.floats(-0.01, 0.01), st.floats(-0.01, 0.01), st.floats(1e-4, 1e-3), st.floats(1e-4, 1e-3))
 def test_gradient_matches_finite_differences(a: float, b: float, vi: float, vn: float) -> None:
     v = np.array([a, b, vi + a * a, vn + b * b])

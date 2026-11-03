@@ -56,7 +56,7 @@ def _redraw_after(innov: Innovations, cut: int, seed: int) -> Innovations:
 
 
 @pytest.mark.parametrize("preset", sorted(CFGS))
-@settings(max_examples=40, deadline=None)
+@settings(max_examples=40)
 @given(cut=st.integers(0, N_TOTAL - 2), seed=st.integers(0, 2**32 - 1))
 def test_paths_up_to_t_ignore_innovations_after_t(preset: str, cut: int, seed: int) -> None:
     cfg = CFGS[preset]

@@ -57,7 +57,7 @@ def _value(frame: pd.DataFrame, day: str) -> tuple[float, pd.Timestamp]:
 # --- alfred_asof ------------------------------------------------------------------------------
 
 
-@settings(max_examples=300, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+@settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
 @given(releases(SESSIONS[0] - pd.Timedelta(days=30), SESSIONS[-1] + pd.Timedelta(days=5), 8))
 def test_alfred_asof_matches_brute_force_oracle(
     rels: list[tuple[pd.Timestamp, dict[pd.Timestamp, float]]],

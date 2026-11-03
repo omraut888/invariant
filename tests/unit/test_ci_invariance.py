@@ -48,7 +48,7 @@ _shift = st.floats(-1e3, 1e3)
 
 @pytest.mark.parametrize("name", DECISION_TESTS)
 @pytest.mark.parametrize("z_set", list(Z_SETS))
-@settings(max_examples=15, deadline=None)
+@settings(max_examples=15)
 @given(
     seed=st.integers(0, 2**16),
     scales=st.tuples(_scale, _scale, _scale),

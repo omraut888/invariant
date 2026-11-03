@@ -318,9 +318,7 @@ def test_stage_prefix_validation(stages: list[StageName]) -> None:
 _fate = st.one_of(st.none(), st.sampled_from(STAGE_ORDER))
 
 
-@settings(
-    max_examples=40, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture]
-)
+@settings(max_examples=40, suppress_health_check=[HealthCheck.function_scoped_fixture])
 @given(st.dictionaries(st.sampled_from(["s_a", "s_b", "s_c", "s_d", "s_e"]), _fate, min_size=1))
 def test_written_fates_are_read_back(
     tmp_path_factory: pytest.TempPathFactory, fates: dict[str, StageName | None]

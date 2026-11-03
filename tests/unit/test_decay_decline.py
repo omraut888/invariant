@@ -20,7 +20,7 @@ def _hc0_split_t(x: np.ndarray, y: np.ndarray, k: int) -> float:
     return float((b1 - b2) / np.sqrt(v1 + v2))
 
 
-@settings(max_examples=30, deadline=None)
+@settings(max_examples=30)
 @given(st.integers(0, 2**32 - 1))
 def test_cumulative_sum_statistic_matches_brute_force(seed: int) -> None:
     rng = np.random.default_rng(seed)
@@ -32,7 +32,7 @@ def test_cumulative_sum_statistic_matches_brute_force(seed: int) -> None:
     assert float(sup_split_statistic(x, y, ks)) == pytest.approx(expected, rel=1e-9)
 
 
-@settings(max_examples=20, deadline=None)
+@settings(max_examples=20)
 @given(st.integers(0, 2**32 - 1), st.floats(-2.0, 2.0))
 def test_statistic_invariant_to_a_common_coefficient(seed: int, beta: float) -> None:
     rng = np.random.default_rng(seed)

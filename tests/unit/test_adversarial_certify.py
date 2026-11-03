@@ -46,14 +46,14 @@ def test_horizon_weights() -> None:
     assert w.sum() == pytest.approx(1.0) and w[1] > c.share
 
 
-@settings(max_examples=50, deadline=None)
+@settings(max_examples=50)
 @given(mu=st.floats(-0.01, 0.01), sd=st.floats(1e-4, 0.05), w=st.floats(0.0, 1.0))
 def test_one_state_mixture_is_the_plain_sharpe(mu: float, sd: float, w: float) -> None:
     m, s = np.array([mu, mu]), np.array([sd, sd])
     assert mixture_sharpe(m, s, np.array([1 - w, w])) == pytest.approx(mu / sd * math.sqrt(252))
 
 
-@settings(max_examples=50, deadline=None)
+@settings(max_examples=50)
 @given(w1=st.floats(0.0, 1.0), w2=st.floats(0.0, 1.0))
 def test_mixture_sharpe_falls_as_the_bad_state_grows(w1: float, w2: float) -> None:
     mu, sd = np.array([0.001, -0.001]), np.array([0.01, 0.02])

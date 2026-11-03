@@ -21,7 +21,7 @@ def _data(seed: int, n: int, k: int) -> tuple[np.ndarray, np.ndarray, np.ndarray
     return x, 0.2 * x + rng.standard_normal(n), z
 
 
-@settings(max_examples=25, deadline=None)
+@settings(max_examples=25)
 @given(st.integers(0, 2**32 - 1), st.integers(0, 3), st.integers(1, 5))
 def test_partial_corr_window_ignores_rows_after_it(seed: int, k: int, j: int) -> None:
     x, y, z = _data(seed, 600, k)

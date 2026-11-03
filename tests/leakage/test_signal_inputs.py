@@ -160,7 +160,7 @@ def _market_oracle(c: MarketCase) -> pd.DataFrame:
     )
 
 
-@settings(max_examples=300, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+@settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
 @given(market_cases())
 def test_market_values_at_or_before_t_ignore_everything_after_t(c: MarketCase) -> None:
     a = _market(c.releases_a, c.current_a, c)
@@ -168,7 +168,7 @@ def test_market_values_at_or_before_t_ignore_everything_after_t(c: MarketCase) -
     assert _prefix_equal(a, b, c.t)
 
 
-@settings(max_examples=300, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+@settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
 @given(market_cases())
 def test_market_asof_matches_the_oracle(c: MarketCase) -> None:
     got = _market(c.releases_a, c.current_a, c)
@@ -311,13 +311,13 @@ def _macro(rels: list[Release], c: MacroCase) -> pd.DataFrame:
     )
 
 
-@settings(max_examples=300, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+@settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
 @given(macro_cases())
 def test_changes_at_or_before_t_ignore_releases_after_t(c: MacroCase) -> None:
     assert _prefix_equal(_macro(c.releases_a, c), _macro(c.releases_b, c), c.t)
 
 
-@settings(max_examples=300, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+@settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
 @given(macro_cases())
 def test_the_change_is_computed_inside_one_vintage(c: MacroCase) -> None:
     got = _macro(c.releases_a, c)
@@ -383,7 +383,7 @@ def test_a_revision_released_with_the_new_month_is_used() -> None:
 # --- 5. signal windows ------------------------------------------------------------------------
 
 
-@settings(max_examples=200, deadline=None)
+@settings(max_examples=200)
 @given(
     st.lists(st.floats(-0.1, 0.1), min_size=30, max_size=30),
     st.lists(st.floats(-0.1, 0.1), min_size=30, max_size=30),

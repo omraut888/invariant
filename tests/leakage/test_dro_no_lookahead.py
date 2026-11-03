@@ -31,7 +31,7 @@ CFG = WalkForwardConfig(
 )
 
 
-@settings(max_examples=6, deadline=None)
+@settings(max_examples=6)
 @given(st.integers(0, 2**32 - 1), st.integers(130, 230), st.integers(0, 2))
 def test_no_arm_uses_data_after_t(seed: int, cut: int, lag: int) -> None:
     cfg = replace(CFG, lag=lag)

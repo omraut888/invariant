@@ -43,7 +43,7 @@ def _leaks(build: Builder, s: Scenario) -> bool:
 # --- 1. the property --------------------------------------------------------------------------
 
 
-@settings(max_examples=300, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+@settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
 @given(scenarios())
 def test_features_at_or_before_t_ignore_everything_after_t(s: Scenario) -> None:
     pa, pb = assemble_panel(s.a, s.config), assemble_panel(s.b, s.config)
@@ -177,7 +177,7 @@ _INDEX = pd.DatetimeIndex(
 _ret = st.one_of(st.floats(min_value=-0.2, max_value=0.2), st.just(float("nan")))
 
 
-@settings(max_examples=200, deadline=None)
+@settings(max_examples=200)
 @given(
     st.lists(_ret, min_size=_N, max_size=_N),
     st.lists(_ret, min_size=_N, max_size=_N),
@@ -195,7 +195,7 @@ def test_no_target_depends_on_returns_at_or_before_t(
     assert bit_identical(ya.iloc[t:], yb.iloc[t:])  # targets at t and later: unchanged
 
 
-@settings(max_examples=100, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+@settings(max_examples=100, suppress_health_check=[HealthCheck.too_slow])
 @given(scenarios())
 def test_panel_targets_ignore_prices_before_entry(s: Scenario) -> None:
     # y_t = ln(P_{t+e+h} / P_{t+e}), so prices dated before t+e must not matter. (With e = 0

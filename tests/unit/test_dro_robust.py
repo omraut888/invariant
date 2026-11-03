@@ -21,7 +21,7 @@ def _instance(seed: int, n: int = 80, k: int = 3) -> tuple[np.ndarray, np.ndarra
     return samples, w / np.abs(w).sum()
 
 
-@settings(max_examples=60, deadline=None)
+@settings(max_examples=60)
 @given(st.integers(0, 2**32 - 1), st.floats(0.0, 4.0), st.floats(1e-5, 1e-2))
 def test_explicit_worst_case_attains_the_closed_form(seed: int, c: float, eps: float) -> None:
     samples, w = _instance(seed)
@@ -33,7 +33,7 @@ def test_explicit_worst_case_attains_the_closed_form(seed: int, c: float, eps: f
     assert mean_std_risk(moved, w, c) == pytest.approx(closed, rel=1e-9, abs=1e-14)
 
 
-@settings(max_examples=40, deadline=None)
+@settings(max_examples=40)
 @given(st.integers(0, 2**32 - 1), st.floats(0.0, 4.0), st.floats(1e-5, 1e-2))
 def test_no_feasible_perturbation_exceeds_the_closed_form(seed: int, c: float, eps: float) -> None:
     samples, w = _instance(seed)
@@ -99,7 +99,7 @@ def test_portfolio_matches_brute_force_on_two_assets() -> None:
             assert np.abs(sol.w).sum() == pytest.approx(1.0, abs=1e-6)
 
 
-@settings(max_examples=25, deadline=None)
+@settings(max_examples=25)
 @given(st.integers(0, 2**32 - 1), st.floats(1e-3, 1e3))
 def test_solution_is_invariant_to_rescaling_units(seed: int, k: float) -> None:
     rng = np.random.default_rng(seed)
@@ -150,7 +150,7 @@ def _cvxpy_reference(mu: np.ndarray, cov: np.ndarray, c: float, kappa: float) ->
 # 1 / sqrt(mean diag cov) = 100 here, so each is within about 1e-10 of the optimum in caller units
 # and they may differ by about 2e-10; the objective recomputed from w carries the same gap. The
 # examples are the cases that showed a 1e-10 bound was tighter than the solvers promise.
-@settings(max_examples=60, deadline=None)
+@settings(max_examples=60)
 @given(st.integers(0, 2**32 - 1), st.integers(2, 6), st.floats(0.0, 0.2), st.floats(0.0, 2e-3))
 @example(5, 5, 0.0078125, 0.0019947590421317118)
 @example(196414, 4, 0.0625, 0.0)
