@@ -1,17 +1,19 @@
 # INVARIANT
 
-**Status:** Stages 1–3 (causal screen, decay test, portfolio construction) are complete and
-validated on a planted-signal benchmark. Stage 4 (adversarial stress) was evaluated and **not
-adopted as a kill stage** ([ADR 0016](docs/adr/0016-stage4-adversarial-study.md)); a
-reported-only stress diagnostic replaces it. Stage 5 (research memo) is accepted on the
-benchmark: a template memo built only from the ledger and stage results, and a verifier that
-rejects any memo that is not exactly that memo
-([ADR 0017](docs/adr/0017-stage5-research-memo.md)). An LLM-written narrative was planned and
-**cut**: an independent red team showed that word-list verification cannot police free prose.
-The first real-data run is done
-([ADR 0018](docs/adr/0018-first-real-data-run.md)): all ten pre-registered candidates were
-killed at Stage 1 ([below](#results-on-real-data)). Every other result in this README is from
-the synthetic benchmark.
+**Status (v1.0.0):**
+- **Stages 1–3** (causal screen, decay test, portfolio construction) are adopted as kill stages,
+  each accepted on a planted-signal benchmark before use on real data.
+- **Stage 4** (adversarial stress) was evaluated and **rejected as a kill stage**
+  ([ADR 0016](docs/adr/0016-stage4-adversarial-study.md)); a reported-only stress diagnostic
+  is kept in Stage 3.
+- **Stage 5** (research memo) is accepted, **template only**: a memo built from the ledger and
+  stage results, and a verifier that rejects any memo that is not exactly that memo
+  ([ADR 0017](docs/adr/0017-stage5-research-memo.md)). The planned LLM narrative was cut,
+  because word-list verification could not police free prose.
+- **The first real-data run is reported**
+  ([ADR 0018](docs/adr/0018-first-real-data-run.md)): all ten pre-registered candidates were
+  killed at Stage 1 ([below](#results-on-real-data)). Every other result in this README is from
+  the synthetic benchmark.
 
 INVARIANT is a research pipeline for trading signals that tries to kill every candidate and
 reports what survives. Most backtests show the signals that worked. INVARIANT puts each
@@ -26,7 +28,7 @@ before it ran. Where a method failed, or a stage has a blind spot, this README s
   [.918, .935] and recall .917 [.908, .925]
   ([report](docs/results/0014-portfolio-stage-validation/report.json)).
 - **Ridge regularization beat Wasserstein DRO** in a pre-registered study of portfolio
-  methods, on gross Sharpe: 1.560 against 1.525
+  methods, on gross Sharpe: 1.560 against 1.526 for the better DRO arm
   ([report](docs/results/0013-dro-method-study/report.json)).
 - **At realistic signal strength the pipeline kills the strategy.** With ICs of .02, no
   portfolio method beats 1/N in more than .030 of runs
@@ -40,7 +42,7 @@ before it ran. Where a method failed, or a stage has a blind spot, this README s
   narrative missed 7 of 126 corruptions written by an independent agent, and rejected 8 of its
   13 harmless sentences ([report](docs/results/0017-memo-validation-run1/report.json)). The
   template-only verifier then missed none of 368 hand-written and 5184 generated corruptions,
-  with no false rejection in 48 runs
+  and accepted all 48 template memos
   ([report](docs/results/0017-memo-validation-deviation1/report.json)).
 - **On real data, nothing survived Stage 1.** Ten macro and market signals from the
   literature, 2005–2025, against 13 ETFs: the smallest BH q was .576
@@ -121,7 +123,7 @@ backlog. Stage 1 also conditions only on these 23 observed series, so it cannot 
 confounding by anything else.
 
 **Sensitivity: the posting-lag assumption does not change any outcome.** Daily FRED series have
-no archive before 2010–2014, so their pre-archive availability is an assumption
+no vintage archive before 2005–2014 (by series), so their pre-archive availability is an assumption
 ([ADR 0019](docs/adr/0019-fred-market-source-and-within-vintage-changes.md)). A pre-registered
 second run used the most conservative alternative (each value usable only after the longest
 delay the archive shows: up to 112 sessions for the credit spreads). Every signal got the same
@@ -142,8 +144,8 @@ daily observations. Each rate is over M independent synthetic markets, with a Wi
 interval. Each number links to the archived report it comes from.
 
 ### Stage 1, causal screen
-PCMCI with an HC3 partial-correlation test, Bonferroni over lags and Benjamini–Hochberg across
-signals ([ADR 0009](docs/adr/0009-stage1-ci-test-and-multiple-testing.md),
+PCMCI with an HC3 partial-correlation test, Bonferroni over lags and assets and
+Benjamini–Hochberg across signals ([ADR 0009](docs/adr/0009-stage1-ci-test-and-multiple-testing.md),
 [0010](docs/adr/0010-stage1-causal-stage.md)). Pass rates over M = 500
 ([report](docs/results/0010-causal-stage-validation/report.json)):
 
@@ -160,11 +162,11 @@ signals ([ADR 0009](docs/adr/0009-stage1-ci-test-and-multiple-testing.md),
   detectable at this sample size", not "no effect".
 - **It cannot handle a hidden confounder.** When `z` is not in the data, s_conf passes Stage 1
   in .730 [.689, .767] of runs
-  ([report](docs/results/0010-causal-stage-validation/report.json)). Stage 2 kills only .045
-  [.032, .062] of those, because a spurious edge need not decay, so s_conf passes both stages in
-  .702 [.673, .730] of runs ([report](docs/results/0012-decay-stage-validation/report.json)). No
-  observational method can remove this. The memo will have to say so whenever a plausible
-  confounder is missing from the data.
+  ([report](docs/results/0010-causal-stage-validation/report.json)). In the Stage 2 validation
+  (fresh seeds) it passed Stage 1 in .735 and Stage 2 killed only .045 [.032, .062] of those,
+  because a spurious edge need not decay, so s_conf passes both stages in .702 [.673, .730] of
+  runs ([report](docs/results/0012-decay-stage-validation/report.json)). No
+  observational method can remove this. The memo says so whenever a signal passes Stage 1.
 - The best lag is not identified.
 
 ### Stage 2, decay test
@@ -177,8 +179,8 @@ Stage 1 ([report](docs/results/0012-decay-stage-validation/report.json)):
 
 Caveats:
 - **No half-life is reported.** The project plan called for one, but at the benchmark's
-  signal-to-noise ratio it is not identifiable, and every candidate estimator's interval
-  claimed decay in 10–12% of runs with no decay
+  signal-to-noise ratio it is not identifiable, and in the study's three main scenarios
+  every candidate estimator's interval claimed decay in 9–12% of runs with no decay
   ([report](docs/results/0011-decay-study/report.json)).
 - Power is lowest for a decay that started recently.
 - s_decay still passes both stages in 28% of runs.
@@ -190,8 +192,8 @@ the covariance (Ridge-CV). All four were mean–std portfolios with gross exposu
 ([ADR 0013](docs/adr/0013-stage3-dro-method-study.md),
 [report](docs/results/0013-dro-method-study/report.json)).
 - Every arm met the false-pass gate on two null markets.
-- Ridge-CV had the best Sharpe: 1.560, against 1.525 for the better DRO arm. The interval of the
-  difference excludes 0: .034 [.021, .047]. Ridge-CV was selected. Wasserstein DRO was
+- Ridge-CV had the best Sharpe: 1.560, against 1.526 for the better DRO arm (DRO-CV). The
+  interval of the difference excludes 0: .034 [.021, .047]. Ridge-CV was selected. Wasserstein DRO was
   implemented, verified against exact solutions and evaluated, and it was not selected.
 - **After costs the ranking flips.** Net of 5 bp the DRO forecast-confidence arm is best
   (1.303 against 1.226), because it trades far less. Selection was pre-registered on gross
@@ -216,8 +218,8 @@ Caveats:
   Sharpe, reported but not used to decide, does separate them: its interval excludes 0 for
   s_noise in 4% of those runs, against 88% for s_real. A per-signal rule built on it is in the
   backlog.
-- **The test is on gross Sharpe.** On the null markets Ridge-CV loses about .31 of Sharpe to
-  costs, so a false pass would lose money.
+- **The test is on gross Sharpe.** On the null markets Ridge-CV's gross Sharpe is about 0 and
+  its net Sharpe −.31 to −.32, so a false pass would lose money.
 
 ### Stage 5, research memo
 [ADR 0017](docs/adr/0017-stage5-research-memo.md). The memo is built from one run's ledger,
@@ -323,11 +325,16 @@ uv run python -m scripts.memo_validation --n-jobs 8 \
 
 Each stage's study and validation has a script in `scripts/` and a config in `configs/`.
 Benchmark runs need no API key. `FRED_API_KEY` in `.env` (see `.env.example`) is needed only to
-fetch real ALFRED data. Working rules for contributors are in [CLAUDE.md](CLAUDE.md).
+fetch real FRED and ALFRED data (`invariant snapshot`). The real-data run
+(`invariant run --config configs/real_0018.yaml`) refuses any snapshot but the pinned
+`930504ace5464752`, which is not distributed, so it cannot be rerun from a clone; its ledgers
+and memos are archived in [docs/results/](docs/results/). Working rules for contributors are in [CLAUDE.md](CLAUDE.md).
 
-## Roadmap
+## What v1.0 contains, and what it does not
 
-- **Stage 4, adversarial stress: evaluated, not adopted** ([ADR 0016](docs/adr/0016-stage4-adversarial-study.md)).
+- **Stages 1–3: adopted as kill stages** ([ADRs 0009–0014](docs/adr/)).
+- **Stage 4, adversarial stress: evaluated, rejected as a kill stage**
+  ([ADR 0016](docs/adr/0016-stage4-adversarial-study.md)).
   - **What was tried.** Two regime-fragile signals were planted
     ([ADR 0015](docs/adr/0015-benchmark-v4-regime-signal.md)), and the design was taken as far
     as a population feasibility check.
@@ -336,16 +343,19 @@ fetch real ALFRED data. Working rules for contributors are in [CLAUDE.md](CLAUDE
     - Bootstrap path generators failed the stylized-facts check three times.
     - The plausible set for high-volatility exposure is too narrow to overturn an
       average-profitable strategy: the worst-case Sharpe stays at +0.90 even with perfectly
-      known moments.
+      known moments ([report](docs/results/0016-feasibility/feasibility.json)).
     - A plain "loses money in stress" rule would penalise ordinary market exposure, not
       fragility.
   - **What remains.** Stage 3 reports a stress diagnostic: each portfolio's Sharpe in
     high-volatility periods, with an interval. It never decides.
-- **Stage 5, research memo: accepted on the benchmark, template only**
+- **Stage 5, research memo: accepted, template only**
   ([ADR 0017](docs/adr/0017-stage5-research-memo.md)). The LLM narrative was cut after an
   independent red team showed that word-list verification cannot police free prose.
-- **Real data: first run done** ([ADR 0018](docs/adr/0018-first-real-data-run.md)). Ten
-  candidates, all killed at Stage 1; the posting-lag sensitivity run agrees.
+- **Real data: first run reported** ([ADR 0018](docs/adr/0018-first-real-data-run.md),
+  [0019](docs/adr/0019-fred-market-source-and-within-vintage-changes.md)). Ten candidates, all
+  killed at Stage 1; the posting-lag sensitivity run agrees.
+
+There are no target dates. Remaining work is the backlog below.
 
 **Backlog**, each to be decided by its own pre-registered study:
 - A pooled cross-asset Stage 1 decision unit: one test of a signal against all assets jointly,
@@ -371,7 +381,7 @@ fetch real ALFRED data. Working rules for contributors are in [CLAUDE.md](CLAUDE
 - Every rate above is measured on synthetic markets. Real markets violate the benchmark's
   assumptions (stationarity, linear effects, a known set of candidates), and the real-data run
   has no ground truth: it is reported, not graded.
-- Daily FRED series have no vintage archive before 2010–2014; their earlier availability is an
+- Daily FRED series have no vintage archive before 2005–2014 (by series); their earlier availability is an
   assumption, checked by a sensitivity run (ADR 0019).
 - The candidate list comes from a literature that searched many predictors on overlapping data;
   no correction here undoes that (Harvey, Liu & Zhu 2016).
