@@ -25,7 +25,8 @@ superseded by the ADRs, and where they differ the ADRs are authoritative.
 ### 1. Causal screen ([ADR 0009](adr/0009-stage1-ci-test-and-multiple-testing.md), [0010](adr/0010-stage1-causal-stage.md))
 - **Method.** PCMCI over the signals, the asset returns and the observed conditioning variables.
   Each signal's link to returns is tested with an HC3 partial-correlation test (the `hybrid`
-  decision), with Bonferroni over lags and Benjamini–Hochberg across signals.
+  decision), with Bonferroni over each signal's lags and assets and Benjamini–Hochberg across
+  signals.
 - **Kills** a signal with no significant conditional link to any return.
 - **Cannot detect** a confounder that is missing from the data. On the benchmark's
   `hidden_confounder` preset the confounded signal passes in most runs, and no observational
@@ -81,7 +82,7 @@ superseded by the ADRs, and where they differ the ADRs are authoritative.
   cannot rule out an unobserved confounder, that Stage 3 used ridge regularization (Wasserstein
   DRO was evaluated, not selected), and that Stage 4 was evaluated and not adopted, so the
   stress diagnostic is a description, not a certification. Citations come from a curated
-  26-entry corpus.
+  39-entry corpus (ADRs 0017, 0018).
 - **Verifier.** Checks V1–V10 rebuild the fact sheet, re-read the raw files by their own code
   path, and reject any memo that is not exactly the run's template memo: structure and every
   block equal to the re-render (V1), atoms and numbers equal to their raw sources (V2, V3),
@@ -95,7 +96,8 @@ superseded by the ADRs, and where they differ the ADRs are authoritative.
   among verified atoms is in the backlog.
 - **Validated** on fresh seeds: 48 of 48 template memos accepted; 0 misses in 576 generated
   corruptions of each of 9 classes; 0 misses on three hand-written sets (368 corruptions, the
-  last written by a new independent agent after the change).
+  last written by a new independent agent after the change). Revalidated on real-data-shaped
+  runs on a fresh seed before the real-data run, with the same result (ADR 0018).
 - **Cannot check** that a cited paper supports the claim it is attached to. Most template
   tampering is caught by the re-render comparison alone, so a bug shared by the template and
   that re-render would pass; a raw-path second check is in the backlog.

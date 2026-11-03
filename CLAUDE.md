@@ -3,7 +3,8 @@
 ## What this is
 An autonomous quant research pipeline. Five stages; Stages 1–3 can kill a candidate signal:
 1. Causal discovery: is the signal structurally upstream of returns, or confounded?
-2. Decay validation: transfer-entropy half-life; is the edge being arbitraged away?
+2. Decay validation: is the edge being arbitraged away? A one-sided sup-split decline test;
+   no half-life is reported, because it is not identifiable at this SNR (ADRs 0011–0012).
 3. Portfolio construction: Wasserstein DRO was implemented, verified and evaluated (ADR 0013);
    ridge regularization (Ridge-CV) was selected. The memo must say this, never "DRO portfolio".
 4. Adversarial regime certification: evaluated and **not adopted as a kill stage** (ADR 0016).
@@ -46,13 +47,15 @@ say so instead of implementing it as written.
 ## Layout
 - src/invariant/config/        settings (.env) + YAML config loading
 - src/invariant/core/          typed contracts, run hashing/reproducibility, logging
-- src/invariant/data/          sources (ETF, French factors, ALFRED), snapshots, point-in-time assembly
+- src/invariant/data/          sources (ETF, French factors, ALFRED, FRED market), snapshots,
+                               point-in-time assembly, real-data signal registry (signals.py)
 - src/invariant/benchmark/     synthetic planted-signal market + ground truth
 - src/invariant/stages/        causal/ decay/ dro/ (evaluated DRO code) portfolio/
                                adversarial/ (evaluated Stage 4 design + stress diagnostic) memo/
 - src/invariant/ledger/        kill ledger
-- src/invariant/orchestration/ pipeline DAG (later)
-- src/invariant/api/           FastAPI service (later)
+- src/invariant/orchestration/ run_kill_stages: Stages 1–3 and the ledger, in order
+- src/invariant/cli.py         `invariant snapshot | run | sensitivity` (ADR 0018)
+- src/invariant/api/           placeholder only; no service in v1.0
 - tests/unit, tests/integration, tests/benchmark, tests/leakage
 - docs/adr/                    architecture decision records
 - data/, runs/                 gitignored, local only
@@ -105,8 +108,9 @@ tree, so a failing check cannot be pushed. Never bypass it with `--no-verify`.
   run resumed from checkpoints or restarted, with the reason.
 
 ## Current phase
+v1.0.0 is the first release: everything below is done; remaining work is the README backlog.
 - Phase 0 (foundations) is done.
-- Stage 1 (causal, `hc3|hybrid`; ADRs 0009–0010) is accepted on the benchmark.
+- Stage 1 (causal, `hc3|hybrid`; ADRs 0009–0010) is accepted on the benchmark and adopted.
 - Stage 2 (decay: a one-sided sup-split decline test, no half-life reported; ADRs 0011–0012)
   is accepted on the benchmark.
 - Stage 3 method study (ADR 0013) is done: all size gates pass; Ridge-CV selected by the
